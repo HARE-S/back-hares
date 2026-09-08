@@ -6,11 +6,11 @@ services:
     container_name: back_hares_db
     restart: always
     environment:
-      POSTGRES_USER: hares_user
-      POSTGRES_PASSWORD: hares_pass
-      POSTGRES_DB: hares_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -23,11 +23,11 @@ services:
     volumes:
       - .:/app
     environment:
-      - POSTGRES_USER=hares_user
-      - POSTGRES_PASSWORD=hares_pass
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=hares_db
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
     depends_on:
       - db
 
