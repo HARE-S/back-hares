@@ -69,9 +69,10 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE31-01 | **Construcción de la serie** En `analytics/evolution.py`, a partir de una lista de resultados. | - | Pendiente |
-| T-BE31-02 | **Acotación por rango de fechas** Parámetros opcionales de inicio y fin. | - | Pendiente |
-| T-BE31-03 | **Cálculo de la variación** Absoluta y porcentual entre extremos. | - | Pendiente |
-| T-BE31-04 | **Indicador de datos insuficientes** Con el umbral documentado. | - | Pendiente |
+| T-BE31-01 | **Construcción de la serie** En `analytics/evolution.py`, a partir de una lista de resultados. | Santiago | Completado |
+| T-BE31-02 | **Acotación por rango de fechas** Parámetros opcionales de inicio y fin. | Santiago | Completado |
+| T-BE31-03 | **Cálculo de la variación** Absoluta y porcentual entre extremos. | Santiago | Completado |
+| T-BE31-04 | **Indicador de datos insuficientes** Con el umbral documentado. | Santiago | Completado |
 | T-BE31-05 | **Endpoint de evolución** Con comprobación de permiso sobre el alumno. | - | Pendiente |
-| T-BE31-06 | **Tests de evolución** Escenarios 1 a 5 con series conocidas. | - | Pendiente |
+| T-BE31-06 | **Tests de evolución** Escenarios 1 a 5 con series conocidas. | Santiago | Completado |
+
