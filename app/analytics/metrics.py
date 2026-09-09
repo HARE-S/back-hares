@@ -10,13 +10,15 @@ def calculate_ppm(word_count: int, time_seconds: float) -> float:
     Calcula las Palabras Por Minuto (PPM).
 
     :param word_count: Número total de palabras de la prueba.
-    :param time_seconds: Tiempo empleado en segundos.
-    :return: Valor flotante con las palabras por minuto (0.0 si time_seconds <= 0).
+    :param time_seconds: Tiempo empleado expresado en segundos.
+    :return: Palabras leídas por minuto (PPM) redondeado a 2 decimales.
     """
     if time_seconds <= 0 or word_count <= 0:
         return 0.0
 
-    ppm = (word_count / time_seconds) * 60.0
+    # Convertimos los segundos a minutos para calcular explícitamente por minuto
+    time_minutes = time_seconds / 60.0
+    ppm = word_count / time_minutes
     return round(ppm, 2)
 
 
