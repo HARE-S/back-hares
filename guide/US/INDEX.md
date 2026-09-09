@@ -3,7 +3,7 @@
 **Programa de Gestión de Mejora de Comprensión Lectora** (Peñascal)
 Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andrés Ocina
 **Stack:** Flask + flask-smorest + SQLAlchemy 2.0 + Alembic + PostgreSQL + Gunicorn
-49 historias · Actualizado: 09/09/2026
+51 historias · Actualizado: 09/09/2026
 
 ---
 
@@ -81,7 +81,10 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-47](BE-47-pruebas-automatizadas.md) | Batería de pruebas automatizadas | 8 | Alta | Pendiente |
 | [BE-48](BE-48-documentacion-api.md) | Documentación de la API | 3 | Alta | Pendiente |
 | [BE-49](BE-49-manual-usuario.md) | Manual de uso de las funciones de servidor | 2 | Media | Pendiente |
-| | **Total** | **211** | | |
+| **Añadidas tras revisión del cliente (09/09)** | | | | |
+| [BE-50](BE-50-crud-manual-alumnado.md) | Alta y modificación manual de alumnado | 8 | Alta | Pendiente |
+| [BE-51](BE-51-historial-por-seccion.md) | Historial de pruebas por sección | 3 | Media | Pendiente |
+| | **Total** | **222** | | |
 
 ---
 
@@ -124,7 +127,9 @@ La numeración `BE-XX` es propia del backend. El backlog que ve el cliente y el 
 | **5 — Núcleo** | BE-18 a BE-26, BE-30 | 32 | Resultados y lecturas con métricas |
 | **6 — Análisis** | BE-27, BE-28, BE-29, BE-31, BE-32 | 24 | Filtrado y evolución |
 | **7 — Salidas** | BE-33, BE-35, BE-36, BE-37, BE-47 | 29 | Exportación e informes |
-| **8 — Cierre** | BE-34, BE-44, BE-49 | 12 | Auditoría y documentación |
+| **8 — Cierre** | BE-34, BE-44, BE-49, BE-51 | 15 | Auditoría, historial de grupo y documentación |
+
+**BE-50** se sitúa en el Sprint 3 o 4, junto a la importación y los permisos, en cuanto el cliente confirme la política de conflictos.
 
 **La autenticación va en el Sprint 2 a propósito.** Cada endpoint escrito después nace ya protegido. Dejarla para el final obliga a repasar todos los endpoints uno a uno, y ahí es donde se cuela el que se quedó abierto.
 
@@ -170,6 +175,7 @@ Y dos existen por ausencias en el esquema: **BE-07** (sin `external_id` no hay r
 | BE-01 | Suscripción a imágenes DHI sin confirmar | Cliente |
 | BE-09 | `import` como job puntual o mecanismo permanente | Cliente |
 | BE-12 | Significado de F/L en los códigos de prueba | Equipo de pedagogía |
+| **BE-50** | Contradicción entre el papel (pide CRUD manual) y la especificación de API (solo `GET`). Falta definir qué prevalece ante conflicto con Alexia | Cliente |
 
 Los bloqueos que dependen del cliente se escalan a Andrés Ocina.
 
