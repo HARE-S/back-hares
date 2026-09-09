@@ -90,6 +90,8 @@ Body: ResultCreate { test_id, section_id, test_date, time, successes, mistakes }
 
    Código, comentarios y nombres **en inglés**. Principios SOLID, con la responsabilidad de cada capa según `structure.md`.
 
+   Todo endpoint lleva `@blp.arguments` y `@blp.response`: sin ellos no aparece en la especificación OpenAPI que consume el equipo de interfaz.
+
 **e. Ejecución y depuración** — siempre dentro del contenedor, contra PostgreSQL:
 ```bash
 docker compose --profile test run --rm backend pytest -x
@@ -224,7 +226,7 @@ La línea es sencilla: **el agente no decide nada que afecte a la seguridad, al 
 
 ### Reglas
 
-- **Estas guías mandan sobre lo que proponga el agente.** Si sugiere JWT, `localStorage` o probar contra SQLite, está contradiciendo decisiones ya documentadas. Se corrige.
+- **Estas guías mandan sobre lo que proponga el agente.** Si sugiere JWT, `localStorage`, probar contra SQLite, Flask-SQLAlchemy o la sesión por defecto de Flask, está contradiciendo decisiones ya documentadas. Se corrige.
 - **Revisar antes de aceptar.** Fallos habituales del código generado: SQL dentro del endpoint, devolver el modelo de SQLAlchemy en lugar del esquema, y saltarse la comprobación de permisos.
 - **Nunca pegar datos reales de alumnado en un prompt.** Son datos de menores; para ejemplos están los datos anónimos de US-06.
 - **Nunca pegar el `.env`** ni credenciales.

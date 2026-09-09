@@ -23,7 +23,7 @@ Cinco servicios sobre cuatro redes:
 | Servicio | Imagen | Función | Redes |
 |---|---|---|---|
 | `database` | `dhi.io/postgresql:18.6-alpine3.24-fips` | Persistencia relacional | `db-network` |
-| `backend` | Propia, base `dhi.io/python:3.14.7-alpine3.24-fips` | API REST (Python) | `db-network`, `backend-network` |
+| `backend` | Propia, base `dhi.io/python:3.14.7-alpine3.24-fips` | API REST (Flask + Gunicorn) | `db-network`, `backend-network` |
 | `frontend` | Propia, base `dhi.io/nginx:1.31.5-alpine3.24-fips` | Sirve la interfaz estática. **Ver guía del frontend** | `frontend-network` |
 | `proxy` | `dhi.io/nginx:1.31.5-alpine3.24-fips` | Único punto de entrada. **Ver guía del frontend** | `public`, `backend-network`, `frontend-network` |
 | `import` | Propia, base `dhi.io/python:3.14.7-alpine3.24-fips` | Carga de datos maestros desde fichero | `db-network` |
@@ -96,8 +96,10 @@ DATABASE_URL=postgresql://app_user:${POSTGRES_PASSWORD}@database:5432/comprensio
 
 # --- Aplicación ---
 APP_ENV=production            # production | development
-SESSION_SECRET=               # generar con: openssl rand -hex 32
+SECRET_KEY=                   # generar con: openssl rand -hex 32
+SESSION_TYPE=sqlalchemy       # sesión en servidor, NO la cookie firmada de Flask
 SESSION_MAX_AGE_MINUTES=120
+FLASK_APP=app.app:create_app
 
 # --- Autenticación Google (EP-12) ---
 GOOGLE_CLIENT_ID=
@@ -115,12 +117,15 @@ La aplicación debe **negarse a arrancar** si:
 
 - Falta cualquier variable sin valor por defecto.
 - `APP_ENV=production` y `DEV_AUTH_BYPASS=true` a la vez.
-- `SESSION_SECRET` tiene menos de 32 bytes.
+- `SECRET_KEY` tiene menos de 32 bytes.
+- `SESSION_TYPE` no está configurado para almacenamiento en servidor.
 - `ALLOWED_HD` está vacío.
 
 Un fallo ruidoso al arrancar es preferible a un sistema que levanta con el bypass de autenticación activo. Esto no es defensivo de más: es la diferencia entre un despliegue fallido y una brecha.
 
-> **Cambio respecto al borrador inicial:** el proyecto **no usa JWT**. Se usan sesiones de servidor con cookie `HttpOnly`, `Secure`, `SameSite=Lax`. El motivo está en US-45: revocar un acceso debe ser borrar una fila, no mantener una lista de tokens revocados. Por eso la variable es `SESSION_SECRET` y no `JWT_SECRET`.
+> **Cambio respecto al borrador inicial:** el proyecto **no usa JWT**. Se usan sesiones de servidor con cookie `HttpOnly`, `Secure`, `SameSite=Lax`. El motivo está en US-45: revocar un acceso debe ser borrar una fila, no mantener una lista de tokens revocados.
+>
+> **Y tampoco la sesión por defecto de Flask**, que guarda el estado dentro de la propia cookie firmada. Con ella, cerrar sesión no invalida nada en el servidor y deshabilitar un usuario no corta sus sesiones activas — se incumplen US-45 y US-49. De ahí `SESSION_TYPE=sqlalchemy`.
 
 ---
 
@@ -461,3 +466,5 @@ Pendientes de confirmar con el cliente. Mientras no se cierren, no se dan por su
 6. **Quién tiene acceso a pgAdmin en producción** y si se crea un usuario de solo lectura para consultas de comprobación.
 
 ---
+
+*Última actualización: 08/09/2026 · Ver `structure.md`, `testing.md` y `workflow.md` de esta misma carpeta, y `frontend/guides/deployment.md` para la interfaz.*

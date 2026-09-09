@@ -1,6 +1,7 @@
 # Estructura del proyecto
 
 > Estructura del **backend** — Programa de Gestión de Mejora de Comprensión Lectora (Peñascal).
+> **Stack: Flask + flask-smorest + SQLAlchemy 2.0 + Alembic + PostgreSQL.**
 > Define dónde vive cada cosa y qué puede importar qué. Ante la duda sobre dónde colocar un fichero nuevo, manda este documento. Si hay que crear una carpeta que no aparece aquí, primero se añade aquí y luego se crea.
 > La estructura de la interfaz está en `frontend/guides/structure.md`.
 
@@ -23,6 +24,33 @@ Modelos             ->  definición de tablas
 **La regla que no se rompe:** una capa nunca importa de una capa superior. Un endpoint puede llamar a un servicio; un servicio jamás importa un endpoint.
 
 El motivo es práctico, no académico. Cuando la lógica de cálculo del PPM vive en un servicio, se puede probar con `pytest` sin levantar la API ni la base de datos. Cuando vive dentro del endpoint, para probarla hay que montar una petición HTTP completa — y entonces se deja de probar.
+
+---
+
+## 1.b Decisiones de stack
+
+El cliente exige Python; el framework lo elige el equipo. **Flask**, con estos complementos:
+
+| Pieza | Elección | Por qué |
+|---|---|---|
+| Framework | **Flask** | Decisión del equipo |
+| API y OpenAPI | **flask-smorest** | Blueprints + `MethodView` + esquemas + **especificación OpenAPI generada** (US-53) |
+| Esquemas | **Marshmallow** | Es lo que consume flask-smorest para validar y documentar |
+| ORM | **SQLAlchemy 2.0 puro** (sin Flask-SQLAlchemy) | Ver más abajo |
+| Migraciones | **Alembic** | Directamente, sin Flask-Migrate |
+| Sesiones | **Flask-Session con backend en base de datos** | Ver más abajo |
+| OIDC | **Authlib** | Cliente OAuth2/OIDC maduro |
+| Servidor | **Gunicorn** | Flask es WSGI |
+
+### Dos decisiones que no son de gusto
+
+**SQLAlchemy puro, no Flask-SQLAlchemy.** Flask-SQLAlchemy acopla los modelos al contexto de la aplicación: para instanciar un modelo o ejecutar una consulta hace falta que exista un `app context`. Eso choca de frente con las reglas de importación del apartado 5: `repositories/` y `services/` dejarían de ser probables sin levantar la aplicación entera. Con SQLAlchemy puro, un servicio recibe una sesión y ya está — se prueba con una lista de objetos.
+
+**Sesión de servidor, no la cookie firmada de Flask.** Esto es lo importante. La sesión que trae Flask de serie **guarda los datos en la propia cookie**, firmados. No hay nada en el servidor. Y US-45 exige que cerrar sesión la invalide **en el servidor**, y US-49 que deshabilitar un usuario corte sus sesiones activas al momento. Con la cookie firmada eso es imposible: la cookie sigue siendo válida hasta que caduca, la tenga quien la tenga.
+
+Por eso se usa **Flask-Session con almacenamiento en PostgreSQL**: la cookie lleva solo un identificador y el estado vive en una tabla. Revocar pasa a ser borrar una fila.
+
+Es exactamente el mismo razonamiento por el que se descartó JWT. Si se usa la sesión por defecto de Flask, se vuelve al problema que se quería evitar.
 
 ---
 
@@ -57,13 +85,14 @@ comprension-lectora/
     ├── src/
     │   └── app/
     │       ├── __init__.py
-    │       ├── main.py             # creación de la app y montaje de routers
-    │       ├── config.py           # lectura y validación de variables de entorno
+    │       ├── app.py              # create_app(): fábrica de la aplicación
+    │       ├── extensions.py       # instancias de db, api, session, migrate
+    │       ├── config.py           # clases de configuración por entorno
     │       ├── database.py         # motor y sesiones de SQLAlchemy
-    │       ├── dependencies.py     # dependencias comunes (sesión, usuario actual)
+    │       ├── decorators.py       # @login_required, @require_role
     │       │
     │       ├── api/
-    │       │   ├── router.py       # agrega todos los routers de v1
+    │       │   ├── __init__.py     # registra todos los blueprints de v1
     │       │   └── v1/
     │       │       ├── auth.py
     │       │       ├── centers.py
@@ -89,7 +118,7 @@ comprension-lectora/
     │       │   ├── user.py
     │       │   └── audit_log.py
     │       │
-    │       ├── schemas/            # entrada y salida de la API (Pydantic)
+    │       ├── schemas/            # entrada y salida de la API (Marshmallow)
     │       │   ├── center.py
     │       │   ├── section.py
     │       │   ├── student.py
@@ -177,7 +206,7 @@ Aquí **no** hay lógica de negocio ni cálculos. Un modelo describe cómo se gu
 
 ### `schemas/` — la frontera de la API
 
-Los objetos Pydantic que entran y salen por HTTP. Separados de los modelos a propósito.
+Los esquemas Marshmallow que entran y salen por HTTP. Separados de los modelos a propósito.
 
 **Nunca devolver un modelo de SQLAlchemy directamente en una respuesta.** Parece un atajo cómodo y es un agujero de seguridad: el día que se añada un campo interno a la tabla `users`, ese campo aparecerá en la respuesta de la API sin que nadie lo decida. El esquema es la lista explícita de lo que sale.
 
@@ -204,17 +233,22 @@ Los servicios reciben datos ya validados en formato y devuelven datos o lanzan e
 
 ### `api/v1/` — los endpoints
 
-Ficheros finos. Un endpoint hace tres cosas: recibir, delegar en un servicio, devolver.
+Un **blueprint de flask-smorest por recurso**, con `MethodView` para agrupar los verbos de una misma ruta. Ficheros finos: un endpoint recibe, delega en un servicio y devuelve.
+
+Los decoradores `@blp.arguments` y `@blp.response` no son decorativos: validan la entrada, serializan la salida **y alimentan la especificación OpenAPI de US-53**. Un endpoint sin ellos queda fuera de la documentación que consume el equipo de interfaz.
 
 ```python
-@router.post("/students/{student_id}/results", status_code=201)
-async def create_result(
-    student_id: UUID,
-    payload: ResultCreate,
-    service: ResultService = Depends(get_result_service),
-    user: User = Depends(require_role("tutor")),
-) -> ResultResponse:
-    return service.register_result(student_id, payload, user)
+blp = Blueprint("results", __name__, url_prefix="/api/students")
+
+
+@blp.route("/<uuid:student_id>/results")
+class StudentResults(MethodView):
+
+    @require_role("tutor", "coordinator")
+    @blp.arguments(ResultCreateSchema)
+    @blp.response(201, ResultSchema)
+    def post(self, payload, student_id):
+        return result_service.register_result(student_id, payload, g.user)
 ```
 
 Si un endpoint pasa de unas quince líneas, es que tiene lógica que pertenece a un servicio.
@@ -229,7 +263,7 @@ Métricas, evolución y proyecciones tienen su propia carpeta porque son la part
 
 | Capa | Puede importar de | Nunca importa de |
 |---|---|---|
-| `api/` | `schemas`, `services`, `dependencies`, `auth` | `repositories`, `models` (para lógica) |
+| `api/` | `schemas`, `services`, `decorators`, `auth` | `repositories`, `models` (para lógica) |
 | `services/` | `repositories`, `models`, `analytics`, `core` | `api`, `schemas` |
 | `repositories/` | `models`, `database` | `services`, `api`, `schemas` |
 | `analytics/` | nada del proyecto salvo `core` | todo lo demás |
@@ -272,7 +306,7 @@ RUN apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev \
  && apk del .build-deps
 COPY src/ ./src/
 ENV PYTHONPATH=/app/src
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "app.app:create_app()"]
 ```
 
 **El error habitual con este layout:** `ModuleNotFoundError: No module named 'app'` al ejecutar los tests. La causa casi siempre es que falta `pythonpath = ["src"]` en la configuración de pytest o `PYTHONPATH` en el contenedor. No es un problema de imports mal escritos.

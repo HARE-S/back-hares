@@ -15,7 +15,7 @@ No todo merece una prueba. Lo que sí, en orden de importancia:
 3. **Seguridad.** Que un endpoint sin sesión devuelva `401`, que un rol sin permiso reciba `403`, que un token con dominio ajeno sea rechazado.
 4. **Contratos de la API.** Que los códigos de estado y las formas de respuesta sean los que dice la especificación.
 
-Lo que **no** se prueba: que SQLAlchemy sepa hacer un `INSERT`, que FastAPI enrute, que Pydantic valide un entero. Eso ya está probado por sus autores. Escribir tests de librerías ajenas infla la cobertura y no protege de nada.
+Lo que **no** se prueba: que SQLAlchemy sepa hacer un `INSERT`, que Flask enrute, que Marshmallow valide un entero. Eso ya está probado por sus autores. Escribir tests de librerías ajenas infla la cobertura y no protege de nada.
 
 ---
 
@@ -25,7 +25,7 @@ Lo que **no** se prueba: que SQLAlchemy sepa hacer un `INSERT`, que FastAPI enru
 |---|---|
 | `pytest` | Motor de pruebas |
 | `pytest-cov` | Cobertura |
-| `httpx` + `TestClient` | Peticiones a la API en tests de integración |
+| Cliente de pruebas de Flask | Peticiones a la API en tests de integración |
 | `factory-boy` o *fixtures* propias | Generación de datos de prueba |
 | `freezegun` | Congelar el tiempo en tests con fechas |
 | `ruff` | Linter y formateo |
@@ -67,6 +67,8 @@ backend/tests/
     ├── import_data_errors.csv
     └── tests_catalog.csv
 ```
+
+> **Fábrica de aplicación obligatoria.** Los tests crean la app con `create_app(TestConfig)`. Una aplicación creada a nivel de módulo no se puede configurar por test y obliga a variables de entorno globales, que es como los tests acaban apuntando sin querer a la base de datos equivocada.
 
 **Unitarias:** sin base de datos, sin red, sin HTTP. Rápidas — el conjunto entero debe correr en segundos.
 **Integración:** con base de datos real y peticiones HTTP completas. Más lentas, menos numerosas.
