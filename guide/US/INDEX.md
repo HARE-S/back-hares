@@ -23,7 +23,8 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | :--- | :--- | :---: | :--- | :--- |
 | **Infraestructura** | | | | |
 | [BE-01](BE-01-stack-contenedorizado.md) | Stack contenedorizado del backend | 5 | Crítica | Pendiente |
-| [BE-02](BE-02-variables-entorno.md) | Configuración por variables de entorno | 3 | Alta | Pendiente |
+| [BE-02](BE-02-variables-entorno.md) | Configuración por variables de entorno | 3 | Alta | Completado |
+
 | **Modelo de datos** | | | | |
 | [BE-03](BE-03-esquema-inicial.md) | Esquema inicial versionado con migraciones | 8 | Crítica | Pendiente |
 | [BE-04](BE-04-borrado-logico.md) | Borrado lógico de pruebas y libros | 3 | Alta | Pendiente |
