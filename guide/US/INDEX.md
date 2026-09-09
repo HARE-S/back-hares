@@ -3,7 +3,8 @@
 **Programa de Gestión de Mejora de Comprensión Lectora** (Peñascal)
 Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andrés Ocina
 **Stack:** Flask + flask-smorest + SQLAlchemy 2.0 + Alembic + PostgreSQL + Gunicorn
-51 historias · Actualizado: 09/09/2026
+51 historias · 227 puntos · Actualizado: 09/09/2026
+**Reparto entre el equipo:** ver [REPARTO.md](REPARTO.md)
 
 ---
 
@@ -84,7 +85,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Añadidas tras revisión del cliente (09/09)** | | | | |
 | [BE-50](BE-50-crud-manual-alumnado.md) | Alta y modificación manual de alumnado | 8 | Alta | Pendiente |
 | [BE-51](BE-51-historial-por-seccion.md) | Historial de pruebas por sección | 3 | Media | Pendiente |
-| | **Total** | **222** | | |
+| | **Total** | **227** | | |
 
 ---
 
