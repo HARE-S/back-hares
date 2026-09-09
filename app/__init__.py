@@ -1,17 +1,20 @@
 from flask import Flask
-from flask_cors import CORS
 from app.config import Config
-from app.database import db
+from app.extensions import db, migrate
+from app.api.health import health_bp
+# Importar modelos para que SQLAlchemy los reconozca
+from app import models  # noqa: F401
 
-def create_app():
-    app = Flask(__name__)
-    
-    app.config.from_object(Config)
-    CORS(app)
-    db.init_app(app)
-    
-    @app.route('/api/health')
-    def health_check():
-        return {"status": "ok", "message": "Backend funcionando correctamente"}, 200
 
-    return app
+def create_app(config_class=Config):
+    application = Flask(__name__)
+    application.config.from_object(config_class)
+
+    # Inicialización de extensiones
+    db.init_app(application)
+    migrate.init_app(application, db)
+
+    # Registro de blueprints
+    application.register_blueprint(health_bp, url_prefix="/api")
+
+    return application
