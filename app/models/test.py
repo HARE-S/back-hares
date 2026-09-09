@@ -17,6 +17,8 @@ class Test(BaseModel):
     code = db.Column(db.String(50), nullable=False, unique=True)
     name = db.Column(db.String(255), nullable=False)
     words = db.Column(db.Integer, nullable=False, default=0)
+    level = db.Column(db.String(10), nullable=True)
+    type = db.Column(db.String(10), nullable=True)
     disabled_at = db.Column(db.Date, nullable=True)
 
     # Relaciones

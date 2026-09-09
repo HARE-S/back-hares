@@ -65,7 +65,8 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE14-01 | **Esquema de paginación** En `schemas/common.py`, reutilizable por todos los listados. | - | Pendiente |
-| T-BE14-02 | **Filtros en el repositorio** Texto, nivel y tipo, combinables. | - | Pendiente |
-| T-BE14-03 | **Respuesta con metadatos** Total de elementos y número de páginas. | - | Pendiente |
-| T-BE14-04 | **Tests de listado** Escenarios 1 a 5. | - | Pendiente |
+| T-BE14-01 | **Esquema de paginación** En `schemas/common.py`, reutilizable por todos los listados. | Yeremi | Hecho |
+| T-BE14-02 | **Filtros en el repositorio** Texto, nivel y tipo, combinables. | Yeremi | Hecho |
+| T-BE14-03 | **Respuesta con metadatos** Total de elementos y número de páginas. | Yeremi | Hecho |
+| T-BE14-04 | **Tests de listado** Escenarios 1 a 5. | Yeremi | Hecho |
+

@@ -26,7 +26,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-02](BE-02-variables-entorno.md) | Configuración por variables de entorno | 3 | Alta | Pendiente |
 | **Modelo de datos** | | | | |
 | [BE-03](BE-03-esquema-inicial.md) | Esquema inicial versionado con migraciones | 8 | Crítica | Pendiente |
-| [BE-04](BE-04-borrado-logico.md) | Borrado lógico de pruebas y libros | 3 | Alta | Pendiente |
+| [BE-04](BE-04-borrado-logico.md) | Borrado lógico de pruebas y libros | 3 | Alta | Completado |
 | [BE-05](BE-05-datos-anonimos.md) | Datos de prueba anónimos | 3 | Alta | Pendiente |
 | **Importación de datos maestros** | | | | |
 | [BE-06](BE-06-importar-alumnado.md) | Importar alumnado desde el volcado de Alexia | 8 | Crítica | Pendiente |
@@ -35,12 +35,12 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-09](BE-09-endpoint-subida-fichero.md) | Endpoint de subida del fichero | 5 | Alta | Pendiente |
 | [BE-10](BE-10-consulta-centros-secciones.md) | Consulta de centros, secciones y alumnado | 3 | Alta | Pendiente |
 | **Catálogo de pruebas** | | | | |
-| [BE-11](BE-11-alta-prueba.md) | Alta de prueba en el catálogo | 3 | Alta | Pendiente |
+| [BE-11](BE-11-alta-prueba.md) | Alta de prueba en el catálogo | 3 | Alta | Completado |
 | [BE-12](BE-12-importar-catalogo-pruebas.md) | Importar el catálogo de pruebas | 5 | Alta | Pendiente |
 | [BE-13](BE-13-edicion-baja-pruebas.md) | Edición y baja de pruebas | 3 | Media | Pendiente |
 | [BE-14](BE-14-listado-pruebas.md) | Listado paginado y filtrado de pruebas | 3 | Media | Pendiente |
 | **Catálogo de libros** | | | | |
-| [BE-15](BE-15-niveles-libro.md) | Modelo de niveles de libro | 3 | Alta | Pendiente |
+| [BE-15](BE-15-niveles-libro.md) | Modelo de niveles de libro | 3 | Alta | Completado |
 | [BE-16](BE-16-mantenimiento-libros.md) | Alta y mantenimiento del catálogo de libros | 3 | Alta | Pendiente |
 | [BE-17](BE-17-carga-inicial-libros.md) | Carga inicial del catálogo de libros | 8 | Media | Pendiente |
 | **Registro de resultados** | | | | |

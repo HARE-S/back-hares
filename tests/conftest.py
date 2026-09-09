@@ -11,12 +11,18 @@ def app():
     app = create_app(TestingConfig)
 
     with app.app_context():
-        # Para compatibilidad con SQLite en tests, registramos la función uuidv7 si aplica
+        # Para compatibilidad con SQLite en tests, registramos la función uuidv7 y translate si aplica
         if db.engine.dialect.name == "sqlite":
             @event.listens_for(db.engine, "connect")
             def set_sqlite_functions(dbapi_connection, connection_record):
                 if hasattr(dbapi_connection, "create_function"):
                     dbapi_connection.create_function("uuidv7", 0, lambda: str(uuidv7()))
+                    dbapi_connection.create_function(
+                        "translate",
+                        3,
+                        lambda text, from_chars, to_chars: str(text).translate(str.maketrans(from_chars, to_chars)) if text is not None else None,
+                    )
+
 
         db.create_all()
         yield app

@@ -70,7 +70,8 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE13-01 | **Esquema de actualización** `TestUpdateSchema` con todos los campos opcionales. | - | Pendiente |
-| T-BE13-02 | **Regla de código bloqueado** Comprobar existencia de resultados antes de permitir el cambio. | - | Pendiente |
-| T-BE13-03 | **Verbos PUT, PATCH y DELETE** En el `MethodView` del recurso individual. | - | Pendiente |
-| T-BE13-04 | **Tests de edición** Escenarios 1 a 5. | - | Pendiente |
+| T-BE13-01 | **Esquema de actualización** `TestUpdateSchema` con todos los campos opcionales. | Yeremi | Hecho |
+| T-BE13-02 | **Regla de código bloqueado** Comprobar existencia de resultados antes de permitir el cambio. | Yeremi | Hecho |
+| T-BE13-03 | **Verbos PUT, PATCH y DELETE** En el `MethodView` del recurso individual. | Yeremi | Hecho |
+| T-BE13-04 | **Tests de edición** Escenarios 1 a 5. | Yeremi | Hecho |
+

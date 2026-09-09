@@ -70,7 +70,8 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE12-01 | **Parser de tests.csv** Separador `;`, UTF-8, tolerante a la columna vacía final. | - | Pendiente |
-| T-BE12-02 | **Derivación de level y type** A partir del patrón del código. | - | Pendiente |
-| T-BE12-03 | **Alta o actualización por código** Reimportación sin duplicar. | - | Pendiente |
-| T-BE12-04 | **Tests del parser** Escenarios 2, 3 y 4 con el fichero real. | - | Pendiente |
+| T-BE12-01 | **Parser de tests.csv** Separador `;`, UTF-8, tolerante a la columna vacía final. | Yeremi | Hecho |
+| T-BE12-02 | **Derivación de level y type** A partir del patrón del código. | Yeremi | Hecho |
+| T-BE12-03 | **Alta o actualización por código** Reimportación sin duplicar. | Yeremi | Hecho |
+| T-BE12-04 | **Tests del parser** Escenarios 2, 3 y 4 con el fichero real. | Yeremi | Hecho |
+

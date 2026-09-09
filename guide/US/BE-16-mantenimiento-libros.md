@@ -70,7 +70,7 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE16-01 | **Esquemas de libro** Alta, actualización y respuesta, con el nivel validado por BE-15. | - | Pendiente |
-| T-BE16-02 | **BookRepository** Alta, consulta, actualización y baja lógica. | - | Pendiente |
-| T-BE16-03 | **Blueprint de libros** Colección e individual con todos los verbos de la especificación. | - | Pendiente |
-| T-BE16-04 | **Tests del catálogo** Escenarios 1 a 5. | - | Pendiente |
+| T-BE16-01 | **Esquemas de libro** Alta, actualización y respuesta, con el nivel validado por BE-15. | Yeremi | Hecho |
+| T-BE16-02 | **BookRepository** Alta, consulta, actualización y baja lógica. | Yeremi | Hecho |
+| T-BE16-03 | **Blueprint de libros** Colección e individual con todos los verbos de la especificación. | Yeremi | Hecho |
+| T-BE16-04 | **Tests del catálogo** Escenarios 1 a 5. | Yeremi | Hecho |

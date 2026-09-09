@@ -61,7 +61,7 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE15-01 | **Enumeración de niveles** Con su orden pedagógico definido. | - | Pendiente |
-| T-BE15-02 | **Validación en el esquema** Rechazo con mensaje enumerando los válidos. | - | Pendiente |
-| T-BE15-03 | **Ordenación en el repositorio** Por orden pedagógico, no alfabético. | - | Pendiente |
-| T-BE15-04 | **Tests de niveles** Escenarios 1 a 4. | - | Pendiente |
+| T-BE15-01 | **Enumeración de niveles** Con su orden pedagógico definido. | Yeremi | Completado |
+| T-BE15-02 | **Validación en el esquema** Rechazo con mensaje enumerando los válidos. | Yeremi | Completado |
+| T-BE15-03 | **Ordenación en el repositorio** Por orden pedagógico, no alfabético. | Yeremi | Completado |
+| T-BE15-04 | **Tests de niveles** Escenarios 1 a 4. | Yeremi | Completado |

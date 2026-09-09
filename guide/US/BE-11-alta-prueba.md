@@ -69,8 +69,8 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE11-01 | **Esquemas de prueba** `TestCreateSchema` con validación de `words` y `TestSchema` de respuesta. | - | Pendiente |
-| T-BE11-02 | **TestRepository** Alta y comprobación de código único. | - | Pendiente |
-| T-BE11-03 | **CatalogService** Regla de código duplicado y excepción de dominio. | - | Pendiente |
-| T-BE11-04 | **Blueprint POST /api/tests** Con `@require_role` de coordinador. | - | Pendiente |
-| T-BE11-05 | **Tests de alta** Escenarios 1 a 5. | - | Pendiente |
+| T-BE11-01 | **Esquemas de prueba** `TestCreateSchema` con validación de `words` y `TestSchema` de respuesta. | Yeremi | Completado |
+| T-BE11-02 | **TestRepository** Alta y comprobación de código único. | Yeremi | Completado |
+| T-BE11-03 | **CatalogService** Regla de código duplicado y excepción de dominio. | Yeremi | Completado |
+| T-BE11-04 | **Blueprint POST /api/tests** Con `@require_role` de coordinador. | Yeremi | Completado |
+| T-BE11-05 | **Tests de alta** Escenarios 1 a 5. | Yeremi | Completado |

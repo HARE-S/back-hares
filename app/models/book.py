@@ -1,6 +1,7 @@
-from sqlalchemy import text
+from sqlalchemy import orm, text
 from app.extensions import db
 from app.models.base import BaseModel
+from app.models.enums import BOOK_LEVEL_ORDER, validate_book_level
 from app.utils.uuidv7 import uuidv7
 
 
@@ -14,8 +15,32 @@ class Book(BaseModel):
         server_default=text("uuidv7()"),
     )
     book = db.Column(db.String(255), nullable=False)
-    level = db.Column(db.Integer, nullable=False)
+    level = db.Column(db.String(10), nullable=False)
+    copies_note = db.Column(db.String(255), nullable=True)
+    sessions_note = db.Column(db.String(255), nullable=True)
     disabled_at = db.Column(db.Date, nullable=True)
+
+    @property
+    def title(self) -> str:
+        return self.book
+
+    @title.setter
+    def title(self, value: str):
+        self.book = value
+
+    def to_dict(self):
+        data = super().to_dict()
+        data["title"] = self.book
+        return data
+
+    @orm.validates("level")
+    def validate_level(self, key, value):
+        return validate_book_level(value)
+
+
+    @property
+    def level_order(self) -> int:
+        return BOOK_LEVEL_ORDER.get(self.level, 99)
 
     # Relaciones
     readed_books = db.relationship(

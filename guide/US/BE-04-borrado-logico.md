@@ -69,8 +69,8 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE04-01 | **Campo disabled_at** Presente en `tests` y `books` desde la migración de BE-03. | - | Pendiente |
-| T-BE04-02 | **Filtro por defecto en repositorios** Excluir deshabilitados salvo petición explícita. | - | Pendiente |
-| T-BE04-03 | **Parámetro include_disabled** Aceptado en los listados de pruebas y libros. | - | Pendiente |
-| T-BE04-04 | **DELETE lógico en los endpoints** Rellenar fecha y devolver `204`; `404` si no existe. | - | Pendiente |
-| T-BE04-05 | **Tests de borrado lógico** Escenarios 1 a 5. | - | Pendiente |
+| T-BE04-01 | **Campo disabled_at** Presente en `tests` y `books` desde la migración de BE-03. | Yeremi | Completado |
+| T-BE04-02 | **Filtro por defecto en repositorios** Excluir deshabilitados salvo petición explícita. | Yeremi | Completado |
+| T-BE04-03 | **Parámetro include_disabled** Aceptado en los listados de pruebas y libros. | Yeremi | Completado |
+| T-BE04-04 | **DELETE lógico en los endpoints** Rellenar fecha y devolver `204`; `404` si no existe. | Yeremi | Completado |
+| T-BE04-05 | **Tests de borrado lógico** Escenarios 1 a 5. | Yeremi | Completado |

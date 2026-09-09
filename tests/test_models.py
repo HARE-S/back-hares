@@ -101,7 +101,7 @@ def test_test_and_results(session):
 
 def test_book_and_readed_books(session):
     student = Student(name="STU02")
-    book = Book(book="El Lazarillo de Tormes", level=3)
+    book = Book(book="El Lazarillo de Tormes", level="II")
     session.add_all([student, book])
     session.commit()
 
