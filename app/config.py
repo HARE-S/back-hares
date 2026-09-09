@@ -4,6 +4,10 @@ import os
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-hares-key")
     
+    # Entorno y autenticación en desarrollo
+    APP_ENV = os.getenv("APP_ENV", "development").lower()
+    DEV_AUTH_BYPASS = os.getenv("DEV_AUTH_BYPASS", "false").lower() in ("true", "1", "yes")
+    
     # Base de datos PostgreSQL
     DB_USER = os.getenv("POSTGRES_USER", "hares_user")
     DB_PASS = os.getenv("POSTGRES_PASSWORD", "hares_pass")
@@ -24,3 +28,4 @@ class TestingConfig(Config):
         "TEST_DATABASE_URL",
         "sqlite:///:memory:"
     )
+
