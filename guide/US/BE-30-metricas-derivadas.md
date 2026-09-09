@@ -76,7 +76,8 @@ Crítica
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE30-01 | **Función de cálculo de PPM** En `analytics/metrics.py`, sin dependencias del proyecto. | - | Pendiente |
-| T-BE30-02 | **Función de porcentaje de aciertos** Con su caso de denominador cero definido. | - | Pendiente |
+| T-BE30-01 | **Función de cálculo de PPM** En `analytics/metrics.py`, sin dependencias del proyecto. | Santiago | Completado |
+| T-BE30-02 | **Función de porcentaje de aciertos** Con su caso de denominador cero definido. | Santiago | Completado |
 | T-BE30-03 | **Integración en los esquemas de respuesta** Campos calculados en todo resultado devuelto. | - | Pendiente |
-| T-BE30-04 | **Tests unitarios de métricas** Escenarios 1 a 4, con valores conocidos. | - | Pendiente |
+| T-BE30-04 | **Tests unitarios de métricas** Escenarios 1 a 4, con valores conocidos. | Santiago | Completado |
+
