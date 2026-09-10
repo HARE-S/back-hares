@@ -92,9 +92,12 @@ def test_date_range_filtering_scenario_2(sample_results):
 
 def test_variations_calculation_scenario_3(sample_results):
     """
-    Escenario 3: Variación entre primera (100 PPM, 70%) y última prueba (200 PPM, 100%).
+    Escenario 3: Variación entre primera (100 PPM, CL 27.5%) y última prueba (200 PPM, CL 50.0%).
+    Fórmula Batería Bruño: CL = (aciertos - fallos/2) / 20 * 100
+    Marzo: CL = (7 - 3/2) / 20 * 100 = 5.5 / 20 * 100 = 27.5%
+    Junio: CL = (10 - 0/2) / 20 * 100 = 10 / 20 * 100 = 50.0%
     Variación PPM: +100.0 abs, +100.0%
-    Variación Aciertos: +30.0 abs, +42.86%
+    Variación Comprensión: +22.5 abs, +81.82%
     """
     res = calculate_individual_evolution(sample_results)
 
@@ -104,9 +107,9 @@ def test_variations_calculation_scenario_3(sample_results):
     assert variations["ppm"]["absolute"] == 100.0  # 200 - 100
     assert variations["ppm"]["percentage"] == 100.0  # ((200 - 100) / 100) * 100
 
-    # Aciertos
-    assert variations["accuracy"]["absolute"] == 30.0  # 100 - 70
-    assert pytest.approx(variations["accuracy"]["percentage"], 0.01) == 42.86  # ((100 - 70) / 70) * 100
+    # Comprensión (Batería Bruño)
+    assert variations["accuracy"]["absolute"] == 22.5  # 50.0 - 27.5
+    assert pytest.approx(variations["accuracy"]["percentage"], 0.01) == 81.82  # ((50.0 - 27.5) / 27.5) * 100
 
 
 def test_insufficient_data_one_test_scenario_4():

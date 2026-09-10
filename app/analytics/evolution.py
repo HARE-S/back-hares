@@ -68,12 +68,11 @@ def calculate_individual_evolution(
 
         # Si el diccionario trae aciertos y errores en lugar de total
         correct_answers = item.get("correct_answers") if item.get("correct_answers") is not None else item.get("successes", 0)
+        mistakes = item.get("mistakes", 0)
         if "total_questions" in item:
             total_questions = item["total_questions"]
-        elif "mistakes" in item:
-            total_questions = correct_answers + item.get("mistakes", 0)
         else:
-            total_questions = 0
+            total_questions = correct_answers + mistakes
 
         ppm = item.get("ppm")
         if ppm is None:
@@ -81,7 +80,7 @@ def calculate_individual_evolution(
 
         accuracy = item.get("accuracy")
         if accuracy is None:
-            accuracy = calculate_accuracy(correct_answers, total_questions)
+            accuracy = calculate_accuracy(correct_answers, mistakes)
 
         processed_results.append({
             "test_date": t_date.isoformat(),
