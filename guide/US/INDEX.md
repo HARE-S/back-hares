@@ -60,10 +60,10 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-28](BE-28-ficha-alumno-agregada.md) | Endpoint agregado de la ficha del alumno | 3 | Alta | Pendiente |
 | [BE-29](BE-29-busqueda-alumnos.md) | Búsqueda de alumnos | 3 | Media | Pendiente |
 | **Análisis y evolución** | | | | |
-| [BE-30](BE-30-metricas-derivadas.md) | Métricas derivadas de comprensión lectora | 3 | Crítica | Pendiente |
-| [BE-31](BE-31-evolucion-individual.md) | Evolución individual de un alumno | 5 | Alta | Pendiente |
+| [BE-30](BE-30-metricas-derivadas.md) | Métricas derivadas de comprensión lectora | 3 | Crítica | Completado |
+| [BE-31](BE-31-evolucion-individual.md) | Evolución individual de un alumno | 5 | Alta | Completado |
 | [BE-32](BE-32-comparativa-grupos.md) | Comparativa de evolución por grupos | 8 | Media | Pendiente |
-| [BE-33](BE-33-proyeccion-evolucion.md) | Proyección de evolución | 8 | Media | Pendiente |
+| [BE-33](BE-33-proyeccion-evolucion.md) | Proyección de evolución | 8 | Media | En revisión |
 | [BE-34](BE-34-alumnos-sin-progreso.md) | Detección de alumnos sin progreso | 5 | Baja | Pendiente |
 | **Exportación e informes** | | | | |
 | [BE-35](BE-35-exportacion-excel.md) | Exportación de datos a Excel | 5 | Alta | Pendiente |
@@ -77,7 +77,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-42](BE-42-perfiles-permisos.md) | Perfiles de permisos por rol | 8 | Alta | Pendiente |
 | [BE-43](BE-43-gestion-usuarios-roles.md) | Gestión de usuarios y asignación de roles | 5 | Alta | Pendiente |
 | [BE-44](BE-44-revocacion-auditoria.md) | Revocación de acceso y auditoría | 5 | Media | Pendiente |
-| [BE-45](BE-45-acceso-desarrollo.md) | Acceso en entorno de desarrollo | 3 | Alta | Pendiente |
+| [BE-45](BE-45-acceso-desarrollo.md) | Acceso en entorno de desarrollo | 3 | Alta | Completado |
 | [BE-46](BE-46-proyecto-google-cloud.md) | Configuración del proyecto en Google Cloud | 3 | Crítica | **Bloqueada** |
 | **Calidad y entrega** | | | | |
 | [BE-47](BE-47-pruebas-automatizadas.md) | Batería de pruebas automatizadas | 8 | Alta | Pendiente |

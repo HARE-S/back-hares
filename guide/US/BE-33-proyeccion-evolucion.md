@@ -72,9 +72,9 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE33-01 | **Regresión lineal simple** En `analytics/projection.py`, sin dependencias del proyecto. | - | Pendiente |
-| T-BE33-02 | **Umbral mínimo de pruebas** Configurable, con respuesta explicativa por debajo. | - | Pendiente |
-| T-BE33-03 | **Marcado de valores estimados** Distinguibles de los medidos en la respuesta. | - | Pendiente |
+| T-BE33-01 | **Regresión lineal simple** En `analytics/projection.py`, sin dependencias del proyecto. | Santiago | Completado |
+| T-BE33-02 | **Umbral mínimo de pruebas** Configurable, con respuesta explicativa por debajo. | Santiago | Completado |
+| T-BE33-03 | **Marcado de valores estimados** Distinguibles de los medidos en la respuesta. | Santiago | Completado |
 | T-BE33-04 | **Endpoint de proyección** Con permiso sobre el alumno. | - | Pendiente |
-| T-BE33-05 | **Tests de proyección** Escenarios 1, 2 y 4 con series conocidas. | - | Pendiente |
+| T-BE33-05 | **Tests de proyección** Escenarios 1, 2, 3, 4 y 5 con series conocidas. | Santiago | Completado |
 | T-BE33-06 | **Validación con pedagogía** Presentar el resultado y acordar si es suficiente. | - | Pendiente |
