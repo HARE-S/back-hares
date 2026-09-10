@@ -76,7 +76,7 @@ Crítica
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE20-01 | **Consulta con datos de prueba** Unión en el repositorio para evitar consultas repetidas. | - | Pendiente |
-| T-BE20-02 | **Enriquecimiento con métricas** PPM y porcentaje de aciertos en el esquema de respuesta. | - | Pendiente |
-| T-BE20-03 | **Blueprint GET de resultados** Con comprobación de permiso sobre el alumno. | - | Pendiente |
-| T-BE20-04 | **Tests de consulta** Escenarios 1 a 6. | - | Pendiente |
+| T-BE20-01 | **Consulta con datos de prueba** Unión en el repositorio para evitar consultas repetidas. | Yeremi | Hecho |
+| T-BE20-02 | **Enriquecimiento con métricas** PPM y porcentaje de aciertos en el esquema de respuesta. | Yeremi | Hecho |
+| T-BE20-03 | **Blueprint GET de resultados** Con comprobación de permiso sobre el alumno. | Yeremi | Hecho |
+| T-BE20-04 | **Tests de consulta** Escenarios 1 a 6. | Yeremi | Hecho |

@@ -95,10 +95,10 @@ Crítica — núcleo funcional del proyecto
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE18-01 | **Esquemas de resultado** `ResultCreateSchema` con validación de no negativos y `ResultSchema` con PPM. | - | Pendiente |
-| T-BE18-02 | **ResultRepository** Alta y comprobación de duplicado por alumno, prueba y fecha. | - | Pendiente |
-| T-BE18-03 | **ResultService** Validar referencias, comprobar permiso sobre la sección y lanzar excepciones de dominio. | - | Pendiente |
-| T-BE18-04 | **Blueprint POST de resultados** `MethodView` con `@blp.arguments`, `@blp.response(201)` y `@require_role`. | - | Pendiente |
-| T-BE18-05 | **Mapeo de excepciones** Dominio → 400, 403, 409 con forma de error estable. | - | Pendiente |
-| T-BE18-06 | **Registro en auditoría** Usuario, fecha y recurso afectado. | - | Pendiente |
-| T-BE18-07 | **Tests de integración** Los ocho escenarios, con fixtures de tutor con y sin permiso. | - | Pendiente |
+| T-BE18-01 | **Esquemas de resultado** `ResultCreateSchema` con validación de no negativos y `ResultSchema` con PPM. | Yeremi | Hecho |
+| T-BE18-02 | **ResultRepository** Alta y comprobación de duplicado por alumno, prueba y fecha. | Yeremi | Hecho |
+| T-BE18-03 | **ResultService** Validar referencias, comprobar permiso sobre la sección y lanzar excepciones de dominio. | Yeremi | Hecho |
+| T-BE18-04 | **Blueprint POST de resultados** `MethodView` con `@blp.arguments`, `@blp.response(201)` y `@require_role`. | Yeremi | Hecho |
+| T-BE18-05 | **Mapeo de excepciones** Dominio → 400, 403, 409 con forma de error estable. | Yeremi | Hecho |
+| T-BE18-06 | **Registro en auditoría** Usuario, fecha y recurso afectado. | Yeremi | Hecho |
+| T-BE18-07 | **Tests de integración** Los ocho escenarios, con fixtures de tutor con y sin permiso. | Yeremi | Hecho |

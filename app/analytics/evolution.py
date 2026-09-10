@@ -81,7 +81,10 @@ def calculate_individual_evolution(
 
         accuracy = item.get("accuracy")
         if accuracy is None:
-            accuracy = calculate_accuracy(correct_answers, total_questions)
+            if total_questions > 0:
+                accuracy = round((correct_answers / total_questions) * 100.0, 2)
+            else:
+                accuracy = 0.0
 
         processed_results.append({
             "test_date": t_date.isoformat(),

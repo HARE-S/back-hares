@@ -37,10 +37,16 @@ def create_app(config_class=Config):
 
     from app.api.v1.tests import tests_bp
     from app.api.v1.books import books_bp
+    from app.api.v1.results import results_bp, single_results_bp
 
     application.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
     application.register_blueprint(books_bp, url_prefix="/api/v1/books")
     application.register_blueprint(books_bp, url_prefix="/api/books", name="books_direct")
+    application.register_blueprint(results_bp, url_prefix="/api/v1/students")
+    application.register_blueprint(results_bp, url_prefix="/api/students", name="results_direct")
+    application.register_blueprint(single_results_bp, url_prefix="/api/v1/results")
+    application.register_blueprint(single_results_bp, url_prefix="/api/results", name="single_results_direct")
+
 
     # Registro condicional del endpoint de autenticación dev (BE-45)
     if application.config.get("DEV_AUTH_BYPASS"):

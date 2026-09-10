@@ -10,7 +10,11 @@ class DuplicateCodeError(DomainException):
 
 class ValidationError(DomainException):
     """Se lanza cuando los datos de entrada no cumplen las reglas de validación."""
-    pass
+
+    def __init__(self, message: str, field: str | None = None):
+        super().__init__(message)
+        self.message = message
+        self.field = field
 
 
 class ForbiddenError(DomainException):
@@ -26,4 +30,20 @@ class ConflictError(DomainException):
 class SchemaValidationError(DomainException):
     """Se lanza cuando un esquema de actualización o entrada tiene formato o valores semánticamente no procesables (422)."""
     pass
+
+
+class NotFoundError(DomainException):
+    """Se lanza cuando un recurso solicitado no existe en el sistema (404)."""
+    pass
+
+
+class BatchValidationError(DomainException):
+    """Se lanza cuando un lote contiene filas inválidas o con errores específicos por fila (BE-22)."""
+
+    def __init__(self, message: str, errors: list):
+        super().__init__(message)
+        self.message = message
+        self.errors = errors
+
+
 

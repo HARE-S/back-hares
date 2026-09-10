@@ -72,8 +72,8 @@ Crítica — sin ella el proyecto no cumple su objetivo
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE19-01 | **Restricción de unicidad** PK subrogada y `UNIQUE(student_id, test_id, test_date)`. | - | Pendiente |
-| T-BE19-02 | **Detección de duplicado en servicio** Comprobar antes de insertar. | - | Pendiente |
-| T-BE19-03 | **Mapeo a 409** Excepción de dominio, no error crudo de base de datos. | - | Pendiente |
-| T-BE19-04 | **Orden del histórico** Por `test_date` ascendente en el repositorio. | - | Pendiente |
-| T-BE19-05 | **Tests de repetición** Escenarios 1, 2, 3 y 5 contra PostgreSQL real. | - | Pendiente |
+| T-BE19-01 | **Restricción de unicidad** PK subrogada y `UNIQUE(student_id, test_id, test_date)`. | Yeremi | Hecho |
+| T-BE19-02 | **Detección de duplicado en servicio** Comprobar antes de insertar. | Yeremi | Hecho |
+| T-BE19-03 | **Mapeo a 409** Excepción de dominio, no error crudo de base de datos. | Yeremi | Hecho |
+| T-BE19-04 | **Orden del histórico** Por `test_date` ascendente en el repositorio. | Yeremi | Hecho |
+| T-BE19-05 | **Tests de repetición** Escenarios 1, 2, 3 y 5 contra PostgreSQL real. | Yeremi | Hecho |
