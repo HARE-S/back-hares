@@ -8,7 +8,7 @@ from app.models import (
     Test,
     Result,
     Book,
-    ReadedBook,
+    ReadBook,
 )
 
 
@@ -99,24 +99,24 @@ def test_test_and_results(session):
     assert len(student.results) == 1
 
 
-def test_book_and_readed_books(session):
+def test_book_and_read_books(session):
     student = Student(name="STU02")
-    book = Book(book="El Lazarillo de Tormes", level=3)
+    book = Book(book="El Lazarillo de Tormes", level="II")
     session.add_all([student, book])
     session.commit()
 
-    readed = ReadedBook(
+    read_book = ReadBook(
         student_id=student.id,
         book_id=book.id,
         start_date=datetime.date(2026, 9, 1),
         end_date=datetime.date(2026, 9, 15),
     )
-    session.add(readed)
+    session.add(read_book)
     session.commit()
 
-    assert len(student.readed_books) == 1
-    assert student.readed_books[0].book.book == "El Lazarillo de Tormes"
-    assert student.readed_books[0].end_date == datetime.date(2026, 9, 15)
+    assert len(student.read_books) == 1
+    assert student.read_books[0].book.book == "El Lazarillo de Tormes"
+    assert student.read_books[0].end_date == datetime.date(2026, 9, 15)
 
 
 def test_to_dict_method(session):

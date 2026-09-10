@@ -13,7 +13,9 @@ class Center(BaseModel):
         default=uuidv7,
         server_default=text("uuidv7()"),
     )
+    external_id = db.Column(db.String(255), unique=True, nullable=True)
     name = db.Column(db.String(255), nullable=False)
+    disabled_at = db.Column(db.Date, nullable=True)
 
     # Relaciones
     sections = db.relationship(
@@ -41,7 +43,10 @@ class Section(BaseModel):
         db.ForeignKey("centers.id", ondelete="CASCADE"),
         nullable=False,
     )
+    external_id = db.Column(db.String(255), unique=True, nullable=True)
     name = db.Column(db.String(255), nullable=False)
+    academic_year = db.Column(db.String(20), nullable=True)
+    disabled_at = db.Column(db.Date, nullable=True)
 
     # Relaciones
     center = db.relationship("Center", back_populates="sections")
