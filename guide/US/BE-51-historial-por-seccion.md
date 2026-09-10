@@ -83,8 +83,8 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE51-01 | **Consulta por sección** Filtrando por `results.section_id`, no por la matrícula actual. | - | Pendiente |
-| T-BE51-02 | **Agrupación por prueba** Opcional, mediante parámetro. | - | Pendiente |
-| T-BE51-03 | **Acotación por rango de fechas** Parámetros opcionales. | - | Pendiente |
-| T-BE51-04 | **Endpoint del historial de sección** Con comprobación de permiso. | - | Pendiente |
-| T-BE51-05 | **Tests del historial** Escenarios 1, 4, 5 y 6. | - | Pendiente |
+| T-BE51-01 | **Consulta por sección** Filtrando por `results.section_id`, no por la matrícula actual. | Yeremi | Hecho |
+| T-BE51-02 | **Agrupación por prueba** Opcional, mediante parámetro. | Yeremi | Hecho |
+| T-BE51-03 | **Acotación por rango de fechas** Parámetros opcionales. | Yeremi | Hecho |
+| T-BE51-04 | **Endpoint del historial de sección** Con comprobación de permiso. | Yeremi | Hecho |
+| T-BE51-05 | **Tests del historial** Escenarios 1, 4, 5 y 6. | Yeremi | Hecho |

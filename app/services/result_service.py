@@ -494,4 +494,128 @@ class ResultService:
             "results": serialized_results,
         }
 
+    def get_section_history(
+        self,
+        section_id: Union[str, uuid.UUID],
+        start_date: Optional[Union[str, datetime.date]] = None,
+        end_date: Optional[Union[str, datetime.date]] = None,
+        group_by: Optional[str] = None,
+        current_user: Optional[Dict[str, Any]] = None,
+    ) -> Union[List[Dict[str, Any]], Dict[str, Any]]:
+        """
+        Consulta el historial de pruebas realizadas por una sección (BE-51).
+        - Valida el ID de la sección (400) y su existencia en BD (404 Not Found si no existe - Escenario 5).
+        - Comprueba permisos de sección del tutor y bloquea rol 'pendiente' (403 Forbidden - Escenario 6).
+        - Acota opcionalmente por rango de fechas start_date y end_date (Escenario 3).
+        - Filtra estrictamente por Result.section_id preservando fidelidad si alumnos cambiaron de grupo (Escenario 4).
+        - Soporta agrupación opcional por prueba con group_by="test" (Escenario 2).
+        - Registra evento en auditoría (Escenario 6 y notas).
+        """
+        try:
+            parsed_section_id = (
+                section_id if isinstance(section_id, uuid.UUID) else uuid.UUID(str(section_id).strip())
+            )
+        except (ValueError, TypeError, AttributeError):
+            raise ValidationError("El identificador de la sección no es válido", field="section_id")
+
+        section = self.session.get(Section, parsed_section_id)
+        if not section:
+            raise NotFoundError("La sección especificada no existe")
+
+        # Comprobar permisos del usuario
+        if current_user:
+            user_role = str(current_user.get("role", "")).strip().lower()
+            if user_role == "pendiente":
+                raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar resultados")
+            if user_role not in ("coordinator", "coordinador", "admin"):
+                assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
+                if str(parsed_section_id).strip() not in assigned_sections:
+                    raise ForbiddenError("El tutor no tiene permiso sobre la sección especificada")
+
+        # Parsear fechas si vienen como string
+        parsed_start_date: Optional[datetime.date] = None
+        if start_date:
+            if isinstance(start_date, datetime.date):
+                parsed_start_date = start_date
+            else:
+                try:
+                    parsed_start_date = datetime.date.fromisoformat(str(start_date).strip())
+                except (ValueError, TypeError):
+                    raise ValidationError("El formato de 'start_date' debe ser YYYY-MM-DD", field="start_date")
+
+        parsed_end_date: Optional[datetime.date] = None
+        if end_date:
+            if isinstance(end_date, datetime.date):
+                parsed_end_date = end_date
+            else:
+                try:
+                    parsed_end_date = datetime.date.fromisoformat(str(end_date).strip())
+                except (ValueError, TypeError):
+                    raise ValidationError("El formato de 'end_date' debe ser YYYY-MM-DD", field="end_date")
+
+        if parsed_start_date and parsed_end_date and parsed_start_date > parsed_end_date:
+            raise ValidationError("La fecha de inicio no puede ser posterior a la fecha de fin", field="start_date")
+
+        # Obtener resultados filtrando estrictamente por section_id en Result
+        results = self.result_repo.get_by_section(
+            section_id=parsed_section_id,
+            start_date=parsed_start_date,
+            end_date=parsed_end_date,
+            order_asc=True,
+        )
+
+        enriched_results = []
+        for r in results:
+            ppm = calculate_ppm(r.test.words, r.time) if r.test else 0.0
+            total_q = r.successes + r.mistakes
+            accuracy = round((r.successes / total_q) * 100.0, 2) if total_q > 0 else 0.0
+            data = ResultSchema.dump(r, ppm=ppm)
+            data["accuracy"] = accuracy
+            data["student_id"] = str(r.student_id)
+            data["student_name"] = r.student.name if r.student else None
+            if r.test:
+                data["test_id"] = str(r.test_id)
+                data["test_code"] = r.test.code
+                data["test_name"] = r.test.name
+                data["test_words"] = r.test.words
+                data["words"] = r.test.words
+            enriched_results.append(data)
+
+        # Agrupación opcional por prueba (Escenario 2)
+        if group_by and group_by.strip().lower() in ("test", "prueba"):
+            groups_by_test: Dict[str, Dict[str, Any]] = {}
+            for item in enriched_results:
+                t_id = item.get("test_id") or "unknown"
+                if t_id not in groups_by_test:
+                    groups_by_test[t_id] = {
+                        "test_id": t_id,
+                        "test_name": item.get("test_name"),
+                        "test_code": item.get("test_code"),
+                        "words": item.get("words"),
+                        "results_count": 0,
+                        "results": [],
+                    }
+                groups_by_test[t_id]["results"].append(item)
+                groups_by_test[t_id]["results_count"] += 1
+            output: Union[List[Dict[str, Any]], Dict[str, Any]] = list(groups_by_test.values())
+        else:
+            output = enriched_results
+
+        # Registro en auditoría (BE-44 y BE-51 Notas)
+        log_audit(
+            user=current_user,
+            action="VIEW_SECTION_RESULTS",
+            resource_type="sections",
+            resource_id=str(parsed_section_id),
+            details={
+                "results_count": len(enriched_results),
+                "group_by": group_by,
+                "start_date": parsed_start_date.isoformat() if parsed_start_date else None,
+                "end_date": parsed_end_date.isoformat() if parsed_end_date else None,
+            },
+        )
+
+        return output
+
+
 

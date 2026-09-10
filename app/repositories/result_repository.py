@@ -93,6 +93,36 @@ class ResultRepository:
             stmt = stmt.order_by(Result.test_date.desc(), Result.id.desc())
         return list(self.session.scalars(stmt).all())
 
+    def get_by_section(
+        self,
+        section_id: uuid.UUID,
+        start_date: Optional[datetime.date] = None,
+        end_date: Optional[datetime.date] = None,
+        order_asc: bool = True,
+    ) -> List[Result]:
+        """
+        Obtiene todos los resultados registrados para una sección (T-BE51-01).
+        Filtra estrictamente por Result.section_id, preservando la fidelidad histórica
+        incluso si los alumnos cambiaron posteriormente de grupo (Escenario 4).
+        Carga ansiosamente (joinedload) las relaciones student y test para evitar N+1.
+        Soporta acotación opcional por rango de fechas (T-BE51-03).
+        """
+        stmt = (
+            select(Result)
+            .where(Result.section_id == section_id)
+            .options(joinedload(Result.student), joinedload(Result.test))
+        )
+        if start_date is not None:
+            stmt = stmt.where(Result.test_date >= start_date)
+        if end_date is not None:
+            stmt = stmt.where(Result.test_date <= end_date)
+
+        if order_asc:
+            stmt = stmt.order_by(Result.test_date.asc(), Result.id.asc())
+        else:
+            stmt = stmt.order_by(Result.test_date.desc(), Result.id.desc())
+        return list(self.session.scalars(stmt).all())
+
     def update(self, result: Result, commit: bool = True) -> Result:
         """
         Actualiza los cambios sobre un resultado persistido.
