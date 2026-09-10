@@ -69,8 +69,9 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE45-01 | **Registro condicional del endpoint** Solo si el bypass está activo. | - | Pendiente |
-| T-BE45-02 | **Usuario simulado con rol configurable** Para poder probar cada perfil. | - | Pendiente |
-| T-BE45-03 | **Comprobación al arrancar** Fallo si coincide con configuración de producción. | - | Pendiente |
-| T-BE45-04 | **Fixture de autenticación para pruebas** Basada en este mecanismo. | - | Pendiente |
-| T-BE45-05 | **Tests de salvaguarda** Escenarios 2, 3 y 5. | - | Pendiente |
+| T-BE45-01 | **Registro condicional del endpoint** Solo si el bypass está activo. | Santiago | Completado |
+| T-BE45-02 | **Usuario simulado con rol configurable** Para poder probar cada perfil. | Santiago | Completado |
+| T-BE45-03 | **Comprobación al arrancar** Fallo si coincide con configuración de producción. | Santiago | Completado |
+| T-BE45-04 | **Fixture de autenticación para pruebas** Basada en este mecanismo. | Santiago | Completado |
+| T-BE45-05 | **Tests de salvaguarda** Escenarios 2, 3 y 5. | Santiago | Completado |
+
