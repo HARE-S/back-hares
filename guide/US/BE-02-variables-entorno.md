@@ -88,9 +88,10 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE02-01 | **Clases de configuración** `Config` base y variantes por entorno seleccionadas con `APP_ENV`. | - | Pendiente |
-| T-BE02-02 | **Validación al arrancar** Comprobar presencia y validez; abortar con mensaje claro. | - | Pendiente |
-| T-BE02-03 | **Comprobación de combinaciones peligrosas** Producción con bypass activo, secreto corto, sesión no persistida. | - | Pendiente |
-| T-BE02-04 | **.env.example documentado** Todas las claves con comentario y sin valores reales. | - | Pendiente |
-| T-BE02-05 | **CORS condicionado al entorno** Lista explícita de orígenes y credenciales habilitadas; desactivado en producción. | - | Pendiente |
-| T-BE02-06 | **Tests de configuración** Escenarios 2 a 7. | - | Pendiente |
+| T-BE02-01 | **Clases de configuración** `Config` base y variantes por entorno seleccionadas con `APP_ENV`. | Santiago | Completado |
+| T-BE02-02 | **Validación al arrancar** Comprobar presencia y validez; abortar con mensaje claro. | Santiago | Completado |
+| T-BE02-03 | **Comprobación de combinaciones peligrosas** Producción con bypass activo, secreto corto, sesión no persistida. | Santiago | Completado |
+| T-BE02-04 | **.env.example documentado** Todas las claves con comentario y sin valores reales. | Santiago | Completado |
+| T-BE02-05 | **CORS condicionado al entorno** Lista explícita de orígenes y credenciales habilitadas; desactivado en producción. | Santiago | Completado |
+| T-BE02-06 | **Tests de configuración** Escenarios 2 a 7. | Santiago | Completado |
+
