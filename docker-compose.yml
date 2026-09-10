@@ -7,27 +7,67 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-hares_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hares_pass}
       POSTGRES_DB: ${POSTGRES_DB:-hares_db}
-    ports:
-      - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - data_dir:/var/lib/postgresql/data
+    networks:
+      - db-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hares_user} -d ${POSTGRES_DB:-hares_db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   backend:
     build: .
     container_name: back_hares_api
     restart: always
-    ports:
-      - "5000:5000"
     volumes:
       - .:/app
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-hares_user}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-hares_pass}
       - POSTGRES_HOST=db
-      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_PORT=5432
       - POSTGRES_DB=${POSTGRES_DB:-hares_db}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - db-network
+      - backend-network
+
+  import:
+    build: .
+    profiles: ["tools"]
+    networks:
+      - db-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    profiles: ["tools"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@penascal.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-pgadmin_dev_pass}
+      PGADMIN_CONFIG_SERVER_MODE: "True"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "True"
+    ports:
+      - "127.0.0.1:5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+    networks:
+      - db-network
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
-  postgres_data:
+  data_dir:
+  pgadmin_data:
+
+networks:
+  db-network:
+  backend-network:

@@ -75,7 +75,7 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE21-01 | **Esquema de actualización de resultado** Todos los campos opcionales, con validación. | - | Pendiente |
-| T-BE21-02 | **PATCH y DELETE del recurso** En el `MethodView` del resultado individual. | - | Pendiente |
-| T-BE21-03 | **Auditoría con valor anterior** Registrar qué cambió y desde qué valor. | - | Pendiente |
-| T-BE21-04 | **Tests de corrección** Escenarios 1 a 6. | - | Pendiente |
+| T-BE21-01 | **Esquema de actualización de resultado** Todos los campos opcionales, con validación. | Yeremi | Hecho |
+| T-BE21-02 | **PATCH y DELETE del recurso** En el `MethodView` del resultado individual. | Yeremi | Hecho |
+| T-BE21-03 | **Auditoría con valor anterior** Registrar qué cambió y desde qué valor. | Yeremi | Hecho |
+| T-BE21-04 | **Tests de corrección** Escenarios 1 a 6. | Yeremi | Hecho |

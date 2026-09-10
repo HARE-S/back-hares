@@ -45,11 +45,11 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-16](BE-16-mantenimiento-libros.md) | Alta y mantenimiento del catálogo de libros | 3 | Alta | Pendiente |
 | [BE-17](BE-17-carga-inicial-libros.md) | Carga inicial del catálogo de libros | 8 | Media | Pendiente |
 | **Registro de resultados** | | | | |
-| [BE-18](BE-18-registrar-resultado.md) | Registrar el resultado de una prueba | 5 | **Crítica** | Pendiente |
-| [BE-19](BE-19-pruebas-sucesivas.md) | Pruebas sucesivas del mismo texto | 3 | **Crítica** | Pendiente |
-| [BE-20](BE-20-consultar-resultados-alumno.md) | Consultar los resultados de un alumno | 3 | Crítica | Pendiente |
-| [BE-21](BE-21-corregir-anular-resultado.md) | Corregir y anular un resultado | 3 | Alta | Pendiente |
-| [BE-22](BE-22-registro-lote.md) | Endpoint de registro en lote | 5 | Alta | Pendiente |
+| [BE-18](BE-18-registrar-resultado.md) | Registrar el resultado de una prueba | 5 | **Crítica** | Completado |
+| [BE-19](BE-19-pruebas-sucesivas.md) | Pruebas sucesivas del mismo texto | 3 | **Crítica** | Completado |
+| [BE-20](BE-20-consultar-resultados-alumno.md) | Consultar los resultados de un alumno | 3 | Crítica | Completado |
+| [BE-21](BE-21-corregir-anular-resultado.md) | Corregir y anular un resultado | 3 | Alta | Completado |
+| [BE-22](BE-22-registro-lote.md) | Endpoint de registro en lote | 5 | Alta | Completado |
 | **Registro de lecturas** | | | | |
 | [BE-23](BE-23-asignar-libro.md) | Asignar un libro a un alumno | 3 | Alta | Pendiente |
 | [BE-24](BE-24-cerrar-lectura.md) | Cerrar una lectura | 2 | Alta | Pendiente |
@@ -85,7 +85,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-49](BE-49-manual-usuario.md) | Manual de uso de las funciones de servidor | 2 | Media | Pendiente |
 | **Añadidas tras revisión del cliente (09/09)** | | | | |
 | [BE-50](BE-50-crud-manual-alumnado.md) | Alta y modificación manual de alumnado | 8 | Alta | Pendiente |
-| [BE-51](BE-51-historial-por-seccion.md) | Historial de pruebas por sección | 3 | Media | Pendiente |
+| [BE-51](BE-51-historial-por-seccion.md) | Historial de pruebas por sección | 3 | Media | Completado |
 | | **Total** | **227** | | |
 
 ---

@@ -1,0 +1,11 @@
+# Override de desarrollo (BE-01): expone puertos solo en local.
+# En producción NO se usa este fichero: docker compose -f docker-compose.yml.
+# Ningún servicio salvo el proxy publica puertos al exterior (ver guide/deployment.md).
+services:
+  db:
+    ports:
+      - "5433:5432"
+
+  backend:
+    ports:
+      - "5000:5000"

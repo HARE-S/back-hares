@@ -76,8 +76,8 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE22-01 | **Esquema del lote** Prueba, fecha y lista de resultados por alumno, con filas opcionales. | - | Pendiente |
-| T-BE22-02 | **Servicio de registro en lote** Validación previa de todas las filas antes de escribir. | - | Pendiente |
-| T-BE22-03 | **Manejo transaccional** Todo o nada, sin resultados a medias. | - | Pendiente |
-| T-BE22-04 | **Respuesta con errores por fila** Identificando el alumno afectado. | - | Pendiente |
-| T-BE22-05 | **Tests del lote** Escenarios 1 a 6. | - | Pendiente |
+| T-BE22-01 | **Esquema del lote** Prueba, fecha y lista de resultados por alumno, con filas opcionales. | Yeremi | Hecho |
+| T-BE22-02 | **Servicio de registro en lote** Validación previa de todas las filas antes de escribir. | Yeremi | Hecho |
+| T-BE22-03 | **Manejo transaccional** Todo o nada, sin resultados a medias. | Yeremi | Hecho |
+| T-BE22-04 | **Respuesta con errores por fila** Identificando el alumno afectado. | Yeremi | Hecho |
+| T-BE22-05 | **Tests del lote** Escenarios 1 a 6. | Yeremi | Hecho |

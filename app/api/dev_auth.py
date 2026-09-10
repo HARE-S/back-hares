@@ -13,9 +13,15 @@ def set_dev_session():
     data = request.get_json() or {}
     role = data.get("role", "tutor")
     email = data.get("email", f"dev.{role}@penascal.org")
+    sections = data.get("sections")
 
     session["dev_role"] = role
     session["user_email"] = email
+    if sections is not None:
+        session["dev_sections"] = sections
+    elif "dev_sections" in session and "sections" in data:
+        session["dev_sections"] = []
+
     if hasattr(g, "current_user"):
         delattr(g, "current_user")
 
