@@ -1,4 +1,4 @@
-from sqlalchemy import text
+from sqlalchemy import text, UniqueConstraint
 from app.extensions import db
 from app.models.base import BaseModel
 from app.utils.uuidv7 import uuidv7
@@ -17,8 +17,8 @@ class Test(BaseModel):
     code = db.Column(db.String(50), nullable=False, unique=True)
     name = db.Column(db.String(255), nullable=False)
     words = db.Column(db.Integer, nullable=False, default=0)
-    level = db.Column(db.String(10), nullable=True)
-    type = db.Column(db.String(10), nullable=True)
+    level = db.Column(db.String(20), nullable=True)
+    type = db.Column(db.String(20), nullable=True)
     disabled_at = db.Column(db.Date, nullable=True)
 
     # Relaciones
@@ -67,8 +67,12 @@ class Result(BaseModel):
     section = db.relationship("Section", back_populates="results")
     test = db.relationship("Test", back_populates="results")
 
-    # Índice opcional para búsquedas y ordenación de progresión
+    # Restricción UNIQUE compuesta: un alumno solo puede tener un resultado
+    # de la misma prueba en la misma fecha, pero puede repetir la prueba
+    # en fechas distintas (BE-03)
     __table_args__ = (
+        db.UniqueConstraint("student_id", "test_id", "test_date",
+                            name="uq_results_student_test_date"),
         db.Index("ix_results_student_test_date", "student_id", "test_date"),
     )
 

@@ -233,7 +233,9 @@ def test_scenario_5_books_resource_contains_no_student_references(app):
     assert not hasattr(Book, "student")
 
     # Verificar que la relación vive en la tabla de asociación de lecturas
-    reading_columns = [col["name"] for col in inspector.get_columns("readed_books")]
+    table_names = inspector.get_table_names()
+    reading_table = "read_books" if "read_books" in table_names else "readed_books"
+    reading_columns = [col["name"] for col in inspector.get_columns(reading_table)]
     assert "student_id" in reading_columns
     assert "book_id" in reading_columns
 

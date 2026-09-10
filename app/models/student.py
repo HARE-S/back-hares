@@ -14,11 +14,13 @@ class Student(BaseModel):
         default=uuidv7,
         server_default=text("uuidv7()"),
     )
+    external_id = db.Column(db.String(255), unique=True, nullable=True)
     name = db.Column(db.String(255), nullable=False)
     birth_date = db.Column(db.Date, nullable=True)
     gender = db.Column(db.String(20), nullable=True)
     academic_status = db.Column(db.String(100), nullable=True)
     sector = db.Column(db.String(100), nullable=True)
+    disabled_at = db.Column(db.Date, nullable=True)
 
     @property
     def age(self):
@@ -49,8 +51,8 @@ class Student(BaseModel):
         cascade="all, delete-orphan",
         lazy="select",
     )
-    readed_books = db.relationship(
-        "ReadedBook",
+    read_books = db.relationship(
+        "ReadBook",
         back_populates="student",
         cascade="all, delete-orphan",
         lazy="select",
