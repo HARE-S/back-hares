@@ -1,4 +1,7 @@
-from flask import Blueprint, jsonify, request
+"""Endpoints de resultados de pruebas con flask-smorest."""
+
+from flask.views import MethodView
+from flask_smorest import Blueprint
 from app.auth.decorators import get_current_user, require_role
 from app.core.exceptions import (
     BatchValidationError,
@@ -10,133 +13,191 @@ from app.core.exceptions import (
 )
 from app.extensions import db
 from app.services.result_service import ResultService
+from app.schemas.result_marshmallow import (
+    ResultCreateRequestSchema,
+    ResultUpdateRequestSchema,
+    ResultBatchRequestSchema,
+    ResultBatchResponseSchema,
+    ResultResponseSchema,
+    ResultHistoryResponseSchema,
+    ErrorSchema,
+)
 
-results_bp = Blueprint("results_v1", __name__)
-single_results_bp = Blueprint("single_results_v1", __name__)
+results_bp = Blueprint(
+    "results_v1",
+    __name__,
+    url_prefix="/students",
+    description="Registro y consulta de resultados de pruebas",
+)
 
-
-@results_bp.route("/<student_id>/results", methods=["POST"])
-@require_role("tutor", "coordinator", "coordinador", "admin")
-def register_student_result(student_id):
-    """
-    Registra el resultado de una prueba para un alumno (BE-18).
-    - 201 Created con el recurso completo y PPM calculado (Escenario 1).
-    - 400 Bad Request si los datos son inválidos, negativos o no existen referencias (Escenarios 2 y 3).
-    - 401 Unauthorized si no hay sesión (Escenario 5, gestionado por @require_role).
-    - 403 Forbidden si el tutor no tiene permiso sobre la sección o rol 'pendiente' (Escenarios 6 y 7).
-    - 409 Conflict si el alumno ya tiene un resultado para la misma prueba y fecha (Escenario 4).
-    """
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        return (
-            jsonify({"error": "Cuerpo de la petición inválido o ausente (se requiere JSON)"}),
-            400,
-        )
-
-    current_user = get_current_user()
-    service = ResultService(db.session)
-
-    try:
-        result_data = service.register_result(
-            student_id=student_id,
-            data=data,
-            current_user=current_user,
-        )
-    except ValidationError as e:
-        response_payload = {"error": str(e)}
-        if hasattr(e, "field") and e.field:
-            response_payload["field"] = e.field
-        return jsonify(response_payload), 400
-    except ForbiddenError as e:
-        return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
-    except ConflictError as e:
-        return jsonify({"error": "CONFLICT", "message": str(e)}), 409
-
-    return jsonify(result_data), 201
+single_results_bp = Blueprint(
+    "single_results_v1",
+    __name__,
+    url_prefix="/results",
+    description="Gestión individual de resultados",
+)
 
 
-@results_bp.route("/<student_id>/results", methods=["GET"])
-@require_role("tutor", "coordinator", "coordinador", "admin")
-def get_student_results(student_id):
-    """
-    Consulta el histórico ordenado de resultados de un alumno (BE-19 Escenario 4 y BE-20).
-    - Devuelve 200 OK con la lista ordenada por test_date ascendente.
-    - Cada resultado incluye PPM y porcentaje de aciertos (accuracy).
-    - 400 Bad Request si el ID es inválido.
-    - 404 Not Found si el alumno no existe.
-    - 401 Unauthorized si no hay sesión autenticada.
-    - 403 Forbidden si el tutor no tiene permisos sobre el alumno o rol 'pendiente'.
-    """
-    current_user = get_current_user()
-    service = ResultService(db.session)
+@results_bp.route("/<student_id>/results")
+class StudentResults(MethodView):
+    """Resultados de un alumno."""
 
-    try:
-        history = service.get_student_history(
-            student_id=student_id,
-            current_user=current_user,
-        )
-    except ValidationError as e:
-        response_payload = {"error": str(e)}
-        if hasattr(e, "field") and e.field:
-            response_payload["field"] = e.field
-        return jsonify(response_payload), 400
-    except NotFoundError as e:
-        return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
-    except ForbiddenError as e:
-        return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
+    @require_role("tutor", "coordinator", "coordinador", "admin")
+    @results_bp.arguments(ResultCreateRequestSchema)
+    @results_bp.response(201, ResultResponseSchema)
+    @results_bp.alt_response(400, schema=ErrorSchema)
+    @results_bp.alt_response(403, schema=ErrorSchema)
+    @results_bp.alt_response(409, schema=ErrorSchema)
+    def post(self, payload, student_id):
+        """Registrar resultado de prueba (BE-18)."""
+        current_user = get_current_user()
+        service = ResultService(db.session)
 
-    return jsonify(history), 200
+        try:
+            result_data = service.register_result(
+                student_id=student_id,
+                data=payload,
+                current_user=current_user,
+            )
+            return result_data, 201
+        except ValidationError as e:
+            return {"error": str(e), "field": getattr(e, "field", None)}, 400
+        except ForbiddenError as e:
+            return {"error": "FORBIDDEN", "message": str(e)}, 403
+        except ConflictError as e:
+            return {"error": "CONFLICT", "message": str(e)}, 409
+
+    @require_role("tutor", "coordinator", "coordinador", "admin")
+    @results_bp.response(200, ResultHistoryResponseSchema(many=True))
+    @results_bp.alt_response(400, schema=ErrorSchema)
+    @results_bp.alt_response(404, schema=ErrorSchema)
+    @results_bp.alt_response(403, schema=ErrorSchema)
+    def get(self, student_id):
+        """Consultar histórico de resultados (BE-20)."""
+        current_user = get_current_user()
+        service = ResultService(db.session)
+
+        try:
+            history = service.get_student_history(
+                student_id=student_id,
+                current_user=current_user,
+            )
+            return history, 200
+        except ValidationError as e:
+            return {"error": str(e), "field": getattr(e, "field", None)}, 400
+        except NotFoundError as e:
+            return {"error": "NOT_FOUND", "message": str(e)}, 404
+        except ForbiddenError as e:
+            return {"error": "FORBIDDEN", "message": str(e)}, 403
 
 
-@single_results_bp.route("/<result_id>", methods=["PATCH"])
-@require_role("tutor", "coordinator", "coordinador", "admin")
-def update_result(result_id):
-    """
-    Modificación parcial de un resultado existente (BE-21 Escenario 1).
-    - 200 OK con el resultado actualizado y PPM recalculado.
-    - 422 Unprocessable Entity si los datos no son válidos (Escenario 2).
-    - 404 Not Found si el resultado no existe (Escenario 4).
-    - 403 Forbidden si el tutor no tiene permiso sobre el alumno (Escenario 5).
-    """
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        return (
-            jsonify({"error": "UNPROCESSABLE_ENTITY", "message": "Cuerpo de la petición inválido o ausente"}),
-            422,
-        )
+@results_bp.route("/<student_id>/results/<result_id>")
+class StudentResultDetail(MethodView):
+    """Modificación y borrado de resultado bajo ruta de alumno."""
 
+    @require_role("tutor", "coordinator", "coordinador", "admin")
+    @results_bp.arguments(ResultUpdateRequestSchema)
+    @results_bp.response(200, ResultResponseSchema)
+    @results_bp.alt_response(422, schema=ErrorSchema)
+    @results_bp.alt_response(404, schema=ErrorSchema)
+    @results_bp.alt_response(403, schema=ErrorSchema)
+    def patch(self, payload, student_id, result_id):
+        """Modificar resultado parcialmente (BE-21)."""
+        return _update_result(payload, result_id)
+
+    @require_role("tutor", "coordinator", "coordinador", "admin")
+    @results_bp.response(204)
+    @results_bp.alt_response(404, schema=ErrorSchema)
+    @results_bp.alt_response(403, schema=ErrorSchema)
+    def delete(self, student_id, result_id):
+        """Eliminar resultado (BE-21)."""
+        return _delete_result(result_id)
+
+
+@single_results_bp.route("/<result_id>")
+class ResultDetail(MethodView):
+    """Operaciones sobre resultado individual."""
+
+    @require_role("tutor", "coordinator", "coordinador", "admin")
+    @single_results_bp.arguments(ResultUpdateRequestSchema)
+    @single_results_bp.response(200, ResultResponseSchema)
+    @single_results_bp.alt_response(422, schema=ErrorSchema)
+    @single_results_bp.alt_response(404, schema=ErrorSchema)
+    @single_results_bp.alt_response(403, schema=ErrorSchema)
+    def patch(self, payload, result_id):
+        """Modificar resultado parcialmente (BE-21)."""
+        return _update_result(payload, result_id)
+
+    @require_role("tutor", "coordinator", "coordinador", "admin")
+    @single_results_bp.response(204)
+    @single_results_bp.alt_response(404, schema=ErrorSchema)
+    @single_results_bp.alt_response(403, schema=ErrorSchema)
+    def delete(self, result_id):
+        """Eliminar resultado (BE-21)."""
+        return _delete_result(result_id)
+
+
+@single_results_bp.route("/batch", methods=["POST"])
+class BatchResults(MethodView):
+    """Registro en lote de resultados."""
+
+    @require_role("tutor", "coordinator", "coordinador", "admin")
+    @single_results_bp.arguments(ResultBatchRequestSchema)
+    @single_results_bp.response(201, ResultBatchResponseSchema)
+    @single_results_bp.alt_response(400, schema=ErrorSchema)
+    @single_results_bp.alt_response(403, schema=ErrorSchema)
+    def post(self, payload):
+        """Registrar lote de resultados (BE-22)."""
+        current_user = get_current_user()
+        service = ResultService(db.session)
+
+        try:
+            summary = service.register_batch(
+                data=payload,
+                current_user=current_user,
+            )
+            return summary, 201
+        except BatchValidationError as e:
+            return {
+                "error": "BATCH_VALIDATION_ERROR",
+                "message": e.message,
+                "errors": e.errors,
+            }, 400
+        except ValidationError as e:
+            return {"error": str(e), "field": getattr(e, "field", None)}, 400
+        except ForbiddenError as e:
+            return {"error": "FORBIDDEN", "message": str(e)}, 403
+        except ConflictError as e:
+            return {"error": "CONFLICT", "message": str(e)}, 409
+
+
+# Funciones auxiliares privadas
+def _update_result(payload, result_id):
+    """Lógica compartida de actualización."""
     current_user = get_current_user()
     service = ResultService(db.session)
 
     try:
         updated = service.update_result(
             result_id=result_id,
-            data=data,
+            data=payload,
             current_user=current_user,
         )
+        return updated, 200
     except SchemaValidationError as e:
-        return jsonify({"error": "UNPROCESSABLE_ENTITY", "message": str(e)}), 422
+        return {"error": "UNPROCESSABLE_ENTITY", "message": str(e)}, 422
     except ValidationError as e:
-        return jsonify({"error": "VALIDATION_ERROR", "message": str(e)}), 400
+        return {"error": "VALIDATION_ERROR", "message": str(e)}, 400
     except NotFoundError as e:
-        return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
+        return {"error": "NOT_FOUND", "message": str(e)}, 404
     except ForbiddenError as e:
-        return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
+        return {"error": "FORBIDDEN", "message": str(e)}, 403
     except ConflictError as e:
-        return jsonify({"error": "CONFLICT", "message": str(e)}), 409
-
-    return jsonify(updated), 200
+        return {"error": "CONFLICT", "message": str(e)}, 409
 
 
-@single_results_bp.route("/<result_id>", methods=["DELETE"])
-@require_role("tutor", "coordinator", "coordinador", "admin")
-def delete_result(result_id):
-    """
-    Anulación y borrado físico de un resultado (BE-21 Escenario 3).
-    - 204 No Content si se elimina con éxito.
-    - 404 Not Found si el resultado no existe (Escenario 4).
-    - 403 Forbidden si el tutor no tiene permiso (Escenario 5).
-    """
+def _delete_result(result_id):
+    """Lógica compartida de borrado."""
     current_user = get_current_user()
     service = ResultService(db.session)
 
@@ -145,73 +206,8 @@ def delete_result(result_id):
             result_id=result_id,
             current_user=current_user,
         )
+        return "", 204
     except NotFoundError as e:
-        return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
+        return {"error": "NOT_FOUND", "message": str(e)}, 404
     except ForbiddenError as e:
-        return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
-
-    return "", 204
-
-
-@results_bp.route("/<student_id>/results/<result_id>", methods=["PATCH"])
-@require_role("tutor", "coordinator", "coordinador", "admin")
-def update_student_result(student_id, result_id):
-    """Alias para actualización bajo la ruta /api/students/<student_id>/results/<result_id>."""
-    return update_result(result_id)
-
-
-@results_bp.route("/<student_id>/results/<result_id>", methods=["DELETE"])
-@require_role("tutor", "coordinator", "coordinador", "admin")
-def delete_student_result(student_id, result_id):
-    """Alias para borrado bajo la ruta /api/students/<student_id>/results/<result_id>."""
-    return delete_result(result_id)
-
-
-@single_results_bp.route("/batch", methods=["POST"])
-@require_role("tutor", "coordinator", "coordinador", "admin")
-def register_batch_results():
-    """
-    Registra un lote de resultados de pruebas para una sección (BE-22).
-    - 201 Created con el resumen de lo registrado y PPM calculado (Escenario 1).
-    - Omite automáticamente alumnos ausentes (Escenario 2).
-    - 400 Bad Request con 'errors' detallando fila, campo y mensaje si alguna fila es inválida (Escenario 3).
-    - Garantiza atomicidad total: ante cualquier error no se persiste nada (Escenario 4).
-    - 400 Bad Request identificando el conflicto si un alumno ya tiene resultado en la fecha (Escenario 5).
-    - 403 Forbidden si el tutor no tiene asignada la sección o rol 'pendiente' (Escenario 6).
-    """
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        return (
-            jsonify({"error": "Cuerpo de la petición inválido o ausente (se requiere JSON)"}),
-            400,
-        )
-
-    current_user = get_current_user()
-    service = ResultService(db.session)
-
-    try:
-        summary = service.register_batch(
-            data=data,
-            current_user=current_user,
-        )
-    except BatchValidationError as e:
-        return jsonify({
-            "error": "BATCH_VALIDATION_ERROR",
-            "message": e.message,
-            "errors": e.errors,
-        }), 400
-    except ValidationError as e:
-        payload = {"error": str(e)}
-        if hasattr(e, "field") and e.field:
-            payload["field"] = e.field
-        return jsonify(payload), 400
-    except ForbiddenError as e:
-        return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
-    except ConflictError as e:
-        return jsonify({"error": "CONFLICT", "message": str(e)}), 409
-
-    return jsonify(summary), 201
-
-
-
-
+        return {"error": "FORBIDDEN", "message": str(e)}, 403
