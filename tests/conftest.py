@@ -22,6 +22,11 @@ def app():
         if "sqlite" in db_uri.lower():
             print("\n⚠️  Tests contra SQLite: restricciones UNIQUE no se verifican.")
             print("   Para CI/CD usar: TEST_DATABASE_URL=postgresql://...")
+        elif "postgresql" in db_uri.lower():
+            from sqlalchemy import text
+            from app.utils.uuidv7 import SQL_CREATE_UUIDV7_FUNCTION
+            db.session.execute(text(SQL_CREATE_UUIDV7_FUNCTION))
+            db.session.commit()
 
         db.create_all()
         yield application
