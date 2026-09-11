@@ -75,7 +75,7 @@ class TestingConfig(Config):
     DEV_AUTH_BYPASS = _get_bool_env("DEV_AUTH_BYPASS", True)
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "TEST_DATABASE_URL",
-        "sqlite:///tests/test_db.sqlite"
+        "sqlite:///test_db.sqlite"
     )
 
 
