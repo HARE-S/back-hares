@@ -71,9 +71,9 @@ Crítica
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE07-01 | **Resolución por external_id** Buscar antes de crear, en centros, secciones y alumnos. | - | Pendiente |
-| T-BE07-02 | **Actualización de existentes** Alumno encontrado se actualiza, no se recrea. | - | Pendiente |
-| T-BE07-03 | **Sincronización de matrículas** Crear las que falten conservando las existentes. | - | Pendiente |
-| T-BE07-04 | **Manejo transaccional por fila** Una fila inválida no aborta ni deja datos a medias. | - | Pendiente |
-| T-BE07-05 | **Test de idempotencia** Importar dos veces y comparar recuentos de las cuatro tablas. | - | Pendiente |
-| T-BE07-06 | **Tests de casos límite** Escenarios 2, 3, 4 y 5. | - | Pendiente |
+| T-BE07-01 | **Resolución por external_id** Buscar antes de crear, en centros, secciones y alumnos. | Marlen | Completado |
+| T-BE07-02 | **Actualización de existentes** Alumno encontrado se actualiza, no se recrea. | Marlen | Completado |
+| T-BE07-03 | **Sincronización de matrículas** Crear las que falten conservando las existentes. | Marlen | Completado |
+| T-BE07-04 | **Manejo transaccional por fila** Una fila inválida no aborta ni deja datos a medias. | Marlen | Completado |
+| T-BE07-05 | **Test de idempotencia** Importar dos veces y comparar recuentos de las cuatro tablas. | Marlen | Completado |
+| T-BE07-06 | **Tests de casos límite** Escenarios 2, 3, 4 y 5. | Marlen | Completado |
