@@ -20,7 +20,7 @@ class PairMetricsService:
         self.session = session
         self.result_repo = ResultRepository(session)
 
-    def get_student_pair_series(self, student_id: str) -> List[Dict[str, Any]]:
+    def get_student_pair_series(self, student_id: str, exclude_anomalous: bool = False) -> List[Dict[str, Any]]:
         """
         Serie de pares por letra de prueba para un alumno.
 
@@ -28,10 +28,13 @@ class PairMetricsService:
         de cada tipo (F/L), y devuelve mean, difference, is_complete por par.
 
         :param student_id: UUID del alumno
+        :param exclude_anomalous: Si True, excluye resultados marcados como anómalos
         :return: Lista de pares ordenados pedagógicamente, con media y diferencia
         """
-        stmt = self.session.query(Result).filter(Result.student_id == student_id)
-        results = stmt.all()
+        query = self.session.query(Result).filter(Result.student_id == student_id)
+        if exclude_anomalous:
+            query = query.filter(Result.anomalous == False)
+        results = query.all()
 
         # Construir dicts con los campos que build_pair_series espera
         result_dicts = [
@@ -78,11 +81,20 @@ class PairMetricsService:
         )
         students = stmt.all()
 
-        # Serie de pares para cada alumno
-        students_series = [self.get_student_pair_series(str(s.id)) for s in students]
+        # Serie de pares para cada alumno (excluyendo anómalos en agregados)
+        students_series = [self.get_student_pair_series(str(s.id), exclude_anomalous=True) for s in students]
+
+        # Contar resultados anómalos excluidos
+        anomalous_count = 0
+        for student in students:
+            anomalous_count += self.session.query(Result).filter(
+                Result.student_id == student.id,
+                Result.anomalous == True,
+            ).count()
 
         # Calcular progreso y agregados
         result = summarize_group_progress(students_series)
+        result["anomalous_excluded"] = anomalous_count
 
         # Calcular distribución por banda: tomar el último par (prueba más reciente)
         # y clasificarlo para cada alumno

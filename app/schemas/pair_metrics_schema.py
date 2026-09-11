@@ -71,3 +71,4 @@ class GroupProgressResponseSchema(Schema):
     global_info = fields.Nested(GroupGlobalSchema, attribute="global")
     reading_level_counts = fields.Nested(ReadingLevelCountSchema)  # "NIVEL POR PRUEBAS"
     population = fields.Int()  # total de alumnos en la sección
+    anomalous_excluded = fields.Int()  # count de resultados anómalos excluidos de agregados

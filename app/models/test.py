@@ -68,6 +68,7 @@ class Result(BaseModel):
     time = db.Column(db.Integer, nullable=False, default=0)
     successes = db.Column(db.Integer, nullable=False, default=0)
     mistakes = db.Column(db.Integer, nullable=False, default=0)
+    anomalous = db.Column(db.Boolean, nullable=False, default=False)
 
     # Relaciones
     student = db.relationship("Student", back_populates="results")
