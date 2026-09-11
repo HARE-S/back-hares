@@ -57,7 +57,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-26](BE-26-lecturas-por-alumno-y-libro.md) | Consulta de lecturas por alumno y por libro | 3 | Media | Completado |
 | **Consulta y filtrado** | | | | |
 | [BE-27](BE-27-filtrado-multicriterio.md) | Filtrado multicriterio del alumnado | 5 | Alta | **Bloqueada** |
-| [BE-28](BE-28-ficha-alumno-agregada.md) | Endpoint agregado de la ficha del alumno | 3 | Alta | Pendiente |
+| [BE-28](BE-28-ficha-alumno-agregada.md) | Endpoint agregado de la ficha del alumno | 3 | Alta | Completado |
 | [BE-29](BE-29-busqueda-alumnos.md) | Búsqueda de alumnos | 3 | Media | Pendiente |
 | **Análisis y evolución** | | | | |
 | [BE-30](BE-30-metricas-derivadas.md) | Métricas derivadas de comprensión lectora | 3 | Crítica | Completado |

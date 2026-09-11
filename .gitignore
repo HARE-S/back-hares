@@ -22,3 +22,7 @@ Thumbs.db
 # IDE
 .idea/
 .vscode/
+
+# SQLite test databases
+test_db.sqlite
+*.sqlite

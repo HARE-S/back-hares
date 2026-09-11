@@ -3,28 +3,24 @@ import pytest
 from flask import Flask, jsonify
 from app import create_app
 from app.auth import get_current_user, require_role
-from app.config import Config
+from app.config import Config, TestingConfig
 
 
-class DevAuthConfig(Config):
-    TESTING = True
+class DevAuthConfig(TestingConfig):
     APP_ENV = "development"
     DEV_AUTH_BYPASS = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
 
 
 class ProductionBypassConfig(Config):
     TESTING = True
     APP_ENV = "production"
     DEV_AUTH_BYPASS = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_DATABASE_URI = "postgresql://test_user:test_password@db-test:5432/hares_test"
 
 
-class NormalConfig(Config):
-    TESTING = True
+class NormalConfig(TestingConfig):
     APP_ENV = "development"
     DEV_AUTH_BYPASS = False
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
 
 
 def test_dev_auth_disabled_by_default_scenario_2():

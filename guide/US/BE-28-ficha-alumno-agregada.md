@@ -70,7 +70,7 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE28-01 | **Esquema StudentDetail** Con secciones, resultados y lecturas anidados. | - | Pendiente |
-| T-BE28-02 | **Composición en el servicio** Reutilizando repositorios existentes, sin consultas nuevas duplicadas. | - | Pendiente |
-| T-BE28-03 | **Distinción de secciones actuales e históricas** A partir de `student_sections`. | - | Pendiente |
-| T-BE28-04 | **Tests de la ficha** Escenarios 1 a 5. | - | Pendiente |
+| T-BE28-01 | **Esquema StudentDetail** Con secciones, resultados y lecturas anidados. | Yeremi | Completado |
+| T-BE28-02 | **Composición en el servicio** Reutilizando repositorios existentes, sin consultas nuevas duplicadas. | Yeremi | Completado |
+| T-BE28-03 | **Distinción de secciones actuales e históricas** A partir de `student_sections`. | Yeremi | Completado |
+| T-BE28-04 | **Tests de la ficha** Escenarios 1 a 5. | Yeremi | Completado |

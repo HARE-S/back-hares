@@ -11,7 +11,6 @@ services:
       - "5000:5000"
 
   # Base de datos para la suite de pruebas (BE-47).
-  # tmpfs: los datos viven en memoria, así que es rápida y no persiste nada.
   db-test:
     image: postgres:15-alpine
     profiles: ["test"]
@@ -19,8 +18,8 @@ services:
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: hares_test
-    tmpfs:
-      - /var/lib/postgresql/data
+    volumes:
+      - test_data:/var/lib/postgresql/data
     networks:
       - db-network
     healthcheck:
@@ -28,3 +27,6 @@ services:
       interval: 3s
       timeout: 3s
       retries: 10
+
+volumes:
+  test_data:

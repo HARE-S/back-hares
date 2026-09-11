@@ -17,23 +17,6 @@ def create_app(config_class=Config):
     db.init_app(application)
     openapi_api.init_app(application)
 
-    # Soporte para SQLite en desarrollo local (BE-47): registrar funciones falsas
-    # En CI/CD se usa PostgreSQL real. En desarrollo local SQLite es conveniente pero
-    # no verifica restricciones UNIQUE compuestas ni uuidv7() realmente.
-    with application.app_context():
-        if db.engine.dialect.name == "sqlite":
-            from sqlalchemy import event
-            @event.listens_for(db.engine, "connect")
-            def set_sqlite_functions(dbapi_connection, connection_record):
-                if hasattr(dbapi_connection, "create_function"):
-                    from app.utils.uuidv7 import uuidv7
-                    dbapi_connection.create_function("uuidv7", 0, lambda: str(uuidv7()))
-                    dbapi_connection.create_function(
-                        "translate",
-                        3,
-                        lambda text, from_chars, to_chars: str(text).translate(str.maketrans(from_chars, to_chars)) if text is not None else None,
-                    )
-
     # Registro de blueprints
     application.register_blueprint(health_bp, url_prefix="/api")
 
@@ -43,10 +26,13 @@ def create_app(config_class=Config):
     from app.api.v1.sections import sections_bp
     from app.api.v1.readings import readings_bp, single_readings_bp
     from app.api.v1.imports import import_bp
+    from app.api.v1.students import students_bp
 
     openapi_api.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
     openapi_api.register_blueprint(books_bp, url_prefix="/api/v1/books")
     application.register_blueprint(books_bp, url_prefix="/api/books", name="books_direct")
+    application.register_blueprint(students_bp, url_prefix="/api/v1/students", name="students_v1")
+    application.register_blueprint(students_bp, url_prefix="/api/students", name="students_direct")
     application.register_blueprint(results_bp, url_prefix="/api/v1/students")
     application.register_blueprint(results_bp, url_prefix="/api/students", name="results_direct")
     application.register_blueprint(readings_bp, url_prefix="/api/v1/students", name="readings_v1")

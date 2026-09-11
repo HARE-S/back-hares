@@ -1,32 +1,39 @@
+import os
 import pytest
+from sqlalchemy import text
 from app import create_app
 from app.config import TestingConfig
 from app.extensions import db
+from app.utils.uuidv7 import SQL_CREATE_UUIDV7_FUNCTION
+
+KEEP_DATA = os.getenv("KEEP_TEST_DATA", "").lower() in ("1", "true", "yes")
 
 
 @pytest.fixture
 def app():
     """
-    Aplicación de pruebas.
+    Aplicación de pruebas sobre PostgreSQL.
 
-    Híbrido: SQLite persistente en desarrollo local (rápido, sin Docker),
-    PostgreSQL en CI/CD (rigurosamente correcto).
-
-    Advertencia: SQLite no aplica uuidv7() ni restricciones UNIQUE compuestas.
-    Las pruebas de BE-19 y BE-25 pasan sin comprobar nada real si corren contra SQLite.
+    Con KEEP_TEST_DATA=1 las tablas no se destruyen al terminar, para poder
+    inspeccionar el estado con pgAdmin después de un fallo.
     """
     application = create_app(TestingConfig)
 
     with application.app_context():
-        db_uri = str(application.config["SQLALCHEMY_DATABASE_URI"])
-        if "sqlite" in db_uri.lower():
+        db_uri = str(application.config.get("SQLALCHEMY_DATABASE_URI", ""))
+        if "postgresql" in db_uri.lower():
+            # uuidv7() no es nativa en PostgreSQL 15: la registra el proyecto.
+            db.session.execute(text(SQL_CREATE_UUIDV7_FUNCTION))
+            db.session.commit()
+        elif "sqlite" in db_uri.lower():
             print("\n⚠️  Tests contra SQLite: restricciones UNIQUE no se verifican.")
             print("   Para CI/CD usar: TEST_DATABASE_URL=postgresql://...")
 
         db.create_all()
         yield application
         db.session.remove()
-        db.drop_all()
+        if not KEEP_DATA:
+            db.drop_all()
 
 
 @pytest.fixture
