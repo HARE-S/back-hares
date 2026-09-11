@@ -62,20 +62,18 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     """
-    Configuración para ejecución de pruebas.
+    Configuración de pruebas.
 
-    Híbrido: SQLite persistente para desarrollo local (rápido, sin Docker),
-    PostgreSQL en CI/CD (rigurosamente correcto).
-
-    Advertencia: SQLite no aplica uuidv7() ni restricciones UNIQUE compuestas,
-    así que las pruebas de BE-19 y BE-25 pasan sin comprobar nada si corren contra SQLite.
+    Las pruebas corren SIEMPRE contra PostgreSQL. El esquema usa uuidv7() y
+    restricciones UNIQUE compuestas que SQLite no aplica igual: contra SQLite,
+    las pruebas de BE-19 y BE-25 pasan sin comprobar nada.
     """
     TESTING = True
     APP_ENV = "testing"
     DEV_AUTH_BYPASS = _get_bool_env("DEV_AUTH_BYPASS", True)
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "TEST_DATABASE_URL",
-        "sqlite:///test_db.sqlite"
+        "postgresql://test_user:test_password@db-test:5432/hares_test",
     )
 
 
@@ -125,12 +123,15 @@ def validate_config(app_config) -> None:
     if str(session_type).lower() not in valid_session_types:
         raise RuntimeError("FATAL: SESSION_TYPE debe apuntar a un almacenamiento persistente en servidor (ej. sqlalchemy).")
 
-    # Salvaguarda de entorno de pruebas: si se define TEST_DATABASE_URL explícitamente,
-    # debe contener 'test' para evitar borrar datos reales.
+    # Salvaguarda del entorno de pruebas.
     if app_env == "testing":
-        explicit_test_url = os.getenv("TEST_DATABASE_URL")
-        if explicit_test_url and "test" not in explicit_test_url.lower():
+        db_uri = str(getattr(app_config, "SQLALCHEMY_DATABASE_URI", ""))
+        if "sqlite" in db_uri.lower():
             raise RuntimeError(
-                "FATAL: la URL explícita TEST_DATABASE_URL debe contener 'test'. "
-                f"Recibida: {explicit_test_url}"
+                "FATAL: las pruebas no pueden ejecutarse contra SQLite. "
+                "Levanta db-test: docker compose --profile test up -d db-test"
+            )
+        if "test" not in db_uri.lower():
+            raise RuntimeError(
+                f"FATAL: la base de pruebas debe contener 'test' en su URL. Recibida: {db_uri}"
             )

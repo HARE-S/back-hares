@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
 from app import create_app
-from app.config import Config
+from app.config import TestingConfig
 from app.core.exceptions import ConflictError
 from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
@@ -13,11 +13,9 @@ from app.models.test import Result, Test
 from app.repositories.result_repository import ResultRepository
 
 
-class NoBypassConfig(Config):
-    TESTING = True
+class NoBypassConfig(TestingConfig):
     APP_ENV = "development"
     DEV_AUTH_BYPASS = False
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
 
 
 @pytest.fixture
@@ -424,7 +422,7 @@ def test_postgresql_unique_constraint_direct():
     Si el contenedor PostgreSQL está accesible, verifica en pg_constraint que existe
     'uq_results_student_test_date' sobre las columnas esperadas (student_id, test_id, test_date).
     """
-    db_url = Config.SQLALCHEMY_DATABASE_URI
+    db_url = TestingConfig.SQLALCHEMY_DATABASE_URI
     if not db_url or "postgresql" not in db_url:
         pytest.skip("Base de datos PostgreSQL no configurada en este entorno")
 

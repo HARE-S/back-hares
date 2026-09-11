@@ -2,7 +2,7 @@ import datetime
 import uuid
 import pytest
 from app import create_app
-from app.config import Config
+from app.config import TestingConfig
 from app.core.audit import clear_audit_logs, get_audit_logs
 from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
@@ -10,11 +10,9 @@ from app.models.test import Result, Test
 from app.repositories.result_repository import ResultRepository
 
 
-class NoBypassConfig(Config):
-    TESTING = True
+class NoBypassConfig(TestingConfig):
     APP_ENV = "development"
     DEV_AUTH_BYPASS = False
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
 
 
 @pytest.fixture
