@@ -202,12 +202,18 @@ bash scripts/docker_down_safe.sh
 
 ## 6. Carga de datos maestros
 
-El servicio `import` carga centros, secciones y alumnado desde el volcado de Alexia (US-07, US-08).
+El servicio `import` es un job puntual que carga datos de prueba anónimos (BE-05): centros, secciones, alumnado, catálogo de pruebas, catálogo mínimo de libros y resultados sintéticos. Sin argumentos usa los CSV por defecto de `data/seeds/`.
 
 ```bash
-docker compose run --rm \
+docker compose --profile tools run --rm import
+```
+
+Con CSV personalizados:
+
+```bash
+docker compose --profile tools run --rm \
   -v /ruta/al/fichero:/data:ro \
-  import python -m app.import_data /data/import_data.csv
+  import python -m app.importer --students /data/import_data.csv --tests /data/tests.csv
 ```
 
 El importador es **idempotente**: se identifica por `external_id`, no por nombre. Reejecutarlo con el mismo fichero no crea duplicados. Si el recuento de filas cambia tras una segunda ejecución, hay un error y debe reportarse.
