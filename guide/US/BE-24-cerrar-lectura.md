@@ -66,7 +66,7 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE24-01 | **Validación de coherencia de fechas** Fin nunca anterior a inicio. | - | Pendiente |
-| T-BE24-02 | **PATCH de la lectura** Permitiendo fijar y limpiar `end_date`. | - | Pendiente |
-| T-BE24-03 | **Estado derivado** En curso o finalizada según `end_date`. | - | Pendiente |
-| T-BE24-04 | **Tests de cierre** Escenarios 1 a 5. | - | Pendiente |
+| T-BE24-01 | **Validación de coherencia de fechas** Fin nunca anterior a inicio. | Yeremi | Completado |
+| T-BE24-02 | **PATCH de la lectura** Permitiendo fijar y limpiar `end_date`. | Yeremi | Completado |
+| T-BE24-03 | **Estado derivado** En curso o finalizada según `end_date`. | Yeremi | Completado |
+| T-BE24-04 | **Tests de cierre** Escenarios 1 a 5. | Yeremi | Completado |
