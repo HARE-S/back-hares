@@ -3,6 +3,7 @@ from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
 from app.models.test import Test, Result
 from app.models.book import Book, ReadBook, ReadedBook
+from app.models.user import User, UserSection, UserRole
 from app.models.enums import (
     BookLevel,
     BOOK_LEVEL_ORDER,
@@ -21,6 +22,9 @@ __all__ = [
     "Book",
     "ReadBook",
     "ReadedBook",
+    "User",
+    "UserSection",
+    "UserRole",
     "BookLevel",
     "BOOK_LEVEL_ORDER",
     "validate_book_level",
