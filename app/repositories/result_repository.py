@@ -1,9 +1,11 @@
 import datetime
 from typing import Any, Dict, List, Optional
 import uuid
-from sqlalchemy import select
+
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
+
 from app.core.exceptions import ConflictError
 from app.models.test import Result
 
@@ -16,11 +18,48 @@ class ResultRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create(
+    def exists(
+        self,
+        student_id: Any,
+        test_id: Any,
+        test_date: datetime.date,
+    ) -> bool:
+        """Comprueba si ya existe un resultado para la clave triplicada (student, test, date)."""
+        stmt = select(Result).where(
+            Result.student_id == student_id,
+            Result.test_id == test_id,
+            Result.test_date == test_date,
+        )
+        return self.session.scalars(stmt).first() is not None
+
+    def exists_duplicate(
         self,
         student_id: uuid.UUID,
-        section_id: uuid.UUID,
         test_id: uuid.UUID,
+        test_date: datetime.date,
+        exclude_id: Optional[uuid.UUID] = None,
+    ) -> bool:
+        """
+        Comprueba si ya existe un resultado para el mismo alumno, prueba y fecha exacta (Escenario 4 de BE-18 y Escenario 3 de BE-19).
+        """
+        stmt = select(Result).where(
+            Result.student_id == student_id,
+            Result.test_id == test_id,
+            Result.test_date == test_date,
+        )
+        if exclude_id is not None:
+            stmt = stmt.where(Result.id != exclude_id)
+        return self.session.scalars(stmt).first() is not None
+
+    def count(self) -> int:
+        """Returns the total number of results."""
+        return int(self.session.scalar(select(func.count(Result.id))) or 0)
+
+    def create(
+        self,
+        student_id: Any,
+        section_id: Any,
+        test_id: Any,
         test_date: datetime.date,
         time: int,
         successes: int,
@@ -54,30 +93,11 @@ class ResultRepository:
             raise
         return result
 
-    def exists_duplicate(
-        self,
-        student_id: uuid.UUID,
-        test_id: uuid.UUID,
-        test_date: datetime.date,
-        exclude_id: Optional[uuid.UUID] = None,
-    ) -> bool:
-        """
-        Comprueba si ya existe un resultado para el mismo alumno, prueba y fecha exacta (Escenario 4 de BE-18 y Escenario 3 de BE-19).
-        """
-        stmt = select(Result).where(
-            Result.student_id == student_id,
-            Result.test_id == test_id,
-            Result.test_date == test_date,
-        )
-        if exclude_id is not None:
-            stmt = stmt.where(Result.id != exclude_id)
-        return self.session.scalars(stmt).first() is not None
-
     def get_by_id(self, result_id: uuid.UUID) -> Optional[Result]:
         """Obtiene un resultado por su identificador primario."""
         return self.session.get(Result, result_id)
 
-    def get_by_student(self, student_id: uuid.UUID, order_asc: bool = True) -> List[Result]:
+    def get_by_student(self, student_id: Any, order_asc: bool = True) -> List[Result]:
         """
         Obtiene todos los resultados asociados a un alumno con la información de la prueba unida (T-BE20-01).
         Por defecto ordenados cronológicamente por test_date ascendente (BE-19 Escenario 4 y T-BE19-04).
@@ -184,6 +204,3 @@ class ResultRepository:
             self.session.rollback()
             raise
         return created_results
-
-
-

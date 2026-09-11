@@ -64,8 +64,8 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE05-01 | **Comando de carga** Punto de entrada ejecutable dentro del contenedor. | - | Pendiente |
-| T-BE05-02 | **Carga de maestros y catálogos** Reutilizar el importador de BE-07 y el de pruebas de BE-12. | - | Pendiente |
-| T-BE05-03 | **Generación de resultados sintéticos** Mínimo tres por alumno, en fechas separadas y con tendencia variada. | - | Pendiente |
-| T-BE05-04 | **Idempotencia** Comprobar existencia antes de crear. | - | Pendiente |
-| T-BE05-05 | **Test del comando** Escenarios 1 a 3. | - | Pendiente |
+| T-BE05-01 | **Comando de carga** Punto de entrada ejecutable dentro del contenedor. | Marlen | Completado |
+| T-BE05-02 | **Carga de maestros y catálogos** Reutilizar el importador de BE-07 y el de pruebas de BE-12. | Marlen | Completado |
+| T-BE05-03 | **Generación de resultados sintéticos** Mínimo tres por alumno, en fechas separadas y con tendencia variada. | Marlen | Completado |
+| T-BE05-04 | **Idempotencia** Comprobar existencia antes de crear. | Marlen | Completado |
+| T-BE05-05 | **Test del comando** Escenarios 1 a 3. | Marlen | Completado |
