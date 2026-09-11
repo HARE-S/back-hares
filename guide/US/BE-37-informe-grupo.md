@@ -75,9 +75,10 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE37-01 | **Cálculo de agregados** Medias, participantes y número de pruebas. | - | Pendiente |
-| T-BE37-02 | **Distribución de resultados** Por tramos, no solo la media. | - | Pendiente |
-| T-BE37-03 | **Desglose por sección** En el informe de centro. | - | Pendiente |
-| T-BE37-04 | **Exportación del informe** Reutilizando BE-35. | - | Pendiente |
-| T-BE37-05 | **Restricción por rol** Informes de centro limitados. | - | Pendiente |
-| T-BE37-06 | **Tests del informe de grupo** Escenarios 2, 4 y 6. | - | Pendiente |
+| T-BE37-01 | **Cálculo de agregados** Medias, participantes y número de pruebas. | Yeremi | Completado |
+| T-BE37-02 | **Distribución de resultados** Por tramos, no solo la media. | Yeremi | Completado |
+| T-BE37-03 | **Desglose por sección** En el informe de centro. | Yeremi | Completado |
+| T-BE37-04 | **Exportación del informe** Reutilizando BE-35. | Yeremi | Completado |
+| T-BE37-05 | **Restricción por rol** Informes de centro limitados. | Yeremi | Completado |
+| T-BE37-06 | **Tests del informe de grupo** Escenarios 2, 4 y 6. | Yeremi | Completado |
+

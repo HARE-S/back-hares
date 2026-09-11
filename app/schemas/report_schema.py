@@ -56,3 +56,69 @@ class StudentReportSchema:
             "projection": None,
             "generated_at": generated_at.isoformat(),
         }
+
+
+class GroupReportSchema:
+    """
+    Serializador para el informe agregado de una sección/grupo (BE-37).
+    """
+
+    @classmethod
+    def dump(
+        cls,
+        section: Any,
+        aggregates: Dict[str, Any],
+        generated_at: Optional[datetime.datetime] = None,
+    ) -> Dict[str, Any]:
+        if generated_at is None:
+            generated_at = datetime.datetime.now(datetime.timezone.utc)
+
+        return {
+            "section_id": str(section.id),
+            "name": section.name,
+            "external_id": getattr(section, "external_id", None),
+            "academic_year": getattr(section, "academic_year", None),
+            "center_id": str(section.center_id) if getattr(section, "center_id", None) else None,
+            "has_data": aggregates.get("has_data", False),
+            "participants_count": aggregates.get("participants_count", 0),
+            "results_count": aggregates.get("results_count", 0),
+            "mean_ppm": aggregates.get("mean_ppm"),
+            "mean_accuracy": aggregates.get("mean_accuracy"),
+            "mean_vef": aggregates.get("mean_vef"),
+            "distribution": aggregates.get("distribution"),
+            "generated_at": generated_at.isoformat(),
+        }
+
+
+class CenterReportSchema:
+    """
+    Serializador para el informe agregado de un centro completo (BE-37).
+    Incluye datos del conjunto y desglose por sección (Escenario 3).
+    """
+
+    @classmethod
+    def dump(
+        cls,
+        center: Any,
+        aggregates: Dict[str, Any],
+        sections_breakdown: Any,
+        generated_at: Optional[datetime.datetime] = None,
+    ) -> Dict[str, Any]:
+        if generated_at is None:
+            generated_at = datetime.datetime.now(datetime.timezone.utc)
+
+        return {
+            "center_id": str(center.id),
+            "name": center.name,
+            "external_id": getattr(center, "external_id", None),
+            "has_data": aggregates.get("has_data", False),
+            "participants_count": aggregates.get("participants_count", 0),
+            "results_count": aggregates.get("results_count", 0),
+            "mean_ppm": aggregates.get("mean_ppm"),
+            "mean_accuracy": aggregates.get("mean_accuracy"),
+            "mean_vef": aggregates.get("mean_vef"),
+            "distribution": aggregates.get("distribution"),
+            "sections": sections_breakdown,
+            "generated_at": generated_at.isoformat(),
+        }
+

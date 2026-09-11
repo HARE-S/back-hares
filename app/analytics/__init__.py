@@ -25,6 +25,8 @@ from app.analytics.pairs import (
     summarize_group_progress,
 )
 
+from app.analytics.group_report import calculate_group_aggregates
+
 try:
     from app.analytics.evolution import calculate_individual_evolution
 
@@ -35,6 +37,7 @@ try:
         "calculate_effective_speed",
         "calculate_metrics_from_result",
         "calculate_individual_evolution",
+        "calculate_group_aggregates",
         "TEST_LETTER_ORDER",
         "calculate_pair",
         "build_pair_series",
@@ -48,10 +51,12 @@ except ImportError:
         "calculate_reading_comprehension",
         "calculate_effective_speed",
         "calculate_metrics_from_result",
+        "calculate_group_aggregates",
         "TEST_LETTER_ORDER",
         "calculate_pair",
         "build_pair_series",
         "calculate_progress",
         "summarize_group_progress",
     ]
+
 

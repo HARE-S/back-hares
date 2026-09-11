@@ -68,8 +68,9 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Exportación e informes** | | | | |
 | [BE-35](BE-35-exportacion-excel.md) | Exportación de datos a Excel | 5 | Alta | Completado |
 | [BE-36](BE-36-datos-informe-alumno.md) | Datos del informe individual de alumno | 3 | Media | Completado |
-| [BE-37](BE-37-informe-grupo.md) | Informe agregado de grupo | 5 | Media | Pendiente |
+| [BE-37](BE-37-informe-grupo.md) | Informe agregado de grupo | 5 | Media | Completado |
 | **Seguridad y acceso** | | | | |
+
 | [BE-38](BE-38-login-google.md) | Inicio de sesión con cuenta de Google | 8 | Crítica | Pendiente |
 | [BE-39](BE-39-restriccion-dominio.md) | Restricción al dominio corporativo | 5 | **Crítica** | Pendiente |
 | [BE-40](BE-40-sesion-servidor.md) | Sesión de servidor | 5 | Crítica | Pendiente |
