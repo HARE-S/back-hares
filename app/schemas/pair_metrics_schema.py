@@ -13,6 +13,7 @@ class PairSchema(Schema):
     mean = fields.Float(allow_none=True)
     difference = fields.Float(allow_none=True)
     is_complete = fields.Bool()
+    reading_level = fields.Str(allow_none=True)  # "bajo", "normal", "alto"
 
 
 class PairSeriesResponseSchema(Schema):
@@ -55,9 +56,18 @@ class GroupGlobalSchema(Schema):
     percentage = fields.Float(allow_none=True)
 
 
+class ReadingLevelCountSchema(Schema):
+    """Recuento de alumnos por banda de nivel lector."""
+
+    bajo = fields.Int()
+    normal = fields.Int()
+    alto = fields.Int()
+
+
 class GroupProgressResponseSchema(Schema):
     """Progresión agregada de un grupo."""
 
     transitions = fields.Dict(keys=fields.Str(), values=fields.Nested(GroupTransitionSchema))
     global_info = fields.Nested(GroupGlobalSchema, attribute="global")
+    reading_level_counts = fields.Nested(ReadingLevelCountSchema)  # "NIVEL POR PRUEBAS"
     population = fields.Int()  # total de alumnos en la sección

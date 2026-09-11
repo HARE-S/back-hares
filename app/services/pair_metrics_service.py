@@ -9,6 +9,7 @@ from app.analytics.pairs import (
     calculate_progress,
     summarize_group_progress,
 )
+from app.analytics.reading_levels import classify_reading_level
 from app.repositories.result_repository import ResultRepository
 
 
@@ -44,7 +45,13 @@ class PairMetricsService:
             if r.test.test_letter and r.test.type
         ]
 
-        return build_pair_series(result_dicts)
+        series = build_pair_series(result_dicts)
+
+        # Añadir banda de nivel lector a cada par (basada en mean)
+        for pair in series:
+            pair["reading_level"] = classify_reading_level(pair.get("mean"))
+
+        return series
 
     def get_student_progress(self, student_id: str) -> Dict[str, Any]:
         """
@@ -58,10 +65,10 @@ class PairMetricsService:
 
     def get_group_progress(self, section_id: str) -> Dict[str, Any]:
         """
-        Progresión de un grupo: porcentaje de alumnos que mejoran.
+        Progresión de un grupo: porcentaje de alumnos que mejoran y distribución por nivel.
 
         :param section_id: UUID de la sección
-        :return: Transiciones con improved (count, measurable, percentage) y global
+        :return: Transiciones con improved, recuento por banda de nivel, población
         """
         # Obtener todos los alumnos de la sección
         stmt = (
@@ -74,7 +81,22 @@ class PairMetricsService:
         # Serie de pares para cada alumno
         students_series = [self.get_student_pair_series(str(s.id)) for s in students]
 
-        return summarize_group_progress(students_series)
+        # Calcular progreso y agregados
+        result = summarize_group_progress(students_series)
+
+        # Calcular distribución por banda: tomar el último par (prueba más reciente)
+        # y clasificarlo para cada alumno
+        reading_levels = {"bajo": 0, "normal": 0, "alto": 0}
+        for series in students_series:
+            if series:  # Si hay al menos un par
+                last_pair = series[-1]  # Último par (prueba más reciente)
+                level = last_pair.get("reading_level")
+                if level in reading_levels:
+                    reading_levels[level] += 1
+
+        result["reading_level_counts"] = reading_levels
+
+        return result
 
     def _calculate_vef(self, result: Result) -> Optional[float]:
         """Calcula Vef (velocidad eficaz) a partir de un resultado."""
