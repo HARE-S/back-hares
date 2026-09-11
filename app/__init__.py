@@ -1,6 +1,6 @@
 from flask import Flask, request
 from app.config import Config, validate_config
-from app.extensions import db
+from app.extensions import db, api as openapi_api
 from app.api.health import health_bp
 # Importar modelos para que SQLAlchemy los reconozca
 from app import models  # noqa: F401
@@ -15,6 +15,7 @@ def create_app(config_class=Config):
 
     # Inicialización de extensiones
     db.init_app(application)
+    openapi_api.init_app(application)
 
     # Registro de funciones de compatibilidad para dialecto SQLite
     with application.app_context():
@@ -40,8 +41,8 @@ def create_app(config_class=Config):
     from app.api.v1.results import results_bp, single_results_bp
     from app.api.v1.sections import sections_bp
 
-    application.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
-    application.register_blueprint(books_bp, url_prefix="/api/v1/books")
+    openapi_api.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
+    openapi_api.register_blueprint(books_bp, url_prefix="/api/v1/books")
     application.register_blueprint(books_bp, url_prefix="/api/books", name="books_direct")
     application.register_blueprint(results_bp, url_prefix="/api/v1/students")
     application.register_blueprint(results_bp, url_prefix="/api/students", name="results_direct")

@@ -88,7 +88,7 @@ def test_scenario_3_invalid_words(client, invalid_words):
         "words": invalid_words,
     }
     response = client.post("/api/v1/tests", json=payload)
-    assert response.status_code == 400
+    assert response.status_code == 422
     data = response.get_json()
     assert "words" in data.get("error", "").lower()
 
@@ -110,7 +110,7 @@ def test_scenario_4_missing_required_fields(client, payload):
     Entonces el sistema devuelve 400 Bad Request
     """
     response = client.post("/api/v1/tests", json=payload)
-    assert response.status_code == 400
+    assert response.status_code == 422
     data = response.get_json()
     assert "obligatorio" in data.get("error", "").lower()
 
