@@ -81,21 +81,24 @@ class StudentRepository:
         self.session.flush()
         return student
 
-    def upsert_student(self, external_id: str, name: str) -> Tuple[Student, bool]:
+    def upsert_student(self, external_id: str, name: str) -> Tuple[Student, bool, bool]:
         """
         Creates or updates a student resolved by external_id (BE-07).
 
-        Returns a tuple (student, created) where created is True when a new
-        row was inserted and False when an existing student was updated.
+        Returns a tuple (student, created, changed):
+        - created is True when a new row was inserted.
+        - changed is True when an existing student had its name updated;
+          False when the student already existed with the same name (omitted).
         """
         student = self.get_student_by_external_id(external_id)
         if student is None:
-            return self.create_student(external_id, name), True
+            return self.create_student(external_id, name), True, False
 
         if student.name != name:
             student.name = name
             self.session.flush()
-        return student, False
+            return student, False, True
+        return student, False, False
 
     def get_all_students(self) -> List[Student]:
         """Returns all students ordered by their external identifier."""
