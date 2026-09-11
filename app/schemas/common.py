@@ -69,3 +69,31 @@ class PaginationQueryArgsSchema(Schema):
 class ErrorSchema(Schema):
     """Respuesta de error genérica."""
     error = fields.Str()
+
+
+def translate_marshmallow_errors(messages: dict) -> str:
+    """
+    Convierte mensajes de error de Marshmallow a un formato amigable en español.
+    Ej: {'code': ['Missing data for required field.']} -> 'code: es obligatorio'
+    """
+    translations = {
+        "missing data for required field.": "es obligatorio",
+        "shorter than minimum length": "es muy corto",
+        "must be greater than or equal to": "debe ser mayor o igual a",
+    }
+
+    error_parts = []
+    for field, errors in messages.items():
+        if isinstance(errors, list) and errors:
+            msg = errors[0].lower()
+            # Try to find a translation
+            translated = msg
+            for en_phrase, es_phrase in translations.items():
+                if en_phrase in msg:
+                    translated = es_phrase
+                    break
+            error_parts.append(translated if field == "overall" else f"{field} {translated}")
+        elif isinstance(errors, str):
+            error_parts.append(f"{field} {errors}")
+
+    return "; ".join(error_parts) if error_parts else "Datos inválidos"

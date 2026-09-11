@@ -2,9 +2,14 @@ from marshmallow import Schema, fields, validate as marshmallow_validate, valida
 from app.models.enums import validate_book_level
 
 
+def validate_non_empty_string(value):
+    if isinstance(value, str) and value.strip() == "":
+        raise ValidationError("es obligatorio")
+
+
 class BookCreateSchema(Schema):
     """Schema para crear un libro (POST /api/v1/books)."""
-    title = fields.Str(required=True, data_key="book", validate=marshmallow_validate.Length(min=1))
+    title = fields.Str(required=True, validate=[validate_non_empty_string, marshmallow_validate.Length(min=1)])
     level = fields.Str(required=True, validate=marshmallow_validate.Length(min=1))
     copies_note = fields.Str(load_default=None, allow_none=True)
     sessions_note = fields.Str(load_default=None, allow_none=True)
@@ -20,8 +25,24 @@ class BookCreateSchema(Schema):
 
 class BookUpdateSchema(Schema):
     """Schema para actualizar un libro (PUT/PATCH /api/v1/books/<id>)."""
-    title = fields.Str(data_key="book", validate=marshmallow_validate.Length(min=1))
+    title = fields.Str(validate=marshmallow_validate.Length(min=1))
     level = fields.Str(validate=marshmallow_validate.Length(min=1))
+    copies_note = fields.Str(allow_none=True)
+    sessions_note = fields.Str(allow_none=True)
+
+    @validates("level")
+    def validate_level(self, value):
+        """Valida que el nivel sea uno de los permitidos (BE-15)."""
+        try:
+            validate_book_level(value)
+        except ValueError as e:
+            raise ValidationError(str(e))
+
+
+class BookPutSchema(Schema):
+    """Schema para reemplazar un libro (PUT /api/v1/books/<id> - reemplazo completo)."""
+    title = fields.Str(required=True, validate=[validate_non_empty_string, marshmallow_validate.Length(min=1)])
+    level = fields.Str(required=True, validate=marshmallow_validate.Length(min=1))
     copies_note = fields.Str(allow_none=True)
     sessions_note = fields.Str(allow_none=True)
 

@@ -17,7 +17,8 @@ from app.repositories.book_repository import BookRepository
 from app.repositories.test_repository import TestRepository
 from app.schemas.book_schema import BookCreateSchema, BookUpdateSchema
 from app.schemas.common import paginate_response
-from app.schemas.test_schema import TestUpdateSchema
+from app.schemas.test_schema import TestUpdateSchema, TestCreateSchema
+from marshmallow import ValidationError as MarshmallowValidationError
 
 
 class CatalogService:
@@ -268,7 +269,11 @@ class CatalogService:
             return None
 
         # Valida esquema de actualización (lanza SchemaValidationError si falla)
-        cleaned = TestUpdateSchema.validate(data, is_patch=is_patch)
+        schema = TestUpdateSchema()
+        try:
+            cleaned = schema.load(data)
+        except MarshmallowValidationError as e:
+            raise SchemaValidationError(str(e.messages))
 
         # Regla de negocio: comprobar intento de cambio de código funcional
         if "code" in cleaned:
@@ -342,7 +347,11 @@ class CatalogService:
         - Valida unicidad de título (lanza DuplicateCodeError -> 409 si ya existe).
         - Persiste el libro y retorna la entidad.
         """
-        validated = BookCreateSchema.validate(data)
+        schema = BookCreateSchema()
+        try:
+            validated = schema.load(data)
+        except MarshmallowValidationError as e:
+            raise SchemaValidationError(str(e.messages))
         title = validated["title"]
 
         if self.book_repo.exists_by_title(title):
@@ -389,7 +398,11 @@ class CatalogService:
         if not book:
             return None
 
-        cleaned = BookUpdateSchema.validate(data, is_patch=is_patch)
+        schema = BookUpdateSchema()
+        try:
+            cleaned = schema.load(data)
+        except MarshmallowValidationError as e:
+            raise SchemaValidationError(str(e.messages))
 
         if "title" in cleaned:
             new_title = cleaned["title"]
