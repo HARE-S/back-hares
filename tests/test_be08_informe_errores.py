@@ -15,9 +15,6 @@ from app.importer import StudentImporter, parse_students_csv_collect
 from app.models.import_report import ImportReport
 from app.repositories.student_repository import StudentRepository
 
-FIXTURES = Path(__file__).parent / "fixtures"
-VALID_CSV = FIXTURES / "import_data_valid.csv"
-
 
 def _csv_with_all_valid_rows(n: int) -> str:
     lines = ["student_id;student_name;sections;center"]
