@@ -27,16 +27,18 @@ class StudentImporter:
         Imports the parsed rows creating missing masters and enrollments.
 
         Returns a summary with counters: total, students_created,
-        students_updated, centers_created, sections_created,
-        enrollments_created.
+        students_updated, students_omitted, centers_created,
+        sections_created, enrollments_created and errors (BE-06).
         """
         summary = {
             "total": len(rows),
             "students_created": 0,
             "students_updated": 0,
+            "students_omitted": 0,
             "centers_created": 0,
             "sections_created": 0,
             "enrollments_created": 0,
+            "errors": 0,
         }
 
         for row in rows:
@@ -44,14 +46,16 @@ class StudentImporter:
             if center_created:
                 summary["centers_created"] += 1
 
-            student, student_created = self.repo.upsert_student(
+            student, student_created, student_changed = self.repo.upsert_student(
                 external_id=row["student_id"],
                 name=row["student_name"],
             )
             if student_created:
                 summary["students_created"] += 1
-            else:
+            elif student_changed:
                 summary["students_updated"] += 1
+            else:
+                summary["students_omitted"] += 1
 
             for section_name in row["sections"]:
                 section, section_created = self.repo.get_or_create_section(center, section_name)

@@ -70,9 +70,9 @@ Crítica
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE06-01 | **Lector de CSV** Separador `;`, UTF-8, validación de cabeceras esperadas. | - | Pendiente |
-| T-BE06-02 | **Parseo de la fila** Extraer alumno, centro y lista de secciones; dividir el multivalor. | - | Pendiente |
-| T-BE06-03 | **Alta de centros y secciones** Crear las que falten antes de matricular. | - | Pendiente |
-| T-BE06-04 | **Alta de alumnos y matrículas** Una fila en `student_sections` por sección. | - | Pendiente |
-| T-BE06-05 | **Resumen de ejecución** Contadores de creados, actualizados, omitidos y errores. | - | Pendiente |
-| T-BE06-06 | **Tests de importación** Escenarios 1 a 5 con el fichero real de ejemplo. | - | Pendiente |
+| T-BE06-01 | **Lector de CSV** Separador `;`, UTF-8, validación de cabeceras esperadas. | Marlen | Completado |
+| T-BE06-02 | **Parseo de la fila** Extraer alumno, centro y lista de secciones; dividir el multivalor. | Marlen | Completado |
+| T-BE06-03 | **Alta de centros y secciones** Crear las que falten antes de matricular. | Marlen | Completado |
+| T-BE06-04 | **Alta de alumnos y matrículas** Una fila en `student_sections` por sección. | Marlen | Completado |
+| T-BE06-05 | **Resumen de ejecución** Contadores de creados, actualizados, omitidos y errores. | Marlen | Completado |
+| T-BE06-06 | **Tests de importación** Escenarios 1 a 5 con el fichero real de ejemplo. | Marlen | Completado |
