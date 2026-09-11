@@ -68,8 +68,8 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE36-01 | **Esquema del informe** Datos, histórico, lecturas y evolución en una estructura. | - | Pendiente |
-| T-BE36-02 | **Composición en el servicio** Reutilizando BE-28 y BE-31. | - | Pendiente |
-| T-BE36-03 | **Fecha de generación** Incluida en la respuesta. | - | Pendiente |
-| T-BE36-04 | **Auditoría y permisos** Registro y comprobación estricta. | - | Pendiente |
-| T-BE36-05 | **Tests del informe** Escenarios 1 a 5. | - | Pendiente |
+| T-BE36-01 | **Esquema del informe** Datos, histórico, lecturas y evolución en una estructura. | Yeremi | Completado |
+| T-BE36-02 | **Composición en el servicio** Reutilizando BE-28 y BE-31. | Yeremi | Completado |
+| T-BE36-03 | **Fecha de generación** Incluida en la respuesta. | Yeremi | Completado |
+| T-BE36-04 | **Auditoría y permisos** Registro y comprobación estricta. | Yeremi | Completado |
+| T-BE36-05 | **Tests del informe** Escenarios 1 a 5. | Yeremi | Completado |

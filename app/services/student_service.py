@@ -3,9 +3,11 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import uuid
 from sqlalchemy.orm import Session
 
+from app.analytics.evolution import calculate_individual_evolution
 from app.core.audit import log_audit
 from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
 from app.models.student import Student
+from app.schemas.report_schema import StudentReportSchema
 from app.schemas.student_schema import StudentDetailSchema
 from app.services.reading_service import ReadingService
 from app.services.result_service import ResultService
@@ -156,3 +158,53 @@ class StudentService:
             results=results,
             readings=readings,
         )
+
+    def get_student_report(
+        self,
+        student_id: Union[str, uuid.UUID],
+        current_user: Optional[Dict[str, Any]] = None,
+        start_date: Optional[Any] = None,
+        end_date: Optional[Any] = None,
+    ) -> Dict[str, Any]:
+        """
+        Obtiene los datos estructurados para el informe individual de un alumno (BE-36).
+        - Reutiliza la composición de la ficha de alumno de BE-28 (T-BE36-02).
+        - Calcula la serie temporal de evolución y variaciones de BE-31.
+        - Incluye fecha y hora de generación ISO UTC (Escenario 2).
+        - Distingue indicador de evolución insuficiente sin proyecciones (Escenario 3).
+        - Registra evento de auditoría GENERATE_STUDENT_REPORT (Escenario 5).
+        """
+        # 1. Obtener la ficha del alumno (comprueba existencia, parseo UUID y permisos de sección)
+        student_card = self.get_student_detail(student_id=student_id, current_user=current_user)
+
+        # 2. Calcular serie de evolución temporal reutilizando BE-31
+        evolution = calculate_individual_evolution(
+            results=student_card.get("results", []),
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        # 3. Fecha y hora de generación
+        now_utc = datetime.datetime.now(datetime.timezone.utc)
+
+        # 4. Registrar en auditoría (T-BE36-04 / Escenario 5)
+        log_audit(
+            user=current_user,
+            action="GENERATE_STUDENT_REPORT",
+            resource_type="students",
+            resource_id=str(student_card["id"]),
+            details={
+                "student_name": student_card.get("name"),
+                "results_count": len(student_card.get("results", [])),
+                "readings_count": len(student_card.get("readings", [])),
+                "has_insufficient_data": evolution.get("has_insufficient_data", False),
+            },
+        )
+
+        # 5. Serializar y devolver informe individual estructurado (T-BE36-01)
+        return StudentReportSchema.dump(
+            student_card=student_card,
+            evolution=evolution,
+            generated_at=now_utc,
+        )
+
