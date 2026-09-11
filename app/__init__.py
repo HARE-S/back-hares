@@ -22,12 +22,14 @@ def create_app(config_class=Config):
 
     from app.api.v1.tests import tests_bp
     from app.api.v1.books import books_bp
+    from app.api.v1.pair_metrics import pair_metrics_bp
     from app.api.v1.results import results_bp, single_results_bp
     from app.api.v1.sections import sections_bp
     from app.api.v1.readings import readings_bp, single_readings_bp
 
     openapi_api.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
     openapi_api.register_blueprint(books_bp, url_prefix="/api/v1/books")
+    openapi_api.register_blueprint(pair_metrics_bp, url_prefix="/api/v1")
     application.register_blueprint(books_bp, url_prefix="/api/books", name="books_direct")
     application.register_blueprint(results_bp, url_prefix="/api/v1/students")
     application.register_blueprint(results_bp, url_prefix="/api/students", name="results_direct")
