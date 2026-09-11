@@ -66,7 +66,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-33](BE-33-proyeccion-evolucion.md) | Proyección de evolución | 8 | Media | En revisión |
 | [BE-34](BE-34-alumnos-sin-progreso.md) | Detección de alumnos sin progreso | 5 | Baja | Pendiente |
 | **Exportación e informes** | | | | |
-| [BE-35](BE-35-exportacion-excel.md) | Exportación de datos a Excel | 5 | Alta | Pendiente |
+| [BE-35](BE-35-exportacion-excel.md) | Exportación de datos a Excel | 5 | Alta | Completado |
 | [BE-36](BE-36-datos-informe-alumno.md) | Datos del informe individual de alumno | 3 | Media | Pendiente |
 | [BE-37](BE-37-informe-grupo.md) | Informe agregado de grupo | 5 | Media | Pendiente |
 | **Seguridad y acceso** | | | | |
