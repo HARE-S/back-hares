@@ -63,15 +63,17 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     """
     Configuración para ejecución de pruebas.
-    Utiliza PostgreSQL mediante TEST_DATABASE_URL / DATABASE_URL si está definido (en Docker/servidor),
-    con fallback a SQLite en memoria para tests locales fuera de contenedor.
+
+    Las pruebas corren SIEMPRE contra PostgreSQL, nunca contra SQLite: el esquema
+    usa uuidv7() y restricciones UNIQUE compuestas que SQLite no aplica igual, así
+    que las pruebas de BE-19 y BE-25 pasarían sin comprobar nada.
     """
     TESTING = True
     APP_ENV = "testing"
     DEV_AUTH_BYPASS = _get_bool_env("DEV_AUTH_BYPASS", True)
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "TEST_DATABASE_URL",
-        os.getenv("TEST_SQLITE_URL", "sqlite:///:memory:")
+        "postgresql://test_user:test_password@db-test:5432/hares_test",
     )
 
 
@@ -120,3 +122,19 @@ def validate_config(app_config) -> None:
     valid_session_types = ("sqlalchemy", "redis", "filesystem", "server")
     if str(session_type).lower() not in valid_session_types:
         raise RuntimeError("FATAL: SESSION_TYPE debe apuntar a un almacenamiento persistente en servidor (ej. sqlalchemy).")
+
+    # Salvaguarda de entorno de pruebas: la suite nunca debe apuntar a una base
+    # de datos que no sea la de test. Un borrado mal dirigido destruiría
+    # expedientes de alumnado.
+    if app_env == "testing":
+        db_uri = str(getattr(app_config, "SQLALCHEMY_DATABASE_URI", ""))
+        if "sqlite" in db_uri.lower():
+            raise RuntimeError(
+                "FATAL: las pruebas no pueden ejecutarse contra SQLite. "
+                "Levanta el servicio db-test: docker compose --profile test up -d db-test"
+            )
+        if "test" not in db_uri.lower():
+            raise RuntimeError(
+                "FATAL: la URL de base de datos de pruebas debe contener 'test'. "
+                f"Recibida: {db_uri}"
+            )
