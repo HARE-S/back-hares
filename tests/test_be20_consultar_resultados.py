@@ -50,7 +50,7 @@ def setup_data(session):
     session.flush()
 
     # Resultados para student_with_results: fechas desordenadas a propósito
-    # R1: 2026-03-24, test_1af, time=60s, 18 aciertos, 2 errores -> PPM=120.0, accuracy=90.0%
+    # R1: 2026-03-24, test_1af, time=60s, 18 aciertos, 2 errores -> PPM=120.0, comprehension=85.0%
     r1 = Result(
         student_id=student_with_results.id,
         section_id=section1.id,
@@ -60,7 +60,7 @@ def setup_data(session):
         successes=18,
         mistakes=2,
     )
-    # R2: 2026-03-10, test_1af, time=72s, 15 aciertos, 5 errores -> PPM=100.0, accuracy=75.0%
+    # R2: 2026-03-10, test_1af, time=72s, 15 aciertos, 5 errores -> PPM=100.0, comprehension=62.5%
     r2 = Result(
         student_id=student_with_results.id,
         section_id=section1.id,
@@ -70,7 +70,7 @@ def setup_data(session):
         successes=15,
         mistakes=5,
     )
-    # R3: 2026-04-05, test_2bf, time=90s, 19 aciertos, 1 error -> PPM=100.0, accuracy=95.0%
+    # R3: 2026-04-05, test_2bf, time=90s, 19 aciertos, 1 error -> PPM=100.0, comprehension=92.5%
     r3 = Result(
         student_id=student_with_results.id,
         section_id=section1.id,
@@ -172,15 +172,15 @@ def test_scenario_3_calculated_metrics(client, setup_data):
 
     # 1. Fecha 2026-03-10: 120 palabras en 72s -> PPM = (120/72)*60 = 100.0. Aciertos 15/20 = 75.0%
     assert results[0]["ppm"] == 100.0
-    assert results[0]["accuracy"] == 75.0
+    assert results[0]["comprehension"] == 62.5
 
     # 2. Fecha 2026-03-24: 120 palabras en 60s -> PPM = 120.0. Aciertos 18/20 = 90.0%
     assert results[1]["ppm"] == 120.0
-    assert results[1]["accuracy"] == 90.0
+    assert results[1]["comprehension"] == 85.0
 
     # 3. Fecha 2026-04-05: 150 palabras en 90s -> PPM = (150/90)*60 = 100.0. Aciertos 19/20 = 95.0%
     assert results[2]["ppm"] == 100.0
-    assert results[2]["accuracy"] == 95.0
+    assert results[2]["comprehension"] == 92.5
 
 
 def test_scenario_4_student_without_results(client, setup_data):

@@ -164,11 +164,7 @@ class ResultService:
 
         history = []
         for r in results:
-            ppm = calculate_ppm(r.test.words, r.time) if r.test else 0.0
-            total_q = r.successes + r.mistakes
-            accuracy = round((r.successes / total_q) * 100.0, 2) if total_q > 0 else 0.0
-            data = ResultSchema.dump(r, ppm=ppm)
-            data["accuracy"] = accuracy
+            data = ResultSchema.dump(r)
             if r.test:
                 data["test_code"] = r.test.code
                 data["test_name"] = r.test.name
@@ -566,11 +562,7 @@ class ResultService:
 
         enriched_results = []
         for r in results:
-            ppm = calculate_ppm(r.test.words, r.time) if r.test else 0.0
-            total_q = r.successes + r.mistakes
-            accuracy = round((r.successes / total_q) * 100.0, 2) if total_q > 0 else 0.0
-            data = ResultSchema.dump(r, ppm=ppm)
-            data["accuracy"] = accuracy
+            data = ResultSchema.dump(r)
             data["student_id"] = str(r.student_id)
             data["student_name"] = r.student.name if r.student else None
             if r.test:

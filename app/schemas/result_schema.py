@@ -103,14 +103,30 @@ class ResultCreateSchema:
 
 class ResultSchema:
     """
-    Serializador para entidades Result con el PPM inyectado (BE-18 Escenario 1).
+    Serializador para entidades Result.
+
+    Inyecta las tres métricas de la Batería de Lectura Eficaz: ppm (velocidad
+    espontánea), comprehension (comprensión lectora ponderada) y vef (velocidad
+    eficaz). El cálculo vive aquí y no en los servicios, para que ningún endpoint
+    pueda devolver una métrica distinta de otro.
     """
 
     @classmethod
     def dump(cls, result: Any, ppm: Optional[float] = None) -> Dict[str, Any]:
+        from app.analytics.metrics import calculate_metrics_from_result
+
         data = result.to_dict() if hasattr(result, "to_dict") else dict(result)
+
+        metrics = calculate_metrics_from_result(result)
+        data["ppm"] = metrics["ppm"]
+        data["comprehension"] = metrics["comprehension"]
+        data["vef"] = metrics["vef"]
+
+        # Compatibilidad: el parámetro ppm se mantiene para las llamadas existentes,
+        # pero ya no hace falta pasarlo. Puede eliminarse cuando no queden usos.
         if ppm is not None:
             data["ppm"] = float(ppm)
+
         return data
 
 

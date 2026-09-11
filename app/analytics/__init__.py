@@ -13,6 +13,7 @@ Contiene funciones puras para el cálculo de métricas de comprensión lectora y
 from app.analytics.metrics import (
     calculate_accuracy,
     calculate_effective_speed,
+    calculate_metrics_from_result,
     calculate_ppm,
     calculate_reading_comprehension,
 )
@@ -25,6 +26,7 @@ try:
         "calculate_accuracy",
         "calculate_reading_comprehension",
         "calculate_effective_speed",
+        "calculate_metrics_from_result",
         "calculate_individual_evolution",
     ]
 except ImportError:
@@ -33,5 +35,6 @@ except ImportError:
         "calculate_accuracy",
         "calculate_reading_comprehension",
         "calculate_effective_speed",
+        "calculate_metrics_from_result",
     ]
 

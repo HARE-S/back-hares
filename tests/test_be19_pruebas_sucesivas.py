@@ -215,7 +215,7 @@ def test_scenario_4_ordered_history_with_metrics(client, setup_data):
     )
 
     # Insertamos desordenados a propósito: primero 24/03, luego 10/03, luego 07/04
-    # 1. 24/03: time=60s, words=100 -> PPM=100.0. 16 aciertos, 4 errores -> accuracy=80.0%
+    # 1. 24/03: time=60s, words=100 -> PPM=100.0. 16 aciertos, 4 errores -> comprehension=70.0%
     client.post(
         f"/api/v1/students/{student.id}/results",
         json={
@@ -228,7 +228,7 @@ def test_scenario_4_ordered_history_with_metrics(client, setup_data):
         },
     )
 
-    # 2. 10/03: time=120s, words=100 -> PPM=50.0. 10 aciertos, 10 errores -> accuracy=50.0%
+    # 2. 10/03: time=120s, words=100 -> PPM=50.0. 10 aciertos, 10 errores -> comprehension=25.0%
     client.post(
         f"/api/v1/students/{student.id}/results",
         json={
@@ -241,7 +241,7 @@ def test_scenario_4_ordered_history_with_metrics(client, setup_data):
         },
     )
 
-    # 3. 07/04: time=50s, words=100 -> PPM=120.0. 20 aciertos, 0 errores -> accuracy=100.0%
+    # 3. 07/04: time=50s, words=100 -> PPM=120.0. 20 aciertos, 0 errores -> comprehension=100.0%
     client.post(
         f"/api/v1/students/{student.id}/results",
         json={
@@ -263,17 +263,17 @@ def test_scenario_4_ordered_history_with_metrics(client, setup_data):
     # Comprobar orden cronológico ascendente estricto
     assert history[0]["test_date"] == "2026-03-10"
     assert history[0]["ppm"] == 50.0
-    assert history[0]["accuracy"] == 50.0
+    assert history[0]["comprehension"] == 25.0
     assert history[0]["test_code"] == "1AF"
 
     assert history[1]["test_date"] == "2026-03-24"
     assert history[1]["ppm"] == 100.0
-    assert history[1]["accuracy"] == 80.0
+    assert history[1]["comprehension"] == 70.0
     assert history[1]["test_code"] == "1AF"
 
     assert history[2]["test_date"] == "2026-04-07"
     assert history[2]["ppm"] == 120.0
-    assert history[2]["accuracy"] == 100.0
+    assert history[2]["comprehension"] == 100.0
     assert history[2]["test_code"] == "1AF"
 
     # Verificar también ruta directa /api/students/{student_id}/results

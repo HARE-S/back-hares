@@ -6,7 +6,7 @@ Este módulo es independiente y no importa dependencias de base de datos ni de F
 
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
-from app.analytics.metrics import calculate_accuracy, calculate_ppm
+from app.analytics.metrics import calculate_ppm, calculate_reading_comprehension
 
 
 def _parse_date(val: Any) -> Optional[date]:
@@ -80,7 +80,7 @@ def calculate_individual_evolution(
 
         accuracy = item.get("accuracy")
         if accuracy is None:
-            accuracy = calculate_accuracy(correct_answers, mistakes)
+            accuracy = calculate_reading_comprehension(correct_answers, mistakes)
 
         processed_results.append({
             "test_date": t_date.isoformat(),

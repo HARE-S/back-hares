@@ -49,7 +49,7 @@ def setup_data(session):
     session.flush()
 
     # Resultados para sección A:
-    # r1: s1 hace 1AF el 2026-01-15 (time=60s -> PPM=120.0, acc=90%)
+    # r1: s1 hace 1AF el 2026-01-15 (time=60s -> PPM=120.0, comprehension=85%)
     r1 = Result(
         student_id=s1.id,
         section_id=section_a.id,
@@ -59,7 +59,7 @@ def setup_data(session):
         successes=18,
         mistakes=2,
     )
-    # r2: s2 hace 1AF el 2026-03-20 (time=90s -> PPM=80.0, acc=75%)
+    # r2: s2 hace 1AF el 2026-03-20 (time=90s -> PPM=80.0, comprehension=62.5%)
     r2 = Result(
         student_id=s2.id,
         section_id=section_a.id,
@@ -127,14 +127,14 @@ def test_scenario_1_section_history_returns_all_results_with_student_and_test_me
     assert first["test_name"] == "El halcón peregrino"
     assert first["test_date"] == "2026-01-15"
     assert first["ppm"] == 120.0
-    assert first["accuracy"] == 90.0
+    assert first["comprehension"] == 85.0
 
     second = data[1]
     assert second["student_id"] == str(s2.id)
     assert second["student_name"] == "Leire Blanco"
     assert second["test_date"] == "2026-03-20"
     assert second["ppm"] == 80.0
-    assert second["accuracy"] == 75.0
+    assert second["comprehension"] == 62.5
 
     # Comprobar ruta directa sin prefijo v1
     resp_direct = client.get(f"/api/sections/{sec_a.id}/results")

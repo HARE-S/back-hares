@@ -114,3 +114,33 @@ def calculate_accuracy(correct_answers: int, mistakes: int, unanswered: int = 0)
     :return: Porcentaje de comprensión entre 0.0 y 100.0.
     """
     return calculate_reading_comprehension(correct_answers, mistakes, unanswered)
+
+
+def calculate_metrics_from_result(result: any) -> dict:
+    """
+    Calcula las tres métricas de la Batería de Lectura Eficaz a partir de una entidad Result.
+
+    Inyecta ppm (velocidad espontánea), comprehension (comprensión lectora) y vef
+    (velocidad eficaz) en un diccionario único, garantizando que todos los endpoints
+    devuelvan las mismas métricas calculadas de la misma forma.
+
+    :param result: Entidad Result con propiedades test.words, time, successes, mistakes.
+    :return: Diccionario con las claves ppm, comprehension, vef (todas floats redondeadas a 2 decimales).
+
+    Ejemplo:
+        result = Result(test=Test(words=300), time=103, successes=15, mistakes=3)
+        metrics = calculate_metrics_from_result(result)
+        # {'ppm': 174.76, 'comprehension': 67.5, 'vef': 117.71}
+    """
+    ppm = 0.0
+    if result.test and result.time > 0:
+        ppm = calculate_ppm(result.test.words, result.time)
+
+    comprehension = calculate_reading_comprehension(result.successes, result.mistakes)
+    vef = calculate_effective_speed(ppm, comprehension)
+
+    return {
+        "ppm": ppm,
+        "comprehension": comprehension,
+        "vef": vef,
+    }
