@@ -20,9 +20,14 @@ def app():
     application = create_app(TestingConfig)
 
     with application.app_context():
-        # uuidv7() no es nativa en PostgreSQL 15: la registra el proyecto.
-        db.session.execute(text(SQL_CREATE_UUIDV7_FUNCTION))
-        db.session.commit()
+        db_uri = str(application.config.get("SQLALCHEMY_DATABASE_URI", ""))
+        if "postgresql" in db_uri.lower():
+            # uuidv7() no es nativa en PostgreSQL 15: la registra el proyecto.
+            db.session.execute(text(SQL_CREATE_UUIDV7_FUNCTION))
+            db.session.commit()
+        elif "sqlite" in db_uri.lower():
+            print("\n⚠️  Tests contra SQLite: restricciones UNIQUE no se verifican.")
+            print("   Para CI/CD usar: TEST_DATABASE_URL=postgresql://...")
 
         db.create_all()
         yield application

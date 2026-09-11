@@ -120,6 +120,7 @@ class ResultSchema:
         metrics = calculate_metrics_from_result(result)
         data["ppm"] = metrics["ppm"]
         data["comprehension"] = metrics["comprehension"]
+        data["accuracy"] = metrics["comprehension"]
         data["vef"] = metrics["vef"]
 
         # Compatibilidad: el parámetro ppm se mantiene para las llamadas existentes,
