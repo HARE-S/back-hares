@@ -24,7 +24,8 @@ class TestRepository:
         code: str,
         name: str,
         words: int = 0,
-        level: Optional[str] = None,
+        course: Optional[int] = None,
+        test_letter: Optional[str] = None,
         type: Optional[str] = None,
         disabled_at=None,
     ) -> Test:
@@ -33,7 +34,8 @@ class TestRepository:
             code=code,
             name=name,
             words=words,
-            level=level,
+            course=course,
+            test_letter=test_letter,
             type=type,
             disabled_at=disabled_at,
         )
@@ -46,14 +48,15 @@ class TestRepository:
         code: str,
         name: str,
         words: int = 0,
-        level: Optional[str] = None,
+        course: Optional[int] = None,
+        test_letter: Optional[str] = None,
         type: Optional[str] = None,
         disabled_at=None,
         commit: bool = True,
     ) -> Tuple[Test, bool]:
         """
         Crea o actualiza una prueba identificada por su código funcional único.
-        Si la prueba ya existe, actualiza name, words, level y type.
+        Si la prueba ya existe, actualiza name, words, course, test_letter y type.
         Retorna una tupla (test, created) donde created es True si se creó una nueva fila
         o False si se actualizó una existente.
         """
@@ -61,7 +64,8 @@ class TestRepository:
         if test:
             test.name = name
             test.words = words
-            test.level = level
+            test.course = course
+            test.test_letter = test_letter
             test.type = type
             if disabled_at is not None:
                 test.disabled_at = disabled_at
@@ -75,7 +79,8 @@ class TestRepository:
             code=code,
             name=name,
             words=words,
-            level=level,
+            course=course,
+            test_letter=test_letter,
             type=type,
             disabled_at=disabled_at,
         )
@@ -153,7 +158,7 @@ class TestRepository:
     def get_paginated(
         self,
         filter_text: Optional[str] = None,
-        level: Optional[str] = None,
+        course: Optional[int] = None,
         type: Optional[str] = None,
         page: int = 1,
         limit: int = 10,
@@ -162,7 +167,7 @@ class TestRepository:
         """
         Consulta paginada y filtrada de pruebas de lectura (BE-14).
         - Filtros combinables: filter_text (búsqueda en code y name insensible a acentos),
-          level y type.
+          course y type.
         - Excluye por defecto las pruebas con disabled_at (baja lógica).
         - Devuelve una tupla (items, total).
         """
@@ -174,8 +179,8 @@ class TestRepository:
         if not include_disabled:
             conditions.append(Test.disabled_at.is_(None))
 
-        if level is not None and str(level).strip() != "":
-            conditions.append(Test.level == str(level).strip())
+        if course is not None:
+            conditions.append(Test.course == course)
 
         if type is not None and str(type).strip() != "":
             conditions.append(Test.type == str(type).strip().upper())

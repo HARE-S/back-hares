@@ -13,7 +13,8 @@ def test_scenario_1_create_test_success(client):
         "code": "0IF",
         "name": "Normativa piscinas",
         "words": 235,
-        "level": "0",
+        "course": 0,
+        "test_letter": "I",
         "type": "F",
     }
     headers = {"X-User-Role": "coordinator"}
@@ -26,7 +27,8 @@ def test_scenario_1_create_test_success(client):
     assert data["code"] == "0IF"
     assert data["name"] == "Normativa piscinas"
     assert data["words"] == 235
-    assert data["level"] == "0"
+    assert data["course"] == 0
+    assert data["test_letter"] == "I"
     assert data["type"] == "F"
     assert data["disabled_at"] is None
 
@@ -34,7 +36,7 @@ def test_scenario_1_create_test_success(client):
 def test_scenario_1_auto_deduce_level_and_type(client):
     """
     Prueba adicional para Escenario 1:
-    Si no se especifican level ni type, se deducen automáticamente del formato del código.
+    Si no se especifican course, test_letter ni type, se deducen automáticamente del formato del código.
     """
     payload = {
         "code": "1AL",
@@ -46,7 +48,8 @@ def test_scenario_1_auto_deduce_level_and_type(client):
 
     data = response.get_json()
     assert data["code"] == "1AL"
-    assert data["level"] == "1"
+    assert data["course"] == 1
+    assert data["test_letter"] == "A"
     assert data["type"] == "L"
 
 

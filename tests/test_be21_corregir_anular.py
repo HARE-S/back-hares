@@ -87,7 +87,7 @@ def test_scenario_1_partial_update_recalculates_ppm(client, setup_data, session)
 
     # Modificar únicamente el tiempo a 60 segundos
     payload = {"time": 60}
-    resp = client.patch(f"/api/results/{res.id}", json=payload)
+    resp = client.patch(f"/api/v1/results/{res.id}", json=payload)
     assert resp.status_code == 200
 
     data = resp.get_json()
@@ -126,17 +126,17 @@ def test_scenario_2_invalid_data_returns_422(client, setup_data, session):
     )
 
     # 1. Aciertos negativos
-    r1 = client.patch(f"/api/results/{res.id}", json={"successes": -3})
+    r1 = client.patch(f"/api/v1/results/{res.id}", json={"successes": -3})
     assert r1.status_code == 422
     assert r1.get_json()["error"] == "UNPROCESSABLE_ENTITY"
 
     # 2. Tiempo cero o negativo
-    r2 = client.patch(f"/api/results/{res.id}", json={"time": 0})
+    r2 = client.patch(f"/api/v1/results/{res.id}", json={"time": 0})
     assert r2.status_code == 422
     assert r2.get_json()["error"] == "UNPROCESSABLE_ENTITY"
 
     # 3. Errores negativos
-    r3 = client.patch(f"/api/results/{res.id}", json={"mistakes": -1})
+    r3 = client.patch(f"/api/v1/results/{res.id}", json={"mistakes": -1})
     assert r3.status_code == 422
     assert r3.get_json()["error"] == "UNPROCESSABLE_ENTITY"
 
@@ -164,7 +164,7 @@ def test_scenario_3_deletion_returns_204_and_removes_physically(client, setup_da
         json={"role": "tutor", "sections": [str(sec.id)]},
     )
 
-    resp = client.delete(f"/api/results/{res.id}")
+    resp = client.delete(f"/api/v1/results/{res.id}")
     assert resp.status_code == 204
     assert resp.data == b""
 
@@ -186,12 +186,12 @@ def test_scenario_4_nonexistent_result_returns_404(client):
     fake_id = uuid.uuid4()
 
     # PATCH sobre id inexistente
-    r_patch = client.patch(f"/api/results/{fake_id}", json={"time": 50})
+    r_patch = client.patch(f"/api/v1/results/{fake_id}", json={"time": 50})
     assert r_patch.status_code == 404
     assert r_patch.get_json()["error"] == "NOT_FOUND"
 
     # DELETE sobre id inexistente
-    r_del = client.delete(f"/api/results/{fake_id}")
+    r_del = client.delete(f"/api/v1/results/{fake_id}")
     assert r_del.status_code == 404
     assert r_del.get_json()["error"] == "NOT_FOUND"
 
@@ -213,12 +213,12 @@ def test_scenario_5_tutor_without_permission_returns_403(client, setup_data, ses
     )
 
     # Intento de PATCH -> 403
-    r_patch = client.patch(f"/api/results/{res.id}", json={"time": 50})
+    r_patch = client.patch(f"/api/v1/results/{res.id}", json={"time": 50})
     assert r_patch.status_code == 403
     assert r_patch.get_json()["error"] == "FORBIDDEN"
 
     # Intento de DELETE -> 403
-    r_del = client.delete(f"/api/results/{res.id}")
+    r_del = client.delete(f"/api/v1/results/{res.id}")
     assert r_del.status_code == 403
     assert r_del.get_json()["error"] == "FORBIDDEN"
 
@@ -252,7 +252,7 @@ def test_scenario_6_audit_logged_with_previous_values(client, setup_data):
     )
 
     resp_patch = client.patch(
-        f"/api/results/{res.id}",
+        f"/api/v1/results/{res.id}",
         json={"time": 55, "successes": 19},
     )
     assert resp_patch.status_code == 200
@@ -270,7 +270,7 @@ def test_scenario_6_audit_logged_with_previous_values(client, setup_data):
     assert audit_patch["details"]["new_values"]["successes"] == 19
 
     # 2. Traza de anulación (DELETE)
-    resp_del = client.delete(f"/api/results/{res.id}")
+    resp_del = client.delete(f"/api/v1/results/{res.id}")
     assert resp_del.status_code == 204
 
     logs_all = get_audit_logs(resource_type="results", resource_id=str(res.id))
@@ -285,7 +285,7 @@ def test_scenario_6_audit_logged_with_previous_values(client, setup_data):
 
 def test_alias_routes_under_student_prefix(client, setup_data, session):
     """
-    Verifica que las rutas alias /api/students/<student_id>/results/<result_id>
+    Verifica que las rutas alias /api/v1/students/<student_id>/results/<result_id>
     también funcionan correctamente para PATCH y DELETE.
     """
     student = setup_data["student1"]
@@ -297,16 +297,16 @@ def test_alias_routes_under_student_prefix(client, setup_data, session):
         json={"role": "tutor", "sections": [str(sec.id)]},
     )
 
-    # PATCH vía /api/students/<student_id>/results/<result_id>
+    # PATCH vía /api/v1/students/<student_id>/results/<result_id>
     resp_patch = client.patch(
-        f"/api/students/{student.id}/results/{res.id}",
+        f"/api/v1/students/{student.id}/results/{res.id}",
         json={"time": 45},
     )
     assert resp_patch.status_code == 200
     assert resp_patch.get_json()["time"] == 45
 
-    # DELETE vía /api/students/<student_id>/results/<result_id>
-    resp_del = client.delete(f"/api/students/{student.id}/results/{res.id}")
+    # DELETE vía /api/v1/students/<student_id>/results/<result_id>
+    resp_del = client.delete(f"/api/v1/students/{student.id}/results/{res.id}")
     assert resp_del.status_code == 204
 
     session.expire_all()
@@ -342,6 +342,6 @@ def test_collision_on_patch_date_returns_409(client, setup_data, session):
     )
 
     # Intentar cambiar la fecha de res2 a la fecha de res1 (2026-03-10) -> Colisión
-    resp = client.patch(f"/api/results/{res2.id}", json={"test_date": "2026-03-10"})
+    resp = client.patch(f"/api/v1/results/{res2.id}", json={"test_date": "2026-03-10"})
     assert resp.status_code == 409
     assert resp.get_json()["error"] == "CONFLICT"

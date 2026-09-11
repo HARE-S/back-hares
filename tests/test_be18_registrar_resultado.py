@@ -48,7 +48,7 @@ def setup_data(session):
 
 def test_scenario_1_register_result_success(client, setup_data):
     """
-    Escenario 1: Registro correcto (POST /api/students/{student_id}/results)
+    Escenario 1: Registro correcto (POST /api/v1/students/{student_id}/results)
     Dado un tutor con sesión activa y la sección del alumno asignada
     Cuando envía test_id, section_id, test_date, time, successes y mistakes
     Entonces el sistema crea el resultado asociado al alumno
@@ -75,8 +75,8 @@ def test_scenario_1_register_result_success(client, setup_data):
         "mistakes": 2,
     }
 
-    # Probar endpoint directo /api/students/<id>/results
-    resp = client.post(f"/api/students/{student.id}/results", json=payload)
+    # Probar endpoint directo /api/v1/students/<id>/results
+    resp = client.post(f"/api/v1/students/{student.id}/results", json=payload)
     assert resp.status_code == 201
     data = resp.get_json()
 

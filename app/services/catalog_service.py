@@ -34,27 +34,34 @@ class CatalogService:
 
 
     @staticmethod
-    def deduce_level_and_type_from_code(code: str) -> Tuple[Optional[str], Optional[str]]:
+    def deduce_level_and_type_from_code(code: str) -> Tuple[Optional[int], Optional[str], Optional[str]]:
         """
-        Deduce nivel y tipo a partir de la convención de códigos del centro (ej. '0IF', '1AL', '2BF'):
-        - Primer carácter: Nivel (ej: '0', '1', '2', '3')
-        - Último carácter: Tipo (ej: 'F' para ficción, 'L' para literatura)
+        Deduce curso, letra pedagógica y tipo a partir de la convención de códigos (ej. '0IF', '1AL', '2BF'):
+        - Primer carácter: Curso (0-3) → int o None
+        - Segundo carácter: Letra pedagógica (I, A, B, C, D, E) → str (uppercase) o None
+        - Último carácter: Tipo (F=funcional, L=literario) → str (uppercase) o None
         """
-        level = None
+        course = None
+        test_letter = None
         test_type = None
         if code and len(code) >= 2:
             if code[0].isdigit():
-                level = code[0]
+                course = int(code[0])
+            if len(code) >= 2:
+                middle = code[1].upper()
+                if middle in ("I", "A", "B", "C", "D", "E"):
+                    test_letter = middle
             if code[-1].upper() in ("F", "L"):
                 test_type = code[-1].upper()
-        return level, test_type
+        return course, test_letter, test_type
 
     def create_test(
         self,
         code: Optional[str],
         name: Optional[str],
         words: Optional[int],
-        level: Optional[str] = None,
+        course: Optional[int] = None,
+        test_letter: Optional[str] = None,
         type: Optional[str] = None,
     ) -> Test:
         """
@@ -95,16 +102,18 @@ class CatalogService:
                 f"Ya existe una prueba registrada con el código '{code_str}'"
             )
 
-        # Inferencia de nivel y tipo si no se han provisto explícitamente
-        deduced_level, deduced_type = self.deduce_level_and_type_from_code(code_str)
-        final_level = str(level).strip() if level is not None else deduced_level
-        final_type = str(type).strip() if type is not None else deduced_type
+        # Inferencia de curso, letra pedagógica y tipo si no se han provisto explícitamente
+        deduced_course, deduced_letter, deduced_type = self.deduce_level_and_type_from_code(code_str)
+        final_course = course if course is not None else deduced_course
+        final_letter = test_letter if test_letter is not None else deduced_letter
+        final_type = type if type is not None else deduced_type
 
         return self.test_repo.create(
             code=code_str,
             name=name_str,
             words=words_int,
-            level=final_level,
+            course=final_course,
+            test_letter=final_letter,
             type=final_type,
         )
 
@@ -178,14 +187,15 @@ class CatalogService:
                     f"Línea {line_num}: El campo 'words' debe ser un número entero mayor que cero (recibido '{words_raw}')"
                 )
 
-            # Derivación de nivel y tipo (Escenario 4)
-            level, test_type = cls.deduce_level_and_type_from_code(code)
+            # Derivación de curso, letra pedagógica y tipo (Escenario 4)
+            course, test_letter, test_type = cls.deduce_level_and_type_from_code(code)
 
             parsed_rows.append({
                 "code": code,
                 "name": name,
                 "words": words,
-                "level": level,
+                "course": course,
+                "test_letter": test_letter,
                 "type": test_type,
             })
 
@@ -229,7 +239,8 @@ class CatalogService:
                 code=row["code"],
                 name=row["name"],
                 words=row["words"],
-                level=row["level"],
+                course=row["course"],
+                test_letter=row["test_letter"],
                 type=row["type"],
                 commit=False,
             )
@@ -292,12 +303,14 @@ class CatalogService:
                         f"Ya existe otra prueba registrada con el código '{new_code}'"
                     )
 
-        # En PUT (reemplazo completo), si no se especifican level ni type, se deducen del código
+        # En PUT (reemplazo completo), si no se especifican course/test_letter/type, se deducen del código
         if not is_patch:
             target_code = cleaned.get("code", test.code)
-            deduced_lvl, deduced_tp = self.deduce_level_and_type_from_code(target_code)
-            if "level" not in cleaned or cleaned["level"] is None:
-                cleaned["level"] = deduced_lvl
+            deduced_course, deduced_letter, deduced_tp = self.deduce_level_and_type_from_code(target_code)
+            if "course" not in cleaned or cleaned["course"] is None:
+                cleaned["course"] = deduced_course
+            if "test_letter" not in cleaned or cleaned["test_letter"] is None:
+                cleaned["test_letter"] = deduced_letter
             if "type" not in cleaned or cleaned["type"] is None:
                 cleaned["type"] = deduced_tp
 
@@ -315,7 +328,7 @@ class CatalogService:
     def list_tests(
         self,
         filter_text: Optional[str] = None,
-        level: Optional[str] = None,
+        course: Optional[int] = None,
         type: Optional[str] = None,
         page: int = 1,
         limit: int = 10,
@@ -328,7 +341,7 @@ class CatalogService:
         """
         items, total = self.test_repo.get_paginated(
             filter_text=filter_text,
-            level=level,
+            course=course,
             type=type,
             page=page,
             limit=limit,

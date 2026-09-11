@@ -99,7 +99,7 @@ def test_scenario_1_full_ordered_history(client, setup_data):
     """
     Escenario 1: Histórico completo
     Dado un alumno con varios resultados registrados
-    Cuando se consulta GET /api/students/{id}/results
+    Cuando se consulta GET /api/v1/students/{id}/results
     Entonces se devuelven todos sus resultados ordenados por fecha
     Y devuelve 200 OK
     """
@@ -107,8 +107,8 @@ def test_scenario_1_full_ordered_history(client, setup_data):
 
     client.post("/api/dev/session", json={"role": "coordinator"})
 
-    # Probar endpoint directo /api/students/{id}/results
-    resp = client.get(f"/api/students/{student.id}/results")
+    # Probar endpoint directo /api/v1/students/{id}/results
+    resp = client.get(f"/api/v1/students/{student.id}/results")
     assert resp.status_code == 200
     results = resp.get_json()
     assert len(results) == 3
@@ -136,7 +136,7 @@ def test_scenario_2_test_metadata_included(client, setup_data):
 
     client.post("/api/dev/session", json={"role": "coordinator"})
 
-    resp = client.get(f"/api/students/{student.id}/results")
+    resp = client.get(f"/api/v1/students/{student.id}/results")
     assert resp.status_code == 200
     results = resp.get_json()
 
@@ -166,7 +166,7 @@ def test_scenario_3_calculated_metrics(client, setup_data):
 
     client.post("/api/dev/session", json={"role": "coordinator"})
 
-    resp = client.get(f"/api/students/{student.id}/results")
+    resp = client.get(f"/api/v1/students/{student.id}/results")
     assert resp.status_code == 200
     results = resp.get_json()
 
@@ -195,7 +195,7 @@ def test_scenario_4_student_without_results(client, setup_data):
 
     client.post("/api/dev/session", json={"role": "coordinator"})
 
-    resp = client.get(f"/api/students/{student.id}/results")
+    resp = client.get(f"/api/v1/students/{student.id}/results")
     assert resp.status_code == 200
     assert resp.get_json() == []
 
@@ -210,7 +210,7 @@ def test_scenario_5_nonexistent_student_returns_404(client):
     client.post("/api/dev/session", json={"role": "coordinator"})
 
     nonexistent_id = uuid.uuid4()
-    resp = client.get(f"/api/students/{nonexistent_id}/results")
+    resp = client.get(f"/api/v1/students/{nonexistent_id}/results")
     assert resp.status_code == 404
     data = resp.get_json()
     assert data["error"] == "NOT_FOUND"
@@ -234,13 +234,13 @@ def test_scenario_6_tutor_without_permission(client, setup_data):
     )
 
     # Intenta consultar alumno de la sección 2
-    resp = client.get(f"/api/students/{student_sec2.id}/results")
+    resp = client.get(f"/api/v1/students/{student_sec2.id}/results")
     assert resp.status_code == 403
     assert resp.get_json()["error"] == "FORBIDDEN"
 
     # En cambio, para un alumno de su sección (sección 1) sí tiene permiso
     student_sec1 = setup_data["student_with_results"]
-    resp_ok = client.get(f"/api/students/{student_sec1.id}/results")
+    resp_ok = client.get(f"/api/v1/students/{student_sec1.id}/results")
     assert resp_ok.status_code == 200
 
 
@@ -263,7 +263,7 @@ def test_audit_logged_on_history_view(client, setup_data):
         },
     )
 
-    resp = client.get(f"/api/students/{student.id}/results")
+    resp = client.get(f"/api/v1/students/{student.id}/results")
     assert resp.status_code == 200
 
     logs = get_audit_logs(resource_type="students", resource_id=str(student.id))

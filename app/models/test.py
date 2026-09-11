@@ -2,6 +2,7 @@ from sqlalchemy import text, UniqueConstraint
 from app.extensions import db
 from app.models.base import BaseModel
 from app.utils.uuidv7 import uuidv7
+from app.analytics.pairs import TEST_LETTER_ORDER
 
 
 class Test(BaseModel):
@@ -17,7 +18,8 @@ class Test(BaseModel):
     code = db.Column(db.String(50), nullable=False, unique=True)
     name = db.Column(db.String(255), nullable=False)
     words = db.Column(db.Integer, nullable=False, default=0)
-    level = db.Column(db.String(20), nullable=True)
+    course = db.Column(db.Integer, nullable=True)
+    test_letter = db.Column(db.String(5), nullable=True)
     type = db.Column(db.String(20), nullable=True)
     disabled_at = db.Column(db.Date, nullable=True)
 
@@ -28,6 +30,11 @@ class Test(BaseModel):
         cascade="all, delete-orphan",
         lazy="select",
     )
+
+    @property
+    def letter_order(self) -> int:
+        """Orden pedagógico de la prueba: la Inicial es diagnóstica y va primero."""
+        return TEST_LETTER_ORDER.get(self.test_letter, 99)
 
     def __repr__(self):
         return f"<Test id={self.id} code='{self.code}' name='{self.name}'>"

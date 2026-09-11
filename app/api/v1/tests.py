@@ -26,7 +26,8 @@ class TestsList(MethodView):
         Listado paginado y filtrado de pruebas de lectura (BE-14).
         """
         filter_text = request.args.get("filter") or request.args.get("q") or request.args.get("search")
-        level = request.args.get("level")
+        course_raw = request.args.get("course")
+        course = int(course_raw) if course_raw else None
         test_type = request.args.get("type")
         page = request.args.get("page", 1, type=int)
         limit = request.args.get("limit", 10, type=int)
@@ -39,7 +40,7 @@ class TestsList(MethodView):
         service = CatalogService(db.session)
         response_data = service.list_tests(
             filter_text=filter_text,
-            level=level,
+            course=course,
             type=test_type,
             page=page,
             limit=limit,
@@ -71,7 +72,8 @@ class TestsList(MethodView):
                 code=payload.get("code"),
                 name=payload.get("name"),
                 words=payload.get("words"),
-                level=payload.get("level"),
+                course=payload.get("course"),
+                test_letter=payload.get("test_letter"),
                 type=payload.get("type"),
             )
         except ValidationError as e:

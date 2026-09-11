@@ -276,8 +276,8 @@ def test_scenario_4_ordered_history_with_metrics(client, setup_data):
     assert history[2]["comprehension"] == 100.0
     assert history[2]["test_code"] == "1AF"
 
-    # Verificar también ruta directa /api/students/{student_id}/results
-    resp_direct = client.get(f"/api/students/{student.id}/results")
+    # Verificar también ruta directa /api/v1/students/{student_id}/results
+    resp_direct = client.get(f"/api/v1/students/{student.id}/results")
     assert resp_direct.status_code == 200
     assert len(resp_direct.get_json()) == 3
 

@@ -112,7 +112,7 @@ def test_scenario_4_level_and_type_derivation(app):
     Dado una prueba con código "0IF"
     Cuando se importa
     Entonces se guarda con level "0"
-    Y con type "F"
+    Y con test_letter "I" y type "F"
     """
     csv_sample = (
         "code;name;words\n"
@@ -129,19 +129,23 @@ def test_scenario_4_level_and_type_derivation(app):
         repo = TestRepository(db.session)
 
         t0 = repo.get_by_code("0IF")
-        assert t0.level == "0"
+        assert t0.course == 0
+        assert t0.test_letter == "I"
         assert t0.type == "F"
 
         t1 = repo.get_by_code("1AL")
-        assert t1.level == "1"
+        assert t1.course == 1
+        assert t1.test_letter == "A"
         assert t1.type == "L"
 
         t2 = repo.get_by_code("2CF")
-        assert t2.level == "2"
+        assert t2.course == 2
+        assert t2.test_letter == "C"
         assert t2.type == "F"
 
         t3 = repo.get_by_code("3CL")
-        assert t3.level == "3"
+        assert t3.course == 3
+        assert t3.test_letter == "C"
         assert t3.type == "L"
 
 

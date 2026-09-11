@@ -14,7 +14,7 @@ def test_scenario_1_full_replacement_put(client, session):
     Entonces el recurso se reemplaza por completo
     Y devuelve 200 OK
     """
-    test = Test(code="0IF", name="Normativa piscinas", words=235, level="0", type="F")
+    test = Test(code="0IF", name="Normativa piscinas", words=235, course=0, test_letter="I", type="F")
     session.add(test)
     session.commit()
 
@@ -22,7 +22,8 @@ def test_scenario_1_full_replacement_put(client, session):
         "code": "0IF_MOD",
         "name": "Normativa piscinas actualizada",
         "words": 250,
-        "level": "1",
+        "course": 1,
+        "test_letter": "I",
         "type": "L",
     }
     headers = {"X-User-Role": "coordinator"}
@@ -35,7 +36,8 @@ def test_scenario_1_full_replacement_put(client, session):
     assert data["code"] == "0IF_MOD"
     assert data["name"] == "Normativa piscinas actualizada"
     assert data["words"] == 250
-    assert data["level"] == "1"
+    assert data["course"] == 1
+    assert data["test_letter"] == "I"
     assert data["type"] == "L"
 
 
@@ -67,7 +69,7 @@ def test_scenario_2_partial_modification_patch(client, session):
     Entonces se modifica únicamente ese campo
     Y devuelve 200 OK
     """
-    test = Test(code="0IL", name="Los cazadores de focas", words=258, level="0", type="L")
+    test = Test(code="0IL", name="Los cazadores de focas", words=258, course=0, test_letter="I", type="L")
     session.add(test)
     session.commit()
 
@@ -81,7 +83,8 @@ def test_scenario_2_partial_modification_patch(client, session):
     assert data["name"] == "Los cazadores del Ártico"
     assert data["code"] == "0IL"
     assert data["words"] == 258
-    assert data["level"] == "0"
+    assert data["course"] == 0
+    assert data["test_letter"] == "I"
     assert data["type"] == "L"
 
 

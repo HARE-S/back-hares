@@ -100,18 +100,18 @@ def test_scenario_2_accent_insensitive_search(client):
 
 def test_scenario_3_filter_by_level_and_type(client):
     """
-    Escenario 3: Filtro por nivel y tipo
-    Dado un catálogo con pruebas de varios niveles
-    Cuando se consulta con level=1 y type=F
-    Entonces se devuelven solo las pruebas de nivel 1 y tipo F
+    Escenario 3: Filtro por curso y tipo
+    Dado un catálogo con pruebas de varios cursos
+    Cuando se consulta con course=1 y type=F
+    Entonces se devuelven solo las pruebas de curso 1 y tipo F
     """
-    response = client.get("/api/v1/tests?level=1&type=F")
+    response = client.get("/api/v1/tests?course=1&type=F")
     assert response.status_code == 200
 
     data = response.get_json()
     assert data["total"] == 6  # 1IF, 1AF, 1BF, 1CF, 1DF, 1EF
     for item in data["items"]:
-        assert item["level"] == "1"
+        assert item["course"] == 1
         assert item["type"] == "F"
 
 
@@ -119,11 +119,11 @@ def test_scenario_4_combined_filters(client):
     """
     Escenario 4: Filtros combinados
     Dado un catálogo de pruebas
-    Cuando se consulta con filter, level y page a la vez
+    Cuando se consulta con filter, course y page a la vez
     Entonces los tres criterios se aplican conjuntamente
     """
-    # En nivel 1, buscar texto "el"
-    response = client.get("/api/v1/tests?level=1&filter=el&page=1&limit=2")
+    # En curso 1, buscar texto "el"
+    response = client.get("/api/v1/tests?course=1&filter=el&page=1&limit=2")
     assert response.status_code == 200
 
     data = response.get_json()
@@ -132,7 +132,7 @@ def test_scenario_4_combined_filters(client):
     assert len(data["items"]) <= 2
 
     for item in data["items"]:
-        assert item["level"] == "1"
+        assert item["course"] == 1
         assert "el" in item["name"].lower() or "el" in item["code"].lower()
 
 

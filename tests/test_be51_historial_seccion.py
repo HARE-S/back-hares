@@ -137,7 +137,7 @@ def test_scenario_1_section_history_returns_all_results_with_student_and_test_me
     assert second["comprehension"] == 62.5
 
     # Comprobar ruta directa sin prefijo v1
-    resp_direct = client.get(f"/api/sections/{sec_a.id}/results")
+    resp_direct = client.get(f"/api/v1/sections/{sec_a.id}/results")
     assert resp_direct.status_code == 200
     assert len(resp_direct.get_json()) == 3
 

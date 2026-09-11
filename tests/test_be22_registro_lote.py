@@ -182,7 +182,7 @@ def test_scenario_2_absent_students_omitted_without_zeros(client, setup_data, se
         ],
     }
 
-    resp = client.post("/api/results/batch", json=batch_payload)
+    resp = client.post("/api/v1/results/batch", json=batch_payload)
     assert resp.status_code == 201
 
     data = resp.get_json()

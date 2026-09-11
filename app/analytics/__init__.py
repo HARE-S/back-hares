@@ -17,6 +17,13 @@ from app.analytics.metrics import (
     calculate_ppm,
     calculate_reading_comprehension,
 )
+from app.analytics.pairs import (
+    TEST_LETTER_ORDER,
+    build_pair_series,
+    calculate_pair,
+    calculate_progress,
+    summarize_group_progress,
+)
 
 try:
     from app.analytics.evolution import calculate_individual_evolution
@@ -28,6 +35,11 @@ try:
         "calculate_effective_speed",
         "calculate_metrics_from_result",
         "calculate_individual_evolution",
+        "TEST_LETTER_ORDER",
+        "calculate_pair",
+        "build_pair_series",
+        "calculate_progress",
+        "summarize_group_progress",
     ]
 except ImportError:
     __all__ = [
@@ -36,5 +48,10 @@ except ImportError:
         "calculate_reading_comprehension",
         "calculate_effective_speed",
         "calculate_metrics_from_result",
+        "TEST_LETTER_ORDER",
+        "calculate_pair",
+        "build_pair_series",
+        "calculate_progress",
+        "summarize_group_progress",
     ]
 

@@ -11,7 +11,8 @@ class TestCreateSchema(Schema):
     code = fields.Str(required=True, validate=[validate_non_empty_string, validate.Length(min=1)])
     name = fields.Str(required=True, validate=[validate_non_empty_string, validate.Length(min=1)])
     words = fields.Int(required=True, validate=validate.Range(min=1))
-    level = fields.Str(load_default=None, allow_none=True)
+    course = fields.Int(load_default=None, allow_none=True)
+    test_letter = fields.Str(load_default=None, allow_none=True)
     type = fields.Str(load_default=None, allow_none=True)
 
 
@@ -20,7 +21,8 @@ class TestUpdateSchema(Schema):
     code = fields.Str(validate=validate.Length(min=1))
     name = fields.Str(validate=validate.Length(min=1))
     words = fields.Int(validate=validate.Range(min=1))
-    level = fields.Str(allow_none=True)
+    course = fields.Int(allow_none=True)
+    test_letter = fields.Str(allow_none=True)
     type = fields.Str(allow_none=True)
 
 
@@ -29,7 +31,8 @@ class TestPutSchema(Schema):
     code = fields.Str(required=True, validate=validate.Length(min=1))
     name = fields.Str(required=True, validate=validate.Length(min=1))
     words = fields.Int(required=True, validate=validate.Range(min=1))
-    level = fields.Str(allow_none=True)
+    course = fields.Int(allow_none=True)
+    test_letter = fields.Str(allow_none=True)
     type = fields.Str(allow_none=True)
 
 
@@ -39,6 +42,7 @@ class TestResponseSchema(Schema):
     code = fields.Str()
     name = fields.Str()
     words = fields.Int()
-    level = fields.Str(allow_none=True)
+    course = fields.Int(allow_none=True)
+    test_letter = fields.Str(allow_none=True)
     type = fields.Str(allow_none=True)
     disabled_at = fields.Date(allow_none=True)

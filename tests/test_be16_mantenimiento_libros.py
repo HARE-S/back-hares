@@ -8,7 +8,7 @@ from app.models.student import Student
 
 def test_scenario_1_create_book_success(client):
     """
-    Escenario 1: Alta de libro (POST /api/books y POST /api/v1/books)
+    Escenario 1: Alta de libro (POST /api/v1/books)
     Dado un coordinador con sesión activa
     Cuando envía title y level
     Entonces el sistema crea el libro
@@ -22,8 +22,8 @@ def test_scenario_1_create_book_success(client):
         "sessions_note": "Sesión semanal de 30 min",
     }
 
-    # Probar endpoint directo /api/books
-    resp = client.post("/api/books", json=payload, headers=headers)
+    # Probar endpoint canónico /api/v1/books
+    resp = client.post("/api/v1/books", json=payload, headers=headers)
     assert resp.status_code == 201
     data = resp.get_json()
     assert data["title"] == "El Principito"
@@ -33,14 +33,6 @@ def test_scenario_1_create_book_success(client):
     assert data["sessions_note"] == "Sesión semanal de 30 min"
     assert "id" in data
 
-    # Probar también endpoint canónico /api/v1/books
-    payload_v1 = {
-        "title": "Don Quijote de la Mancha",
-        "level": "II",
-    }
-    resp_v1 = client.post("/api/v1/books", json=payload_v1, headers=headers)
-    assert resp_v1.status_code == 201
-    assert resp_v1.get_json()["title"] == "Don Quijote de la Mancha"
 
 
 def test_scenario_2_duplicate_title_rejected(client):
@@ -96,11 +88,6 @@ def test_scenario_3_query_and_modification(client):
     get_resp = client.get(f"/api/v1/books/{book_id}")
     assert get_resp.status_code == 200
     assert get_resp.get_json()["title"] == "La metamorfosis"
-
-    # También a través de /api/books/<id>
-    get_resp_alias = client.get(f"/api/books/{book_id}")
-    assert get_resp_alias.status_code == 200
-    assert get_resp_alias.get_json()["title"] == "La metamorfosis"
 
     # 2. Reemplazo completo PUT -> 200 OK
     put_payload = {
