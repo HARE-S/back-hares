@@ -161,3 +161,33 @@ class BookById(MethodView):
             return jsonify({"error": "Libro no encontrado"}), 404
 
         return "", 204
+
+
+from app.auth.decorators import require_role as auth_require_role
+
+
+@books_bp.route("/<book_id>/students")
+class BookStudents(MethodView):
+    @auth_require_role("tutor", "coordinator", "coordinador", "admin")
+    def get(self, book_id):
+        """
+        Consulta la lista de alumnos que han leído un libro con sus fechas de lectura (BE-26 Escenario 2).
+        """
+        from app.auth.decorators import get_current_user
+        from app.core.exceptions import ForbiddenError, NotFoundError
+        from app.services.reading_service import ReadingService
+
+        current_user = get_current_user()
+        status = request.args.get("status")
+        service = ReadingService(db.session)
+
+        try:
+            results = service.get_book_students(book_id, status=status, current_user=current_user)
+        except ValidationError as e:
+            return jsonify({"error": str(e)}), 400
+        except NotFoundError as e:
+            return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
+        except ForbiddenError as e:
+            return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
+
+        return jsonify(results), 200

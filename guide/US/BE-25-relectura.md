@@ -59,6 +59,6 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE25-01 | **Restricción de unicidad** PK subrogada y `UNIQUE(student_id, book_id, start_date)`. | - | Pendiente |
-| T-BE25-02 | **Detección de duplicado** En el servicio, con mapeo a `409`. | - | Pendiente |
-| T-BE25-03 | **Tests de relectura** Escenarios 1, 2 y 4. | - | Pendiente |
+| T-BE25-01 | **Restricción de unicidad** PK subrogada y `UNIQUE(student_id, book_id, start_date)`. | Yeremi | Completado |
+| T-BE25-02 | **Detección de duplicado** En el servicio, con mapeo a `409`. | Yeremi | Completado |
+| T-BE25-03 | **Tests de relectura** Escenarios 1, 2 y 4. | Yeremi | Completado |

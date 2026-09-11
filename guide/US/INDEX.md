@@ -51,10 +51,10 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-21](BE-21-corregir-anular-resultado.md) | Corregir y anular un resultado | 3 | Alta | Completado |
 | [BE-22](BE-22-registro-lote.md) | Endpoint de registro en lote | 5 | Alta | Completado |
 | **Registro de lecturas** | | | | |
-| [BE-23](BE-23-asignar-libro.md) | Asignar un libro a un alumno | 3 | Alta | Pendiente |
-| [BE-24](BE-24-cerrar-lectura.md) | Cerrar una lectura | 2 | Alta | Pendiente |
-| [BE-25](BE-25-relectura.md) | Relectura de un libro | 2 | Media | Pendiente |
-| [BE-26](BE-26-lecturas-por-alumno-y-libro.md) | Consulta de lecturas por alumno y por libro | 3 | Media | Pendiente |
+| [BE-23](BE-23-asignar-libro.md) | Asignar un libro a un alumno | 3 | Alta | Completado |
+| [BE-24](BE-24-cerrar-lectura.md) | Cerrar una lectura | 2 | Alta | Completado |
+| [BE-25](BE-25-relectura.md) | Relectura de un libro | 2 | Media | Completado |
+| [BE-26](BE-26-lecturas-por-alumno-y-libro.md) | Consulta de lecturas por alumno y por libro | 3 | Media | Completado |
 | **Consulta y filtrado** | | | | |
 | [BE-27](BE-27-filtrado-multicriterio.md) | Filtrado multicriterio del alumnado | 5 | Alta | **Bloqueada** |
 | [BE-28](BE-28-ficha-alumno-agregada.md) | Endpoint agregado de la ficha del alumno | 3 | Alta | Pendiente |
