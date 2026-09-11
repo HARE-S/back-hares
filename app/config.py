@@ -44,6 +44,14 @@ class Config:
     # Persistencia de Sesión en Servidor (US-45 / BE-02)
     SESSION_TYPE = os.getenv("SESSION_TYPE", "sqlalchemy").lower()
 
+    # OpenAPI / flask-smorest (BE-48)
+    API_TITLE = "Hares API"
+    API_VERSION = "v1"
+    OPENAPI_VERSION = "3.0.3"
+    OPENAPI_URL_PREFIX = "/api/docs"
+    OPENAPI_SWAGGER_UI_PATH = "/swagger"
+    OPENAPI_SWAGGER_UI_URL = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
+
 
 class DevelopmentConfig(Config):
     """Configuración para entorno de desarrollo."""
@@ -74,6 +82,8 @@ class ProductionConfig(Config):
     DEV_AUTH_BYPASS = False
     # En producción CORS se deshabilita porque el proxy sirve interfaz y API en el mismo origen
     CORS_ORIGINS = []
+    # OpenAPI: desactivar interfaz navegable en producción (BE-48, Escenario 2)
+    OPENAPI_URL_PREFIX = None
 
 
 config_by_name = {

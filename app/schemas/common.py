@@ -54,3 +54,18 @@ def paginate_response(
         "limit": limit,
         "pages": pages,
     }
+
+
+# Schemas Marshmallow para flask-smorest (BE-48)
+from marshmallow import Schema, fields, validate
+
+
+class PaginationQueryArgsSchema(Schema):
+    """Parámetros de paginación en query string."""
+    page = fields.Int(load_default=1, validate=validate.Range(min=1))
+    limit = fields.Int(load_default=10, validate=validate.Range(min=1, max=100))
+
+
+class ErrorSchema(Schema):
+    """Respuesta de error genérica."""
+    error = fields.Str()
