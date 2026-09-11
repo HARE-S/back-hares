@@ -63,7 +63,7 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE08-01 | **Acumulador de errores** Estructura con línea, columna y motivo por cada fila rechazada. | - | Pendiente |
-| T-BE08-02 | **Validaciones con motivo específico** Los cuatro casos del escenario 3. | - | Pendiente |
-| T-BE08-03 | **Endpoint de descarga del informe** Restringido a administrador. | - | Pendiente |
-| T-BE08-04 | **Tests del informe** Escenarios 1 a 3. | - | Pendiente |
+| T-BE08-01 | **Acumulador de errores** Estructura con línea, columna y motivo por cada fila rechazada. | marlen713 | Completado |
+| T-BE08-02 | **Validaciones con motivo específico** Los cuatro casos del escenario 3. | marlen713 | Completado |
+| T-BE08-03 | **Endpoint de descarga del informe** Restringido a administrador. | marlen713 | Completado |
+| T-BE08-04 | **Tests del informe** Escenarios 1 a 4. | marlen713 | Completado |

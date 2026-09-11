@@ -83,17 +83,19 @@ def _parse_students_csv(
     errors: List[Dict[str, Any]] = []
 
     for line_num, line in enumerate(lines[1:], start=2):
+        # Fila de alumnado: las 4 columnas son exactas; no se elimina el token
+        # vacío final (el ';' final tolerado es exclusivo de tests.csv, BE-12),
+        # para que un centro vacío se detecte como tal y no como columna perdida.
         tokens = _read_row_tokens(line)
-        tokens = _strip_empty_tokens(tokens)
 
         error = None
 
-        if len(tokens) < len(header_tokens):
+        if len(tokens) != len(header_tokens):
             error = {
                 "line": line_num,
                 "column": None,
                 "reason": (
-                    f"Faltan columnas requeridas "
+                    f"Número de columnas distinto al esperado "
                     f"(esperadas {len(header_tokens)}, recibidas {len(tokens)})"
                 ),
             }
