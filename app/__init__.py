@@ -41,8 +41,8 @@ def create_app(config_class=Config):
     from app.api.v1.results import results_bp, single_results_bp
     from app.api.v1.sections import sections_bp
 
-    application.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
-    application.register_blueprint(books_bp, url_prefix="/api/v1/books")
+    api.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
+    api.register_blueprint(books_bp, url_prefix="/api/v1/books")
     application.register_blueprint(results_bp, url_prefix="/api/v1/students")
     application.register_blueprint(results_bp, url_prefix="/api/students", name="results_direct")
     application.register_blueprint(single_results_bp, url_prefix="/api/v1/results")
