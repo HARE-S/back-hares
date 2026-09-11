@@ -78,9 +78,9 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE35-01 | **Generador de xlsx** En `exports/excel.py`, con cabeceras en castellano. | - | Pendiente |
-| T-BE35-02 | **Aplicación de los filtros recibidos** Reutilizando los de BE-27. | - | Pendiente |
-| T-BE35-03 | **Formato de fechas y decimales** Tipos reales, no texto. | - | Pendiente |
-| T-BE35-04 | **Endpoint de exportación** Con restricción de ámbito por rol. | - | Pendiente |
-| T-BE35-05 | **Registro en auditoría** Usuario y ámbito exportado. | - | Pendiente |
-| T-BE35-06 | **Tests de exportación** Escenarios 1, 4 y 5, abriendo el fichero generado. | - | Pendiente |
+| T-BE35-01 | **Generador de xlsx** En `exports/excel.py`, con cabeceras en castellano. | Yeremi | Completado |
+| T-BE35-02 | **Aplicación de los filtros recibidos** Reutilizando los de BE-27. | Yeremi | Completado |
+| T-BE35-03 | **Formato de fechas y decimales** Tipos reales, no texto. | Yeremi | Completado |
+| T-BE35-04 | **Endpoint de exportación** Con restricción de ámbito por rol. | Yeremi | Completado |
+| T-BE35-05 | **Registro en auditoría** Usuario y ámbito exportado. | Yeremi | Completado |
+| T-BE35-06 | **Tests de exportación** Escenarios 1, 4 y 5, abriendo el fichero generado. | Yeremi | Completado |
