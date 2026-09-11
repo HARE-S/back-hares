@@ -67,7 +67,7 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE23-01 | **Esquema de lectura** Alta con `book_id`, `start_date` y `end_date` opcional. | - | Pendiente |
-| T-BE23-02 | **ReadingService** Validar existencia y disponibilidad del libro. | - | Pendiente |
-| T-BE23-03 | **Blueprint POST de lecturas** Con comprobación de permiso sobre el alumno. | - | Pendiente |
-| T-BE23-04 | **Tests de asignación** Escenarios 1 a 5. | - | Pendiente |
+| T-BE23-01 | **Esquema de lectura** Alta con `book_id`, `start_date` y `end_date` opcional. | Yeremi | Hecho |
+| T-BE23-02 | **ReadingService** Validar existencia y disponibilidad del libro. | Yeremi | Hecho |
+| T-BE23-03 | **Blueprint POST de lecturas** Con comprobación de permiso sobre el alumno. | Yeremi | Hecho |
+| T-BE23-04 | **Tests de asignación** Escenarios 1 a 5. | Yeremi | Hecho |

@@ -65,7 +65,7 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE26-01 | **Consulta de lecturas por alumno** Con datos del libro incluidos. | - | Pendiente |
-| T-BE26-02 | **Consulta de alumnos por libro** Con fechas de lectura. | - | Pendiente |
-| T-BE26-03 | **Filtro por estado** En curso o finalizada. | - | Pendiente |
-| T-BE26-04 | **Tests de consulta** Escenarios 1 a 5. | - | Pendiente |
+| T-BE26-01 | **Consulta de lecturas por alumno** Con datos del libro incluidos. | Yeremi | Completado |
+| T-BE26-02 | **Consulta de alumnos por libro** Con fechas de lectura. | Yeremi | Completado |
+| T-BE26-03 | **Filtro por estado** En curso o finalizada. | Yeremi | Completado |
+| T-BE26-04 | **Tests de consulta** Escenarios 1 a 5. | Yeremi | Completado |
