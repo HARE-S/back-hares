@@ -28,6 +28,7 @@ def create_app(config_class=Config):
     from app.api.v1.imports import import_bp
     from app.api.v1.students import students_bp
     from app.api.v1.exports import exports_bp
+    from app.api.v1.directory import directory_bp
 
     openapi_api.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
     openapi_api.register_blueprint(books_bp, url_prefix="/api/v1/books")
@@ -47,6 +48,8 @@ def create_app(config_class=Config):
     application.register_blueprint(import_bp, url_prefix="/api/v1/import")
     application.register_blueprint(exports_bp, url_prefix="/api/v1")
     application.register_blueprint(exports_bp, url_prefix="/api", name="exports_direct")
+    application.register_blueprint(directory_bp, url_prefix="/api/v1", name="directory_v1")
+    application.register_blueprint(directory_bp, url_prefix="/api", name="directory_direct")
 
 
     # Registro condicional del endpoint de autenticación dev (BE-45)
