@@ -44,6 +44,12 @@ class Config:
     # Persistencia de Sesión en Servidor (US-45 / BE-02)
     SESSION_TYPE = os.getenv("SESSION_TYPE", "sqlalchemy").lower()
 
+    # Subida de ficheros (BE-09)
+    IMPORT_ALLOWED_EXTENSIONS = {".csv"}
+    IMPORT_UPLOAD_MAX_BYTES = int(
+        os.getenv("IMPORT_UPLOAD_MAX_BYTES", str(2 * 1024 * 1024))
+    )
+
     # OpenAPI / flask-smorest (BE-48)
     API_TITLE = "Hares API"
     API_VERSION = "v1"

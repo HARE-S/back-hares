@@ -69,9 +69,9 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE09-01 | **Endpoint de subida** Recepción del fichero con validación de extensión y tamaño. | - | Pendiente |
-| T-BE09-02 | **Previsualización** Devolver las primeras filas parseadas sin escribir en base de datos. | - | Pendiente |
-| T-BE09-03 | **Endpoint de confirmación** Ejecutar la importación sobre el fichero previamente subido. | - | Pendiente |
-| T-BE09-04 | **Reutilización del validador** Mismo módulo que `importer/`, sin duplicar lógica. | - | Pendiente |
-| T-BE09-05 | **Restricción por rol** Solo administrador; `403` para el resto. | - | Pendiente |
-| T-BE09-06 | **Tests del endpoint** Escenarios 1 a 5. | - | Pendiente |
+| T-BE09-01 | **Endpoint de subida** Recepción del fichero con validación de extensión y tamaño. | Marlen | Completado |
+| T-BE09-02 | **Previsualización** Devolver las primeras filas parseadas sin escribir en base de datos. | Marlen | Completado |
+| T-BE09-03 | **Endpoint de confirmación** Ejecutar la importación sobre el fichero previamente subido. | Marlen | Completado |
+| T-BE09-04 | **Reutilización del validador** Mismo módulo que `importer/`, sin duplicar lógica. | Marlen | Completado |
+| T-BE09-05 | **Restricción por rol** Solo administrador; `403` para el resto. | Marlen | Completado |
+| T-BE09-06 | **Tests del endpoint** Escenarios 1 a 5. | Marlen | Completado |
