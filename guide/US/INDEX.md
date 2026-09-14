@@ -43,7 +43,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Catálogo de libros** | | | | |
 | [BE-15](BE-15-niveles-libro.md) | Modelo de niveles de libro | 3 | Alta | Completado |
 | [BE-16](BE-16-mantenimiento-libros.md) | Alta y mantenimiento del catálogo de libros | 3 | Alta | Pendiente |
-| [BE-17](BE-17-carga-inicial-libros.md) | Carga inicial del catálogo de libros | 8 | Media | Pendiente |
+| [BE-17](BE-17-carga-inicial-libros.md) | Carga inicial del catálogo de libros | 8 | Media | Completado |
 | **Registro de resultados** | | | | |
 | [BE-18](BE-18-registrar-resultado.md) | Registrar el resultado de una prueba | 5 | **Crítica** | Completado |
 | [BE-19](BE-19-pruebas-sucesivas.md) | Pruebas sucesivas del mismo texto | 3 | **Crítica** | Completado |
