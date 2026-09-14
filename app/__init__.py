@@ -1,6 +1,6 @@
 from flask import Flask, request
 from app.config import Config, validate_config
-from app.extensions import db, api as openapi_api
+from app.extensions import db, migrate, openapi_api
 from app.api.health import health_bp
 # Importar modelos para que SQLAlchemy los reconozca
 from app import models  # noqa: F401
@@ -15,6 +15,7 @@ def create_app(config_class=Config):
 
     # Inicialización de extensiones
     db.init_app(application)
+    migrate.init_app(application, db)
     openapi_api.init_app(application)
 
     # Registro de funciones de compatibilidad para dialecto SQLite
@@ -32,23 +33,24 @@ def create_app(config_class=Config):
                         lambda text, from_chars, to_chars: str(text).translate(str.maketrans(from_chars, to_chars)) if text is not None else None,
                     )
 
-
     # Registro de blueprints
     application.register_blueprint(health_bp, url_prefix="/api")
 
+    # Registro de blueprints de API v1
+    from app.api.v1.auth import auth_bp
     from app.api.v1.tests import tests_bp
     from app.api.v1.books import books_bp
     from app.api.v1.results import results_bp, single_results_bp
     from app.api.v1.sections import sections_bp
     from app.api.v1.users import users_bp
 
+    openapi_api.register_blueprint(auth_bp, url_prefix="/api/v1")
     openapi_api.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
     openapi_api.register_blueprint(books_bp, url_prefix="/api/v1/books")
     openapi_api.register_blueprint(results_bp, url_prefix="/api/v1/students")
     openapi_api.register_blueprint(single_results_bp, url_prefix="/api/v1/results")
     openapi_api.register_blueprint(sections_bp, url_prefix="/api/v1/sections")
     openapi_api.register_blueprint(users_bp, url_prefix="/api/v1/users")
-
 
     # Registro condicional del endpoint de autenticación dev (BE-45)
     if application.config.get("DEV_AUTH_BYPASS"):

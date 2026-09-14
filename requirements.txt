@@ -1,8 +1,10 @@
 alembic==1.13.1
 Flask==3.0.0
-flask-smorest==0.44.0
+Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
+flask-smorest==0.44.0
 gunicorn==21.2.0
 marshmallow==3.21.1
 psycopg2-binary==2.9.9
+PyJWT==2.14.0
 pytest==8.3.2
