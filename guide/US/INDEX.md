@@ -64,7 +64,8 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-31](BE-31-evolucion-individual.md) | Evolución individual de un alumno | 5 | Alta | Completado |
 | [BE-32](BE-32-comparativa-grupos.md) | Comparativa de evolución por grupos | 8 | Media | Pendiente |
 | [BE-33](BE-33-proyeccion-evolucion.md) | Proyección de evolución | 8 | Media | En revisión |
-| [BE-34](BE-34-alumnos-sin-progreso.md) | Detección de alumnos sin progreso | 5 | Baja | Pendiente |
+| [BE-34](BE-34-alumnos-sin-progreso.md) | Detección de alumnos sin progreso | 5 | Baja | Completado |
+
 | **Exportación e informes** | | | | |
 | [BE-35](BE-35-exportacion-excel.md) | Exportación de datos a Excel | 5 | Alta | Completado |
 | [BE-36](BE-36-datos-informe-alumno.md) | Datos del informe individual de alumno | 3 | Media | Completado |

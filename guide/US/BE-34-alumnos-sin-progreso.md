@@ -67,8 +67,9 @@ Baja
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE34-01 | **Clasificación de alumnos** Reutilizando la tendencia de `analytics/projection.py`. | - | Pendiente |
-| T-BE34-02 | **Separación de "sin datos suficientes"** Categoría propia, nunca mezclada. | - | Pendiente |
-| T-BE34-03 | **Parámetros configurables** Umbral y número de pruebas por parámetro. | - | Pendiente |
-| T-BE34-04 | **Endpoint del listado** Con filtrado por ámbito del usuario. | - | Pendiente |
-| T-BE34-05 | **Tests de clasificación** Escenarios 1, 2, 3 y 5. | - | Pendiente |
+| T-BE34-01 | **Clasificación de alumnos** Reutilizando la tendencia de `analytics/projection.py`. | Yeremi | Completado |
+| T-BE34-02 | **Separación de "sin datos suficientes"** Categoría propia, nunca mezclada. | Yeremi | Completado |
+| T-BE34-03 | **Parámetros configurables** Umbral y número de pruebas por parámetro. | Yeremi | Completado |
+| T-BE34-04 | **Endpoint del listado** Con filtrado por ámbito del usuario. | Yeremi | Completado |
+| T-BE34-05 | **Tests de clasificación** Escenarios 1, 2, 3 y 5. | Yeremi | Completado |
+

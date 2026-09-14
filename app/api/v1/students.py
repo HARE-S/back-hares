@@ -7,9 +7,77 @@ from app.services.student_service import StudentService
 students_bp = Blueprint("students_v1", __name__)
 
 
+@students_bp.route("/no-progress", methods=["GET"])
+@require_role("tutor", "coordinator", "coordinador", "admin")
+def get_students_without_progress():
+    """
+    Listado de detección de alumnos sin progreso (BE-34).
+    - Identifica alumnos con tendencia negativa (Escenario 1) y tendencia plana (Escenario 2).
+    - Separa estrictamente 'insufficient_data' sin mezclarlo con 'no_progress' (Escenario 3).
+    - Parámetros configurables: n_tests (default 3), threshold (default 0.0), metric (default 'ppm') y section_id (Escenario 4).
+    - Alcance por rol: tutores solo ven alumnos de sus secciones asignadas (Escenario 5).
+    - 403 Forbidden si el rol es 'pendiente' o si el tutor consulta una sección no asignada.
+    - 401 Unauthorized si no hay sesión autenticada.
+    """
+    current_user = get_current_user()
+    service = StudentService(db.session)
+
+    raw_n_tests = request.args.get("n_tests") or request.args.get("last_n_tests")
+    try:
+        n_tests = int(raw_n_tests) if raw_n_tests is not None else 3
+    except (ValueError, TypeError):
+        return (
+            jsonify(
+                {
+                    "error": "El parámetro 'n_tests' debe ser un número entero válido",
+                    "field": "n_tests",
+                }
+            ),
+            400,
+        )
+
+    raw_threshold = request.args.get("threshold")
+    try:
+        threshold = float(raw_threshold) if raw_threshold is not None else 0.0
+    except (ValueError, TypeError):
+        return (
+            jsonify(
+                {
+                    "error": "El parámetro 'threshold' debe ser un número decimal válido",
+                    "field": "threshold",
+                }
+            ),
+            400,
+        )
+
+    metric = request.args.get("metric", "ppm")
+    section_id = request.args.get("section_id")
+
+    try:
+        result = service.get_students_without_progress(
+            current_user=current_user,
+            n_tests=n_tests,
+            threshold=threshold,
+            metric=metric,
+            section_id=section_id,
+        )
+    except ValidationError as e:
+        payload = {"error": str(e)}
+        if hasattr(e, "field") and e.field:
+            payload["field"] = e.field
+        return jsonify(payload), 400
+    except NotFoundError as e:
+        return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
+    except ForbiddenError as e:
+        return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
+
+    return jsonify(result), 200
+
+
 @students_bp.route("/<student_id>", methods=["GET"])
 @require_role("tutor", "coordinator", "coordinador", "admin")
 def get_student_detail(student_id):
+
     """
     Consulta la ficha agregada del alumno en una sola petición (BE-28).
     - 200 OK con datos personales, secciones, resultados y lecturas (Escenarios 1, 2, 3 y 4).
