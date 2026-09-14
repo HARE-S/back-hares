@@ -29,7 +29,7 @@ def build_database_url() -> str:
         return database_url
     user = os.getenv("POSTGRES_USER", "hares_user")
     password = os.getenv("POSTGRES_PASSWORD", "hares_pass")
-    host = os.getenv("POSTGRES_HOST", "db")
+    host = os.getenv("POSTGRES_HOST", "database")
     port = os.getenv("POSTGRES_PORT", "5432")
     name = os.getenv("POSTGRES_DB", "hares_db")
     return f"postgresql://{user}:{password}@{host}:{port}/{name}"

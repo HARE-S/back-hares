@@ -1,8 +1,30 @@
 # Instrucciones de despliegue
 
-> Guía de despliegue del **backend** — Programa de Gestión de Mejora de Comprensión Lectora (Peñascal).
-> Cubre API, base de datos, migraciones, importador y pgAdmin. El despliegue de la interfaz está en `frontend/guides/deployment.md`.
+> Guía de despliegue del **stack completo HARE-S** — Programa de Gestión de Mejora de Comprensión Lectora (Peñascal).
+> El `docker-compose.yml` de este repositorio levanta `database`, `backend`, `import`, `frontend` y `proxy`.
 > Lo que aquí se afirma se considera la configuración correcta. Si algo cambia en el código, se actualiza este documento en el mismo commit.
+
+---
+
+## 0. Una condición derivada de los repos git
+
+`back-hares` y `front-hares` son repositorios git **separados**, pero el compose construye el frontend con `context: ../front-hares`. Por tanto **ambos deben estar clonados como carpetas hermanas** en cada máquina donde se ejecute `docker compose`:
+
+```text
+/algún-directorio/
+├── back-hares/    # aquí vive docker-compose.yml
+└── front-hares/   # aquí vive su Dockerfile
+```
+
+Quien clone solo `back-hares` no podrá construir el servicio `frontend`. El `Dockerfile` del frontend se versiona en el repo `front-hares`.
+
+Además, el proxy pertenece a la red externa `public` (`external: true` en Compose). Antes del primer `up` hay que crearla:
+
+```bash
+docker network create public   # solo la primera vez
+```
+
+Las imágenes del stack se eligen por variables de entorno (`POSTGRES_IMAGE`, `NGINX_IMAGE`); la imagen de Python está fijada en `back-hares/Dockerfile` (`python:3.14-alpine`). Los valores por defecto son las imágenes oficiales; las `dhi.io/*` están documentadas en `.env.example` para cuando la organización tenga acceso al registro.
 
 ---
 
@@ -41,7 +63,9 @@ Las imágenes `dhi.io/*` son **Docker Hardened Images, un producto de suscripci�
 docker pull dhi.io/postgresql:18.6-alpine3.24-fips
 ```
 
-Si falla por autenticación, hay dos caminos: solicitar el acceso, o sustituir por las imágenes oficiales equivalentes (`postgres:18-alpine`, `python:3.14-alpine`, `nginx:1.29-alpine`). **Esa sustitución debe acordarse con el cliente**, porque las DHI fueron una elección suya y la variante `fips` tiene implicaciones de cumplimiento.
+Si falla por autenticación, hay dos caminos: solicitar el acceso, o sustituir por las imágenes oficiales equivalentes (`postgres:18-alpine`, `python:3.14-alpine`, `nginx:1.31.5-alpine`). **Esa sustitución debe acordarse con el cliente**, porque las DHI fueron una elección suya y la variante `fips` tiene implicaciones de cumplimiento.
+
+En el compose esto se resuelve con variables, sin tocar código: `POSTGRES_IMAGE` y `NGINX_IMAGE` en `.env` (ver `.env.example`). La imagen de Python está fijada en el `Dockerfile`; los valores por defecto son las oficiales, y para activar DHI basta descomentar las líneas comentadas en `.env`.
 
 ### Nota sobre Alpine y PostgreSQL
 
@@ -145,6 +169,7 @@ Solo se despliega desde `main`. Ver apartado 10.
 ### 5.2 Construir y levantar
 
 ```bash
+docker network create public   # solo la primera vez (red externa del proxy)
 docker compose build --no-cache
 docker compose up -d database
 ```
@@ -167,13 +192,17 @@ healthcheck:
 
 Sin healthcheck, `depends_on` solo garantiza que el contenedor ha arrancado, no que PostgreSQL acepte conexiones. Es la causa más común de fallo intermitente en el primer despliegue.
 
-### 5.3 Aplicar migraciones
+### 5.3 Inicializar el esquema
+
+> **Estado conocido del historial de migraciones.** El repositorio contiene dos cadenas Alembic independientes (`001..005` y `d759ec76f0af..`) que crean las mismas tablas (`users`, `sessions`, `audit_logs`), por lo que hoy `alembic upgrade head` **no es reproducible** en una base de datos vacía (múltiples cabezas y `create table` duplicados). El bootstrap fiable del esquema es el script que ya usaba el proyecto en local, basado en los modelos (`db.create_all()`), que además registra la función SQL `uuidv7()`:
 
 ```bash
-docker compose run --rm backend alembic upgrade head
+docker compose run --rm backend python scripts/init_db.py
 ```
 
-Las migraciones **nunca** se ejecutan automáticamente al arrancar el backend. Si dos réplicas arrancan a la vez, ambas intentarían migrar. Es un paso explícito y controlado.
+El script es **aditivo** (no borra tablas existentes ni datos). Se puede repetir con seguridad tras errores. Reparar el historial Alembic (fusión de cabezas) es una mejora pendiente y **fuera de alcance** de este despliegue; ticket/RO pendiente con el tutor.
+
+El arranque del esquema **nunca** se hace automáticamente al levantar el backend: es un paso explícito y controlado para evitar que dos réplicas migren a la vez.
 
 ### 5.4 Levantar el resto
 
@@ -368,9 +397,8 @@ Desde fuera del servidor, `curl http://<dominio>:5050` debe dar tiempo de espera
 **Base de datos**
 ```bash
 docker compose exec database psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "\dt"
-docker compose run --rm backend alembic current
 ```
-Las tablas deben existir y la revisión de migración coincidir con `head`.
+Las 14 tablas de los modelos deben existir (incluidas `sessions`, `flask_session_store`, `audit_logs`, `import_reports`, `user_sections`). El esquema se crea con `scripts/init_db.py` (sección 5.3); **no** se valida con `alembic current`, porque el historial Alembic del repositorio es no reproducible (ver nota de 5.3) y `db.create_all()` es la fuente de verdad del esquema.
 
 **Login completo:** entrar con una cuenta `@grupopenascal.com` y comprobar que una cuenta ajena al dominio es rechazada.
 
@@ -447,7 +475,7 @@ Sin etiquetas no se sabe qué versión está corriendo, y volver atrás pasa a s
 | Síntoma | Causa probable | Comprobación |
 |---|---|---|
 | Backend reinicia en bucle | No conecta con la base de datos | `docker compose logs backend`; revisar `DATABASE_URL` y que el host sea `database`, no `localhost` |
-| `relation does not exist` | Migraciones sin aplicar | `alembic current` frente a `alembic head` |
+| `relation does not exist` | Esquema sin inicializar | Ejecutar `scripts/init_db.py` (sección 5.3) |
 | Login redirige y falla | `redirect_uri` no coincide | Debe ser idéntica en `.env` y en Google Cloud, incluido el protocolo |
 | Sesión no persiste | Cookie `Secure` sin HTTPS | Comprobar TLS en el proxy |
 | Cuentas ajenas al dominio entran | Falta validación del claim `hd` | Revisar el backend: el parámetro `hd` de la petición **no** restringe nada |

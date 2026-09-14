@@ -47,6 +47,9 @@ class Config:
     SESSION_USE_SIGNER = True
     SESSION_KEY_PREFIX = "hares_session:"
     PERMANENT_SESSION_LIFETIME = 86400  # 24 horas
+    # Tabla interna de flask-session, distinta del modelo propio de sesiones
+    # (app/models/session.py usa __tablename__="sessions").
+    SESSION_SQLALCHEMY_TABLE = "flask_session_store"
 
     # Subida de ficheros (BE-09)
     IMPORT_ALLOWED_EXTENSIONS = {".csv"}

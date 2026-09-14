@@ -22,13 +22,6 @@ class UserLoginSchema(Schema):
     password = fields.Str(required=True, load_only=True)
 
 
-class TokenResponseSchema(Schema):
-    """Schema para respuesta con token JWT."""
-    access_token = fields.Str()
-    token_type = fields.Str()
-    user = fields.Nested("UserResponseSchema")
-
-
 class UserResponseSchema(Schema):
     """Schema para respuesta de usuario (sin contraseña)."""
     id = fields.UUID()
@@ -40,3 +33,10 @@ class UserResponseSchema(Schema):
     is_active = fields.Boolean()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
+
+
+class TokenResponseSchema(Schema):
+    """Schema para respuesta con token JWT."""
+    access_token = fields.Str()
+    token_type = fields.Str()
+    user = fields.Nested(UserResponseSchema)

@@ -17,6 +17,7 @@ def create_app(config_class=Config):
     db.init_app(application)
     migrate.init_app(application, db)
     openapi_api.init_app(application)
+    application.config['SESSION_SQLALCHEMY'] = db
     session.init_app(application)
 
     # Registro de funciones de compatibilidad para dialecto SQLite

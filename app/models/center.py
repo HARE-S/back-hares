@@ -50,6 +50,12 @@ class Section(BaseModel):
 
     # Relaciones
     center = db.relationship("Center", back_populates="sections")
+    users = db.relationship(
+        "User",
+        secondary="user_sections",
+        back_populates="sections",
+        lazy="select",
+    )
     student_sections = db.relationship(
         "StudentSection",
         back_populates="section",

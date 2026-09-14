@@ -1,7 +1,14 @@
 .git
 .gitignore
+.agents
+.claude
+.vscode
+.venv
+.pytest_cache
 __pycache__
 *.pyc
 .env
+instance
+*.egg-info
 requerimientos.md
 README.md

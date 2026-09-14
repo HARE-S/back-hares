@@ -2,7 +2,7 @@
 # En producción NO se usa este fichero: docker compose -f docker-compose.yml.
 # Ningún servicio salvo el proxy publica puertos al exterior (ver guide/deployment.md).
 services:
-  db:
+  database:
     ports:
       - "5433:5432"
 
@@ -12,14 +12,14 @@ services:
 
   # Base de datos para la suite de pruebas (BE-47).
   db-test:
-    image: postgres:15-alpine
+    image: ${POSTGRES_IMAGE:-postgres:18-alpine}
     profiles: ["test"]
     environment:
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: hares_test
     volumes:
-      - test_data:/var/lib/postgresql/data
+      - test_data:/var/lib/postgresql
     networks:
       - db-network
     healthcheck:

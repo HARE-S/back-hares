@@ -7,6 +7,7 @@ Flask-SQLAlchemy==3.1.1
 gunicorn==21.2.0
 marshmallow==3.21.1
 openpyxl==3.1.5
-psycopg2-binary==2.9.9
+# 2.9.9 no compila en Python 3.14 (removida _PyInterpreterState_Get); desde 2.9.10+ soporta 3.13/3.14.
+psycopg2-binary==2.9.13
 PyJWT==2.14.0
 pytest==8.3.2
