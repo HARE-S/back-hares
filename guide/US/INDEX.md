@@ -37,12 +37,12 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-10](BE-10-consulta-centros-secciones.md) | Consulta de centros, secciones y alumnado | 3 | Alta | Pendiente |
 | **Catálogo de pruebas** | | | | |
 | [BE-11](BE-11-alta-prueba.md) | Alta de prueba en el catálogo | 3 | Alta | Completado |
-| [BE-12](BE-12-importar-catalogo-pruebas.md) | Importar el catálogo de pruebas | 5 | Alta | Pendiente |
-| [BE-13](BE-13-edicion-baja-pruebas.md) | Edición y baja de pruebas | 3 | Media | Pendiente |
-| [BE-14](BE-14-listado-pruebas.md) | Listado paginado y filtrado de pruebas | 3 | Media | Pendiente |
+| [BE-12](BE-12-importar-catalogo-pruebas.md) | Importar el catálogo de pruebas | 5 | Alta | Completado |
+| [BE-13](BE-13-edicion-baja-pruebas.md) | Edición y baja de pruebas | 3 | Media | Completado |
+| [BE-14](BE-14-listado-pruebas.md) | Listado paginado y filtrado de pruebas | 3 | Media | Completado |
 | **Catálogo de libros** | | | | |
 | [BE-15](BE-15-niveles-libro.md) | Modelo de niveles de libro | 3 | Alta | Completado |
-| [BE-16](BE-16-mantenimiento-libros.md) | Alta y mantenimiento del catálogo de libros | 3 | Alta | Pendiente |
+| [BE-16](BE-16-mantenimiento-libros.md) | Alta y mantenimiento del catálogo de libros | 3 | Alta | Completado |
 | [BE-17](BE-17-carga-inicial-libros.md) | Carga inicial del catálogo de libros | 8 | Media | Pendiente |
 | **Registro de resultados** | | | | |
 | [BE-18](BE-18-registrar-resultado.md) | Registrar el resultado de una prueba | 5 | **Crítica** | Completado |
