@@ -1,4 +1,4 @@
-"""Modelo de usuario con autenticación local."""
+"""Modelo de usuario y roles con autenticación local."""
 
 from enum import Enum
 from sqlalchemy import text
@@ -29,14 +29,14 @@ class User(BaseModel):
     )
     email = db.Column(db.String(255), nullable=False, unique=True)
     name = db.Column(db.String(255), nullable=False)
-    lastname = db.Column(db.String(255), nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    area = db.Column(db.String(255), nullable=False)
+    lastname = db.Column(db.String(255), nullable=True)
+    password_hash = db.Column(db.String(255), nullable=True)
+    area = db.Column(db.String(255), nullable=True)
     role = db.Column(
         db.String(20),
         nullable=False,
-        default=UserRole.TUTOR.value,
-        server_default=UserRole.TUTOR.value,
+        default=UserRole.PENDING.value,
+        server_default=UserRole.PENDING.value,
     )
     is_active = db.Column(db.Boolean, nullable=False, default=True, server_default="true")
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.now(), server_default=db.func.now())
@@ -48,7 +48,17 @@ class User(BaseModel):
 
     def verify_password(self, password: str) -> bool:
         """Verifica si la contraseña es correcta."""
+        if not self.password_hash:
+            return False
         return check_password_hash(self.password_hash, password)
+
+    # Relaciones
+    sections = db.relationship(
+        "Section",
+        secondary="user_sections",
+        back_populates="users",
+        lazy="select",
+    )
 
     @property
     def role_enum(self) -> UserRole:
@@ -62,12 +72,35 @@ class User(BaseModel):
         """Verifica si el usuario tiene alguno de los roles permitidos."""
         return self.role in allowed_roles
 
-    def to_dict(self, include_password=False):
-        """Convierte a diccionario, opcionalmente sin password_hash."""
-        result = super().to_dict()
-        if not include_password and "password_hash" in result:
-            del result["password_hash"]
-        return result
+    def __repr__(self):
+        return f"<User id={self.id} email='{self.email}' role='{self.role}'>"
+
+
+class UserSection(BaseModel):
+    """Asociación entre usuario y sección."""
+    __tablename__ = "user_sections"
+
+    id = db.Column(
+        db.Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuidv7,
+        server_default=text("uuidv7()"),
+    )
+    user_id = db.Column(
+        db.Uuid(as_uuid=True),
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    section_id = db.Column(
+        db.Uuid(as_uuid=True),
+        db.ForeignKey("sections.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    created_at = db.Column(db.DateTime, nullable=False, default=db.func.now(), server_default=db.func.now())
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "section_id", name="uq_user_section"),
+    )
 
     def __repr__(self):
-        return f"<User id={self.id} email='{self.email}' role='{self.role}' area='{self.area}'>"
+        return f"<UserSection user_id={self.user_id} section_id={self.section_id}>"

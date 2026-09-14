@@ -21,7 +21,7 @@ class ValidationError(DomainException):
 
 
 class UnauthorizedError(DomainException):
-    """Error de autenticación."""
+    """Se lanza cuando el usuario no está autenticado o las credenciales son inválidas."""
     pass
 
 

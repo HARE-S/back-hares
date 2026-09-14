@@ -81,8 +81,8 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-45](BE-45-acceso-desarrollo.md) | Acceso en entorno de desarrollo | 3 | Alta | Completado |
 | [BE-46](BE-46-proyecto-google-cloud.md) | Configuración del proyecto en Google Cloud | 3 | Crítica | **Bloqueada** |
 | **Calidad y entrega** | | | | |
-| [BE-47](BE-47-pruebas-automatizadas.md) | Batería de pruebas automatizadas | 8 | Alta | Pendiente |
-| [BE-48](BE-48-documentacion-api.md) | Documentación de la API | 3 | Alta | Pendiente |
+| [BE-47](BE-47-pruebas-automatizadas.md) | Batería de pruebas automatizadas | 8 | Alta | **Completado** |
+| [BE-48](BE-48-documentacion-api.md) | Documentación de la API | 3 | Alta | Completado |
 | [BE-49](BE-49-manual-usuario.md) | Manual de uso de las funciones de servidor | 2 | Media | Pendiente |
 | **Añadidas tras revisión del cliente (09/09)** | | | | |
 | [BE-50](BE-50-crud-manual-alumnado.md) | Alta y modificación manual de alumnado | 8 | Alta | Pendiente |

@@ -41,8 +41,12 @@ class Config:
     ]
     CORS_SUPPORTS_CREDENTIALS = True
 
-    # Persistencia de Sesión en Servidor (US-45 / BE-02)
+    # Persistencia de Sesión en Servidor (BE-40 / BE-02)
     SESSION_TYPE = os.getenv("SESSION_TYPE", "sqlalchemy").lower()
+    SESSION_PERMANENT = False
+    SESSION_USE_SIGNER = True
+    SESSION_KEY_PREFIX = "hares_session:"
+    PERMANENT_SESSION_LIFETIME = 86400  # 24 horas
 
     # Subida de ficheros (BE-09)
     IMPORT_ALLOWED_EXTENSIONS = {".csv"}

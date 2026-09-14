@@ -4,7 +4,9 @@ from app.models.student import Student, StudentSection
 from app.models.test import Test, Result
 from app.models.book import Book, ReadBook, ReadedBook
 from app.models.import_report import ImportReport
-from app.models.user import User, UserRole
+from app.models.user import User, UserRole, UserSection
+from app.models.session import Session
+from app.models.audit import AuditLog, AuditAction
 from app.models.enums import (
     BookLevel,
     BOOK_LEVEL_ORDER,
@@ -26,6 +28,10 @@ __all__ = [
     "ImportReport",
     "User",
     "UserRole",
+    "UserSection",
+    "Session",
+    "AuditLog",
+    "AuditAction",
     "BookLevel",
     "BOOK_LEVEL_ORDER",
     "validate_book_level",

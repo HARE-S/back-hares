@@ -46,3 +46,12 @@ class TestResponseSchema(Schema):
     test_letter = fields.Str(allow_none=True)
     type = fields.Str(allow_none=True)
     disabled_at = fields.Date(allow_none=True)
+
+
+class TestImportResponseSchema(Schema):
+    """Schema de respuesta para importación de pruebas (BE-12)."""
+    message = fields.Str()
+    total = fields.Int()
+    created = fields.Int()
+    updated = fields.Int()
+    tests = fields.List(fields.Nested(TestResponseSchema))

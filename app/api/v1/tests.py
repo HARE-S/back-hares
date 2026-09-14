@@ -12,7 +12,13 @@ from app.core.exceptions import (
 )
 from app.extensions import db
 from app.services.catalog_service import CatalogService
-from app.schemas.test_schema import TestCreateSchema, TestUpdateSchema, TestPutSchema, TestResponseSchema
+from app.schemas.test_schema import (
+    TestCreateSchema,
+    TestUpdateSchema,
+    TestPutSchema,
+    TestResponseSchema,
+    TestImportResponseSchema,
+)
 from app.schemas.common import PaginationQueryArgsSchema, translate_marshmallow_errors
 from marshmallow import ValidationError as MarshmallowValidationError
 
@@ -86,9 +92,12 @@ class TestsList(MethodView):
 
 @tests_bp.route("/import", methods=["POST"])
 @require_role("coordinator", "admin")
+@tests_bp.response(200, TestImportResponseSchema)
+@tests_bp.alt_response(400, description="CSV inválido o error de procesamiento")
 def import_tests():
     """
     Importación del catálogo de pruebas desde CSV (BE-12).
+    Acepta: file upload, CSV en body, JSON con file_path, o semilla por defecto.
     """
     file_source = None
     if "file" in request.files:
