@@ -11,12 +11,14 @@ from typing import Any, Dict, List, Tuple
 from sqlalchemy.orm import Session
 
 from app.importer.parser import parse_students_csv_collect
+from app.models.import_report import ImportReport
 from app.repositories.student_repository import StudentRepository
 
 
 def _empty_summary() -> Dict[str, Any]:
     return {
         "total": 0,
+        "processed": 0,
         "students_created": 0,
         "students_updated": 0,
         "students_omitted": 0,
@@ -117,14 +119,32 @@ class StudentImporter:
         commit: bool = True,
         collect_errors: bool = True,
     ) -> Dict[str, Any]:
-        """Parses CSV content and imports it (see import_students)."""
+        """Parses CSV content and imports it (see import_students).
+
+        Persists an `ImportReport` in the same transaction when commit is
+        True, so the administrator can download the error report from the
+        API even though the import itself ran in the `import` container
+        (BE-08 scenario 4).
+        """
         rows, parse_errors = parse_students_csv_collect(content)
-        summary = self.import_students(rows, commit=commit, collect_errors=collect_errors)
+        summary = self.import_students(rows, commit=False, collect_errors=collect_errors)
 
         for error in parse_errors:
             summary["errors"] += 1
             summary["total"] += 1
             if collect_errors:
                 summary["error_details"].append(error)
+
+        summary["processed"] = summary["total"] - summary["errors"]
+
+        if commit:
+            report = ImportReport(
+                total=summary["total"],
+                processed=summary["processed"],
+                errors=summary["errors"],
+                error_details=summary["error_details"],
+            )
+            self.session.add(report)
+            self.session.commit()
 
         return summary

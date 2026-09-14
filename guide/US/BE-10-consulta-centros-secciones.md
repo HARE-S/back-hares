@@ -76,8 +76,8 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE10-01 | **Esquemas de centro, sección y alumno** Marshmallow para las respuestas. | - | Pendiente |
-| T-BE10-02 | **Repositorios de consulta** Listados y detalle, excluyendo deshabilitados. | - | Pendiente |
-| T-BE10-03 | **Blueprints de centros y secciones** Solo `GET`; rutas anidadas de la especificación. | - | Pendiente |
-| T-BE10-04 | **Filtrado por secciones asignadas** El tutor solo ve las suyas. | - | Pendiente |
-| T-BE10-05 | **Tests de consulta y permisos** Escenarios 1 a 6. | - | Pendiente |
+| T-BE10-01 | **Esquemas de centro, sección y alumno** Marshmallow para las respuestas. | Marlen | Completado |
+| T-BE10-02 | **Repositorios de consulta** Listados y detalle, excluyendo deshabilitados. | Marlen | Completado |
+| T-BE10-03 | **Blueprints de centros y secciones** Solo `GET`; rutas anidadas de la especificación. | Marlen | Completado |
+| T-BE10-04 | **Filtrado por secciones asignadas** El tutor solo ve las suyas. | Marlen | Completado |
+| T-BE10-05 | **Tests de consulta y permisos** Escenarios 1 a 6. | Marlen | Completado |

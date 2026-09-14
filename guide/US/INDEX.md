@@ -30,9 +30,9 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-04](BE-04-borrado-logico.md) | Borrado lógico de pruebas y libros | 3 | Alta | Completado |
 | [BE-05](BE-05-datos-anonimos.md) | Datos de prueba anónimos | 3 | Alta | Pendiente |
 | **Importación de datos maestros** | | | | |
-| [BE-06](BE-06-importar-alumnado.md) | Importar alumnado desde el volcado de Alexia | 8 | Crítica | Pendiente |
-| [BE-07](BE-07-importacion-idempotente.md) | Importación idempotente | 5 | Crítica | Pendiente |
-| [BE-08](BE-08-informe-errores-importacion.md) | Informe de errores de importación | 3 | Media | Pendiente |
+| [BE-06](BE-06-importar-alumnado.md) | Importar alumnado desde el volcado de Alexia | 8 | Crítica | Completado |
+| [BE-07](BE-07-importacion-idempotente.md) | Importación idempotente | 5 | Crítica | Completado |
+| [BE-08](BE-08-informe-errores-importacion.md) | Informe de errores de importación | 3 | Media | Completado |
 | [BE-09](BE-09-endpoint-subida-fichero.md) | Endpoint de subida del fichero | 5 | Alta | Pendiente |
 | [BE-10](BE-10-consulta-centros-secciones.md) | Consulta de centros, secciones y alumnado | 3 | Alta | Pendiente |
 | **Catálogo de pruebas** | | | | |

@@ -42,6 +42,23 @@ class StudentRepository:
             return self.create_center(name), True
         return center, False
 
+    def get_all_active_centers(self) -> List[Center]:
+        """Returns all non-disabled centers ordered by name (BE-10)."""
+        stmt = (
+            select(Center)
+            .where(Center.disabled_at.is_(None))
+            .order_by(Center.name.asc())
+        )
+        return list(self.session.scalars(stmt).all())
+
+    def get_active_center(self, center_id) -> Optional[Center]:
+        """Returns a center by id, excluding disabled ones (BE-10)."""
+        stmt = select(Center).where(
+            Center.id == center_id,
+            Center.disabled_at.is_(None),
+        )
+        return self.session.scalars(stmt).first()
+
     # ---------------------------------------------------------------- sections
     def get_section_by_name(self, center: Center, name: str) -> Optional[Section]:
         """Returns a section by name within the given center."""
@@ -67,6 +84,26 @@ class StudentRepository:
         if section is None:
             return self.create_section(center, name), True
         return section, False
+
+    def get_sections_by_center(self, center_id) -> List[Section]:
+        """Returns the non-disabled sections of a center ordered by name (BE-10)."""
+        stmt = (
+            select(Section)
+            .where(
+                Section.center_id == center_id,
+                Section.disabled_at.is_(None),
+            )
+            .order_by(Section.name.asc())
+        )
+        return list(self.session.scalars(stmt).all())
+
+    def get_active_section(self, section_id) -> Optional[Section]:
+        """Returns a section by id, excluding disabled ones (BE-10)."""
+        stmt = select(Section).where(
+            Section.id == section_id,
+            Section.disabled_at.is_(None),
+        )
+        return self.session.scalars(stmt).first()
 
     # ---------------------------------------------------------------- students
     def get_student_by_external_id(self, external_id: str) -> Optional[Student]:
@@ -103,6 +140,19 @@ class StudentRepository:
     def get_all_students(self) -> List[Student]:
         """Returns all students ordered by their external identifier."""
         stmt = select(Student).order_by(Student.external_id.asc())
+        return list(self.session.scalars(stmt).all())
+
+    def get_students_by_section(self, section_id) -> List[Student]:
+        """Returns the non-disabled students enrolled in a section (BE-10)."""
+        stmt = (
+            select(Student)
+            .join(StudentSection, StudentSection.student_id == Student.id)
+            .where(
+                StudentSection.section_id == section_id,
+                Student.disabled_at.is_(None),
+            )
+            .order_by(Student.name.asc(), Student.external_id.asc())
+        )
         return list(self.session.scalars(stmt).all())
 
     def count_students(self) -> int:
