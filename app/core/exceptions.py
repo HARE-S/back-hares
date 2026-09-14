@@ -17,6 +17,11 @@ class ValidationError(DomainException):
         self.field = field
 
 
+class UnauthorizedError(DomainException):
+    """Se lanza cuando el usuario no está autenticado o las credenciales son inválidas."""
+    pass
+
+
 class ForbiddenError(DomainException):
     """Se lanza cuando el usuario no tiene permisos suficientes para la acción."""
     pass
