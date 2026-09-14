@@ -1,18 +1,24 @@
-"""Implementación del CLI de carga de datos de prueba anónimos (BE-05).
+"""Implementación del CLI de carga de datos (BE-05 y BE-17).
 
 Usado por `python -m app.importer` y por `scripts/seed_data.py`. La lógica
 de impresión y de ejecución vive en un único lugar para no divergir.
+
+Sin argumentos carga los datos de prueba anónimos (BE-05). Con `--books`
+carga únicamente el catálogo inicial de libros desde el Excel del centro
+(BE-17) y genera el CSV de revisión manual para las filas no interpretables.
 """
 import argparse
 
 from app import create_app
 from app.extensions import db
+from app.importer.books_loader import BookImporter
+from app.importer.books_parser import write_review_csv
 from app.services.seed_service import SeedService
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Cargar datos de prueba anónimos en la base de datos (BE-05)."
+        description="Cargar datos en la base de datos (BE-05 / BE-17)."
     )
     parser.add_argument(
         "--students",
@@ -26,12 +32,46 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Ruta al CSV del catálogo de pruebas "
         f"(por defecto: {SeedService.DEFAULT_TESTS_CSV})",
     )
+    parser.add_argument(
+        "--books",
+        default=None,
+        help="Ruta al Excel del catálogo inicial de libros (BE-17). "
+        "Cuando se indica, solo se carga el catálogo de libros.",
+    )
     return parser
+
+
+def _run_books(books_path: str) -> None:
+    summary = BookImporter(db.session).import_from_xlsx(books_path)
+
+    print(
+        "Carga del catálogo inicial de libros completada.\n"
+        f"  Libros: {summary['books_created']} creados, "
+        f"{summary['books_existing']} ya existían\n"
+        f"  Filas totales: {summary['total']}\n"
+        f"  Cabeceras repetidas ignoradas: {summary['headers_skipped']}\n"
+        f"  Rótulos de sección ignorados: {summary['separators_skipped']}\n"
+        f"  Errores: {summary['errors']}"
+    )
+
+    review = summary["review"]
+    if review:
+        out = write_review_csv(books_path, review)
+        print(
+            f"\n  Filas para revisión manual: {len(review)}\n"
+            f"  Listado generado en: {out}"
+        )
+    else:
+        print("\n  No hay filas pendientes de revisión manual.")
 
 
 def run(args: argparse.Namespace) -> None:
     app = create_app()
     with app.app_context():
+        if args.books:
+            _run_books(args.books)
+            return
+
         service = SeedService(db.session)
         summary = service.seed(
             students_csv_path=args.students,

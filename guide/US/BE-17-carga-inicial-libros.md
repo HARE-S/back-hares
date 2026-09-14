@@ -71,9 +71,9 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE17-01 | **Lectura del Excel** Localizar la hoja y el rango de datos útil. | - | Pendiente |
-| T-BE17-02 | **Detección de filas no válidas** Cabeceras repetidas, rótulos de sección y texto suelto. | - | Pendiente |
-| T-BE17-03 | **Normalización de niveles** Del texto "Nivel 0-I" al valor de la enumeración de BE-15. | - | Pendiente |
-| T-BE17-04 | **Campos de inventario como texto** `copies_note` y `sessions_note` sin conversión numérica. | - | Pendiente |
-| T-BE17-05 | **Listado de revisión manual** Filas no interpretables, exportables. | - | Pendiente |
-| T-BE17-06 | **Tests con el fichero real** Escenarios 2, 3 y 4. | - | Pendiente |
+| T-BE17-01 | **Lectura del Excel** Localizar la hoja y el rango de datos útil. | Marlen | Completado |
+| T-BE17-02 | **Detección de filas no válidas** Cabeceras repetidas, rótulos de sección y texto suelto. | Marlen | Completado |
+| T-BE17-03 | **Normalización de niveles** Del texto "Nivel 0-I" al valor de la enumeración de BE-15. | Marlen | Completado |
+| T-BE17-04 | **Campos de inventario como texto** `copies_note` y `sessions_note` sin conversión numérica. | Marlen | Completado |
+| T-BE17-05 | **Listado de revisión manual** Filas no interpretables, exportables. | Marlen | Completado |
+| T-BE17-06 | **Tests con el fichero real** Escenarios 2, 3 y 4. | Marlen | Completado |
