@@ -64,12 +64,14 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-31](BE-31-evolucion-individual.md) | Evolución individual de un alumno | 5 | Alta | Completado |
 | [BE-32](BE-32-comparativa-grupos.md) | Comparativa de evolución por grupos | 8 | Media | Pendiente |
 | [BE-33](BE-33-proyeccion-evolucion.md) | Proyección de evolución | 8 | Media | En revisión |
-| [BE-34](BE-34-alumnos-sin-progreso.md) | Detección de alumnos sin progreso | 5 | Baja | Pendiente |
+| [BE-34](BE-34-alumnos-sin-progreso.md) | Detección de alumnos sin progreso | 5 | Baja | Completado |
+
 | **Exportación e informes** | | | | |
 | [BE-35](BE-35-exportacion-excel.md) | Exportación de datos a Excel | 5 | Alta | Completado |
-| [BE-36](BE-36-datos-informe-alumno.md) | Datos del informe individual de alumno | 3 | Media | Pendiente |
-| [BE-37](BE-37-informe-grupo.md) | Informe agregado de grupo | 5 | Media | Pendiente |
+| [BE-36](BE-36-datos-informe-alumno.md) | Datos del informe individual de alumno | 3 | Media | Completado |
+| [BE-37](BE-37-informe-grupo.md) | Informe agregado de grupo | 5 | Media | Completado |
 | **Seguridad y acceso** | | | | |
+
 | [BE-38](BE-38-login-google.md) | Inicio de sesión con cuenta de Google | 8 | Crítica | Pendiente |
 | [BE-39](BE-39-restriccion-dominio.md) | Restricción al dominio corporativo | 5 | **Crítica** | Pendiente |
 | [BE-40](BE-40-sesion-servidor.md) | Sesión de servidor | 5 | Crítica | Pendiente |

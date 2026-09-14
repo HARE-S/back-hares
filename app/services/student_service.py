@@ -1,14 +1,21 @@
 import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 import uuid
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
+from app.analytics.evolution import calculate_individual_evolution
+from app.analytics.metrics import calculate_ppm, calculate_reading_comprehension
+from app.analytics.progress_detection import classify_students_progress
 from app.core.audit import log_audit
 from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
-from app.models.student import Student
+from app.models.student import Student, StudentSection
+from app.models.test import Result
+from app.schemas.progress_schema import ProgressDetectionSchema
+from app.schemas.report_schema import StudentReportSchema
 from app.schemas.student_schema import StudentDetailSchema
 from app.services.reading_service import ReadingService
 from app.services.result_service import ResultService
+
 
 
 class StudentService:
@@ -156,3 +163,220 @@ class StudentService:
             results=results,
             readings=readings,
         )
+
+    def get_student_report(
+        self,
+        student_id: Union[str, uuid.UUID],
+        current_user: Optional[Dict[str, Any]] = None,
+        start_date: Optional[Any] = None,
+        end_date: Optional[Any] = None,
+    ) -> Dict[str, Any]:
+        """
+        Obtiene los datos estructurados para el informe individual de un alumno (BE-36).
+        - Reutiliza la composición de la ficha de alumno de BE-28 (T-BE36-02).
+        - Calcula la serie temporal de evolución y variaciones de BE-31.
+        - Incluye fecha y hora de generación ISO UTC (Escenario 2).
+        - Distingue indicador de evolución insuficiente sin proyecciones (Escenario 3).
+        - Registra evento de auditoría GENERATE_STUDENT_REPORT (Escenario 5).
+        """
+        # 1. Obtener la ficha del alumno (comprueba existencia, parseo UUID y permisos de sección)
+        student_card = self.get_student_detail(student_id=student_id, current_user=current_user)
+
+        # 2. Calcular serie de evolución temporal reutilizando BE-31
+        evolution = calculate_individual_evolution(
+            results=student_card.get("results", []),
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        # 3. Fecha y hora de generación
+        now_utc = datetime.datetime.now(datetime.timezone.utc)
+
+        # 4. Registrar en auditoría (T-BE36-04 / Escenario 5)
+        log_audit(
+            user=current_user,
+            action="GENERATE_STUDENT_REPORT",
+            resource_type="students",
+            resource_id=str(student_card["id"]),
+            details={
+                "student_name": student_card.get("name"),
+                "results_count": len(student_card.get("results", [])),
+                "readings_count": len(student_card.get("readings", [])),
+                "has_insufficient_data": evolution.get("has_insufficient_data", False),
+            },
+        )
+
+        # 5. Serializar y devolver informe individual estructurado (T-BE36-01)
+        return StudentReportSchema.dump(
+            student_card=student_card,
+            evolution=evolution,
+            generated_at=now_utc,
+        )
+
+    def get_students_without_progress(
+        self,
+        current_user: Optional[Dict[str, Any]] = None,
+        n_tests: int = 3,
+        threshold: float = 0.0,
+        metric: str = "ppm",
+        section_id: Optional[Union[str, uuid.UUID]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Detecta y lista los alumnos que no muestran progreso en las últimas N pruebas (BE-34).
+        - Evalúa tendencia negativa (empeoran) y plana (por debajo de threshold) (Escenarios 1 y 2).
+        - Separa estrictamente la categoría 'insufficient_data' sin mezclarla con 'no_progress' (Escenario 3).
+        - Permite configurar parámetros n_tests, threshold y metric (Escenario 4).
+        - Filtra estrictamente por el ámbito del tutor (solo alumnos de sus secciones asignadas) (Escenario 5).
+        - Registra evento de auditoría DETECT_NO_PROGRESS_STUDENTS.
+        """
+        # 1. Comprobación de roles y permisos
+        target_section_ids: Optional[List[uuid.UUID]] = None
+        parsed_sec_id: Optional[uuid.UUID] = None
+
+        if current_user:
+            user_role = str(current_user.get("role", "")).strip().lower()
+            if user_role == "pendiente":
+                raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar alumnos")
+
+            if user_role not in ("coordinator", "coordinador", "admin"):
+                # Tutor: ámbito restringido
+                assigned_raw = current_user.get("sections") or []
+                assigned_sections = {str(s).strip() for s in assigned_raw if str(s).strip()}
+
+                if section_id:
+                    try:
+                        parsed_sec_id = (
+                            section_id
+                            if isinstance(section_id, uuid.UUID)
+                            else uuid.UUID(str(section_id).strip())
+                        )
+                    except (ValueError, TypeError, AttributeError):
+                        raise ValidationError(
+                            "El identificador de la sección no es válido", field="section_id"
+                        )
+
+                    if str(parsed_sec_id) not in assigned_sections:
+                        raise ForbiddenError("El tutor no tiene permiso sobre la sección especificada")
+                    target_section_ids = [parsed_sec_id]
+                else:
+                    target_section_ids = []
+                    for s in assigned_sections:
+                        try:
+                            target_section_ids.append(uuid.UUID(s))
+                        except (ValueError, TypeError):
+                            pass
+            else:
+                # Coordinador / Admin
+                if section_id:
+                    try:
+                        parsed_sec_id = (
+                            section_id
+                            if isinstance(section_id, uuid.UUID)
+                            else uuid.UUID(str(section_id).strip())
+                        )
+                        target_section_ids = [parsed_sec_id]
+                    except (ValueError, TypeError, AttributeError):
+                        raise ValidationError(
+                            "El identificador de la sección no es válido", field="section_id"
+                        )
+
+        # 2. Consulta de alumnos según el ámbito
+        query = (
+            self.session.query(Student)
+            .options(
+                joinedload(Student.student_sections).joinedload(StudentSection.section),
+                joinedload(Student.results).joinedload(Result.test),
+            )
+            .filter(Student.disabled_at.is_(None))
+        )
+
+        if target_section_ids is not None:
+            if not target_section_ids:
+                # Tutor sin secciones asignadas -> 0 alumnos
+                empty_classification = classify_students_progress(
+                    [], n_tests=n_tests, threshold=threshold, metric=metric
+                )
+                return ProgressDetectionSchema.dump(empty_classification)
+
+            query = query.join(Student.student_sections).filter(
+                StudentSection.section_id.in_(target_section_ids)
+            ).distinct()
+
+        students = query.order_by(Student.name.asc()).all()
+
+        # 3. Construir conjunto de datos de alumnos con sus resultados
+        students_data = []
+        for student in students:
+            # Obtener sección actual o primera asignada
+            current_sec = None
+            for ss in student.student_sections:
+                if ss.section and ss.section.disabled_at is None:
+                    current_sec = ss.section
+                    break
+            if not current_sec and student.student_sections:
+                current_sec = student.student_sections[0].section
+
+            # Resultados de pruebas con métricas
+            formatted_results = []
+            for r in student.results:
+                if parsed_sec_id and str(r.section_id) != str(parsed_sec_id):
+                    continue
+
+                ppm = calculate_ppm(r.test.words, r.time) if r.test and r.time > 0 else 0.0
+                acc = calculate_reading_comprehension(r.successes, r.mistakes)
+                formatted_results.append(
+                    {
+                        "test_date": r.test_date.isoformat() if r.test_date else None,
+                        "ppm": ppm,
+                        "accuracy": acc,
+                        "test_name": r.test.name if r.test else "",
+                    }
+                )
+
+            formatted_results.sort(key=lambda x: str(x.get("test_date") or ""))
+
+            students_data.append(
+                {
+                    "student": {
+                        "id": str(student.id),
+                        "name": student.name,
+                        "external_id": student.external_id,
+                    },
+                    "section": {
+                        "id": str(current_sec.id) if current_sec else "",
+                        "name": current_sec.name if current_sec else "Sin sección",
+                    },
+                    "results": formatted_results,
+                }
+            )
+
+        # 4. Clasificar alumnos
+        classification = classify_students_progress(
+            students_data=students_data,
+            n_tests=n_tests,
+            threshold=threshold,
+            metric=metric,
+        )
+
+        # 5. Registrar evento de auditoría
+        log_audit(
+            user=current_user,
+            action="DETECT_NO_PROGRESS_STUDENTS",
+            resource_type="students",
+            resource_id=str(section_id) if section_id else "all",
+            details={
+                "n_tests": n_tests,
+                "threshold": threshold,
+                "metric": metric,
+                "section_id": str(section_id) if section_id else None,
+                "total_students": classification["total_students"],
+                "no_progress_count": classification["no_progress_count"],
+                "insufficient_data_count": classification["insufficient_data_count"],
+            },
+        )
+
+
+        # 6. Serializar y devolver
+        return ProgressDetectionSchema.dump(classification)
+
+
