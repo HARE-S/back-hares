@@ -72,7 +72,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Seguridad y acceso** | | | | |
 | [BE-38](BE-38-login-google.md) | Inicio de sesión con cuenta de Google | 8 | Crítica | Pendiente |
 | [BE-39](BE-39-restriccion-dominio.md) | Restricción al dominio corporativo | 5 | **Crítica** | Pendiente |
-| [BE-40](BE-40-sesion-servidor.md) | Sesión de servidor | 5 | Crítica | Pendiente |
+| [BE-40](BE-40-sesion-servidor.md) | Sesión de servidor | 5 | Crítica | **Completado** |
 | [BE-41](BE-41-alta-primer-acceso.md) | Alta de usuario en el primer acceso | 5 | Alta | Pendiente |
 | [BE-42](BE-42-perfiles-permisos.md) | Perfiles de permisos por rol | 8 | Alta | En revisión |
 | [BE-43](BE-43-gestion-usuarios-roles.md) | Gestión de usuarios y asignación de roles | 5 | Alta | Pendiente |
