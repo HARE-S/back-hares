@@ -1,6 +1,6 @@
 from flask import Flask, request
 from app.config import Config, validate_config
-from app.extensions import db, migrate, openapi_api
+from app.extensions import db, migrate, openapi_api, session
 from app.api.health import health_bp
 # Importar modelos para que SQLAlchemy los reconozca
 from app import models  # noqa: F401
@@ -17,6 +17,7 @@ def create_app(config_class=Config):
     db.init_app(application)
     migrate.init_app(application, db)
     openapi_api.init_app(application)
+    session.init_app(application)
 
     # Registro de funciones de compatibilidad para dialecto SQLite
     with application.app_context():
