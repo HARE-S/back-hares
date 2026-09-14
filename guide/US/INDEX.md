@@ -22,13 +22,13 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | ID | Título | Puntos | Prioridad | Estado |
 | :--- | :--- | :---: | :--- | :--- |
 | **Infraestructura** | | | | |
-| [BE-01](BE-01-stack-contenedorizado.md) | Stack contenedorizado del backend | 5 | Crítica | Pendiente |
+| [BE-01](BE-01-stack-contenedorizado.md) | Stack contenedorizado del backend | 5 | Crítica | En revisión |
 | [BE-02](BE-02-variables-entorno.md) | Configuración por variables de entorno | 3 | Alta | Completado |
 
 | **Modelo de datos** | | | | |
-| [BE-03](BE-03-esquema-inicial.md) | Esquema inicial versionado con migraciones | 8 | Crítica | Pendiente |
+| [BE-03](BE-03-esquema-inicial.md) | Esquema inicial versionado con migraciones | 8 | Crítica | Completado |
 | [BE-04](BE-04-borrado-logico.md) | Borrado lógico de pruebas y libros | 3 | Alta | Completado |
-| [BE-05](BE-05-datos-anonimos.md) | Datos de prueba anónimos | 3 | Alta | Pendiente |
+| [BE-05](BE-05-datos-anonimos.md) | Datos de prueba anónimos | 3 | Alta | Completado |
 | **Importación de datos maestros** | | | | |
 | [BE-06](BE-06-importar-alumnado.md) | Importar alumnado desde el volcado de Alexia | 8 | Crítica | Completado |
 | [BE-07](BE-07-importacion-idempotente.md) | Importación idempotente | 5 | Crítica | Completado |
@@ -62,10 +62,9 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Análisis y evolución** | | | | |
 | [BE-30](BE-30-metricas-derivadas.md) | Métricas derivadas de comprensión lectora | 3 | Crítica | Completado |
 | [BE-31](BE-31-evolucion-individual.md) | Evolución individual de un alumno | 5 | Alta | Completado |
-| [BE-32](BE-32-comparativa-grupos.md) | Comparativa de evolución por grupos | 8 | Media | Pendiente |
-| [BE-33](BE-33-proyeccion-evolucion.md) | Proyección de evolución | 8 | Media | En revisión |
+| [BE-32](BE-32-comparativa-grupos.md) | Comparativa de evolución por grupos | 8 | Media | En revisión |
+| [BE-33](BE-33-proyeccion-evolucion.md) | Proyección de evolución | 8 | Media | Completado |
 | [BE-34](BE-34-alumnos-sin-progreso.md) | Detección de alumnos sin progreso | 5 | Baja | Completado |
-
 | **Exportación e informes** | | | | |
 | [BE-35](BE-35-exportacion-excel.md) | Exportación de datos a Excel | 5 | Alta | Completado |
 | [BE-36](BE-36-datos-informe-alumno.md) | Datos del informe individual de alumno | 3 | Media | Completado |
@@ -82,10 +81,10 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-46](BE-46-proyecto-google-cloud.md) | Configuración del proyecto en Google Cloud | 3 | Crítica | **Bloqueada** |
 | **Calidad y entrega** | | | | |
 | [BE-47](BE-47-pruebas-automatizadas.md) | Batería de pruebas automatizadas | 8 | Alta | **Completado** |
-| [BE-48](BE-48-documentacion-api.md) | Documentación de la API | 3 | Alta | Completado |
-| [BE-49](BE-49-manual-usuario.md) | Manual de uso de las funciones de servidor | 2 | Media | Pendiente |
+| [BE-48](BE-48-documentacion-api.md) | Documentación de la API | 3 | Alta | **Completado** |
+| [BE-49](BE-49-manual-usuario.md) | Manual de uso de las funciones de servidor | 2 | Media | **Completado** |
 | **Añadidas tras revisión del cliente (09/09)** | | | | |
-| [BE-50](BE-50-crud-manual-alumnado.md) | Alta y modificación manual de alumnado | 8 | Alta | Pendiente |
+| [BE-50](BE-50-crud-manual-alumnado.md) | Alta y modificación manual de alumnado | 8 | Alta | Completado |
 | [BE-51](BE-51-historial-por-seccion.md) | Historial de pruebas por sección | 3 | Media | Completado |
 | | **Total** | **227** | | |
 
