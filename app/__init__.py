@@ -1,6 +1,6 @@
 from flask import Flask, request
 from app.config import Config, validate_config
-from app.extensions import db, api as openapi_api
+from app.extensions import db, migrate, api as openapi_api
 from app.api.health import health_bp
 # Importar modelos para que SQLAlchemy los reconozca
 from app import models  # noqa: F401
@@ -15,6 +15,7 @@ def create_app(config_class=Config):
 
     # Inicialización de extensiones
     db.init_app(application)
+    migrate.init_app(application, db)
     openapi_api.init_app(application)
 
     # Registro de blueprints
@@ -30,9 +31,11 @@ def create_app(config_class=Config):
     from app.api.v1.exports import exports_bp
     from app.api.v1.centers import centers_bp
     from app.api.v1.directory import directory_bp
+    from app.api.v1.auth import auth_bp
 
     openapi_api.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
     openapi_api.register_blueprint(books_bp, url_prefix="/api/v1/books")
+    openapi_api.register_blueprint(auth_bp, url_prefix="/api/v1")
     application.register_blueprint(books_bp, url_prefix="/api/books", name="books_direct")
     application.register_blueprint(students_bp, url_prefix="/api/v1/students", name="students_v1")
     application.register_blueprint(students_bp, url_prefix="/api/students", name="students_direct")
@@ -53,8 +56,6 @@ def create_app(config_class=Config):
     application.register_blueprint(exports_bp, url_prefix="/api", name="exports_direct")
     application.register_blueprint(directory_bp, url_prefix="/api/v1", name="directory_v1")
     application.register_blueprint(directory_bp, url_prefix="/api", name="directory_direct")
-
-
 
     # Registro condicional del endpoint de autenticación dev (BE-45)
     if application.config.get("DEV_AUTH_BYPASS"):

@@ -1,3 +1,6 @@
+"""Excepciones personalizadas de la aplicación."""
+
+
 class DomainException(Exception):
     """Excepción base del dominio de la aplicación."""
     pass
@@ -15,6 +18,11 @@ class ValidationError(DomainException):
         super().__init__(message)
         self.message = message
         self.field = field
+
+
+class UnauthorizedError(DomainException):
+    """Error de autenticación."""
+    pass
 
 
 class ForbiddenError(DomainException):
@@ -44,6 +52,3 @@ class BatchValidationError(DomainException):
         super().__init__(message)
         self.message = message
         self.errors = errors
-
-
-
