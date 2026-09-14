@@ -19,6 +19,12 @@ class Student(BaseModel):
     gender = db.Column(db.String(20), nullable=True)
     academic_status = db.Column(db.String(100), nullable=True)
     sector = db.Column(db.String(100), nullable=True)
+    area = db.Column(db.String(255), nullable=False, default="Sin área", server_default="Sin área")
+    created_by_user_id = db.Column(
+        db.Uuid(as_uuid=True),
+        db.ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     @property
     def age(self):
@@ -53,6 +59,11 @@ class Student(BaseModel):
         "ReadedBook",
         back_populates="student",
         cascade="all, delete-orphan",
+        lazy="select",
+    )
+    created_by_user = db.relationship(
+        "User",
+        foreign_keys=[created_by_user_id],
         lazy="select",
     )
 
