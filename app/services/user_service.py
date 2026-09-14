@@ -132,12 +132,14 @@ class UserService:
         return self.session.query(User).filter(User.email == email).first()
 
     def _user_to_dict(self, user: User) -> Dict[str, Any]:
-        """Convierte un usuario a diccionario."""
+        """Convierte un usuario a diccionario (sin password_hash)."""
         section_ids = [str(s.id) for s in user.sections] if user.sections else []
         return {
             "id": str(user.id),
             "email": user.email,
             "name": user.name,
+            "lastname": user.lastname,
+            "area": user.area,
             "role": user.role,
             "is_active": user.is_active,
             "created_at": user.created_at.isoformat() if user.created_at else None,

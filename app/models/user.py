@@ -1,7 +1,8 @@
-"""Modelo de usuario y roles."""
+"""Modelo de usuario y roles con autenticación local."""
 
 from enum import Enum
 from sqlalchemy import text
+from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
 from app.models.base import BaseModel
 from app.utils.uuidv7 import uuidv7
@@ -17,7 +18,7 @@ class UserRole(Enum):
 
 
 class User(BaseModel):
-    """Usuario del sistema."""
+    """Usuario del sistema con autenticación local."""
     __tablename__ = "users"
 
     id = db.Column(
@@ -28,6 +29,9 @@ class User(BaseModel):
     )
     email = db.Column(db.String(255), nullable=False, unique=True)
     name = db.Column(db.String(255), nullable=False)
+    lastname = db.Column(db.String(255), nullable=True)
+    password_hash = db.Column(db.String(255), nullable=True)
+    area = db.Column(db.String(255), nullable=True)
     role = db.Column(
         db.String(20),
         nullable=False,
@@ -37,6 +41,16 @@ class User(BaseModel):
     is_active = db.Column(db.Boolean, nullable=False, default=True, server_default="true")
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.now(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime, nullable=False, default=db.func.now(), onupdate=db.func.now(), server_default=db.func.now())
+
+    def set_password(self, password: str):
+        """Hash y guarda la contraseña."""
+        self.password_hash = generate_password_hash(password, method="pbkdf2:sha256")
+
+    def verify_password(self, password: str) -> bool:
+        """Verifica si la contraseña es correcta."""
+        if not self.password_hash:
+            return False
+        return check_password_hash(self.password_hash, password)
 
     # Relaciones
     sections = db.relationship(

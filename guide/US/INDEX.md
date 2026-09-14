@@ -75,7 +75,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-40](BE-40-sesion-servidor.md) | Sesión de servidor | 5 | Crítica | **Completado** |
 | [BE-41](BE-41-alta-primer-acceso.md) | Alta de usuario en el primer acceso | 5 | Alta | Pendiente |
 | [BE-42](BE-42-perfiles-permisos.md) | Perfiles de permisos por rol | 8 | Alta | En revisión |
-| [BE-43](BE-43-gestion-usuarios-roles.md) | Gestión de usuarios y asignación de roles | 5 | Alta | Pendiente |
+| [BE-43](BE-43-gestion-usuarios-roles.md) | Gestión de usuarios y asignación de roles | 5 | Alta | **Completado** |
 | [BE-44](BE-44-revocacion-auditoria.md) | Revocación de acceso y auditoría | 5 | Media | Pendiente |
 | [BE-45](BE-45-acceso-desarrollo.md) | Acceso en entorno de desarrollo | 3 | Alta | Completado |
 | [BE-46](BE-46-proyecto-google-cloud.md) | Configuración del proyecto en Google Cloud | 3 | Crítica | **Bloqueada** |
