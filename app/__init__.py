@@ -44,8 +44,10 @@ def create_app(config_class=Config):
     from app.api.v1.results import results_bp, single_results_bp
     from app.api.v1.sections import sections_bp
     from app.api.v1.users import users_bp
+    from app.api.v1.audit import audit_bp
 
     openapi_api.register_blueprint(auth_bp, url_prefix="/api/v1")
+    openapi_api.register_blueprint(audit_bp, url_prefix="/api/v1")
     openapi_api.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
     openapi_api.register_blueprint(books_bp, url_prefix="/api/v1/books")
     openapi_api.register_blueprint(results_bp, url_prefix="/api/v1/students")

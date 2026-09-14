@@ -5,6 +5,7 @@ from app.models.test import Test, Result
 from app.models.book import Book, ReadBook, ReadedBook
 from app.models.user import User, UserSection, UserRole
 from app.models.session import Session
+from app.models.audit import AuditLog, AuditAction
 from app.models.enums import (
     BookLevel,
     BOOK_LEVEL_ORDER,
