@@ -1,5 +1,28 @@
 from typing import Any, Dict, List, Optional
+
+from marshmallow import Schema, fields
+
 from app.models.student import Student
+
+
+class StudentListItemSchema(Schema):
+    """Un alumno dentro del listado filtrado paginado (BE-27)."""
+    id = fields.UUID()
+    name = fields.Str()
+    external_id = fields.Str()
+    sections = fields.List(fields.Str())
+    test_date = fields.Date(allow_none=True)
+    ppm = fields.Float(allow_none=True)
+    reading_comprehension = fields.Float(allow_none=True)
+
+
+class StudentListResponseSchema(Schema):
+    """Respuesta paginada del listado con filtros multicriterio (BE-27)."""
+    items = fields.List(fields.Nested(StudentListItemSchema))
+    total = fields.Int()
+    page = fields.Int()
+    limit = fields.Int()
+    missing_data = fields.Dict(keys=fields.Str(), values=fields.Int(), allow_none=True)
 
 
 class StudentDetailSchema:

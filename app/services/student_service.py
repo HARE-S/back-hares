@@ -1,6 +1,7 @@
 import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 import uuid
+from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.analytics.evolution import calculate_individual_evolution
@@ -9,6 +10,7 @@ from app.analytics.progress_detection import classify_students_progress
 from app.core.audit import log_audit
 from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
 from app.models.student import Student, StudentSection
+from app.repositories.student_repository import StudentRepository, MISSING_VALUE
 from app.models.test import Result
 from app.schemas.progress_schema import ProgressDetectionSchema
 from app.schemas.report_schema import StudentReportSchema
@@ -378,5 +380,125 @@ class StudentService:
 
         # 6. Serializar y devolver
         return ProgressDetectionSchema.dump(classification)
+
+    # ------------------------------------------------------------------ BE-27
+
+    def list_students(
+        self,
+        filters: Dict[str, Any],
+        current_user: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Listado paginado del alumnado con filtros combinables (BE-27).
+
+        - Rol ``pendiente`` siempre rechazado.
+        - Tutor: ámbito forzado a sus secciones; 403 si no tiene ninguna o
+          si solicita una sección fuera de su ámbito (Escenario 6).
+        - Registro de auditoría ``FILTER_STUDENTS`` cuando se filtra por
+          ``gender`` o ``academic_status`` por contener datos sensibles del menor.
+        - ``missing_data`` indica cuántos alumnos del ámbito no tenían
+          informado cada campo filtrado (Escenario 5).
+        """
+        # 1. Rol inválido
+        user_role = str((current_user or {}).get("role", "")).strip().lower()
+        if user_role == "pendiente":
+            raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar el alumnado")
+
+        # 2. Resolución del ámbito por rol (Escenario 6)
+        repo_filters = dict(filters)
+        section_id = repo_filters.pop("section_id", None)
+        page = repo_filters.pop("page", 1)
+        limit = repo_filters.pop("limit", 10)
+
+        if current_user and user_role not in ("coordinator", "coordinador", "admin"):
+            assigned = {
+                uuid.UUID(str(s).strip())
+                for s in (current_user.get("sections") or [])
+                if str(s).strip()
+            }
+            if not assigned:
+                raise ForbiddenError("El tutor no tiene secciones asignadas")
+            if section_id is not None:
+                parsed = uuid.UUID(str(section_id))
+                if parsed not in assigned:
+                    raise ForbiddenError("El tutor no tiene permiso sobre la sección especificada")
+                repo_filters["section_ids"] = [parsed]
+            else:
+                repo_filters["section_ids"] = list(assigned)
+        else:
+            if section_id is not None:
+                repo_filters["section_ids"] = [uuid.UUID(str(section_id))]
+
+        # 3. Consulta al repositorio
+        repo = StudentRepository(self.session)
+        students, total = repo.filter_students(
+            repo_filters, page=page, limit=limit
+        )
+
+        # 4. Último resultado por alumno (PPM y comprensión lectora)
+        last_results_map: Dict[uuid.UUID, Result] = {}
+        if students:
+            student_ids = [s.id for s in students]
+            stmt = (
+                select(Result)
+                .where(Result.student_id.in_(student_ids))
+                .join(Result.test)
+                .order_by(Result.student_id, Result.test_date.desc())
+            )
+            seen: set = set()
+            for r in self.session.scalars(stmt).all():
+                if r.student_id not in seen:
+                    last_results_map[r.student_id] = r
+                    seen.add(r.student_id)
+
+        # 5. Construcción de la respuesta paginada
+        items: List[Dict[str, Any]] = []
+        for s in students:
+            lr = last_results_map.get(s.id)
+            current_section_names = [
+                ss.section.name
+                for ss in (s.student_sections or [])
+                if ss.section and ss.section.disabled_at is None
+            ] or ["Sin sección"]
+            ppm = calculate_ppm(lr.test.words, lr.time) if lr and lr.test and lr.time > 0 else None
+            acc = calculate_reading_comprehension(lr.successes, lr.mistakes) if lr else None
+            items.append({
+                "id": s.id,
+                "name": s.name,
+                "external_id": s.external_id,
+                "sections": current_section_names,
+                "test_date": lr.test_date if lr else None,
+                "ppm": ppm,
+                "reading_comprehension": acc,
+            })
+
+        # 6. Conteo de alumnos sin datos (Escenario 5)
+        missing_data: Dict[str, int] = {}
+        for field in ("gender", "academic_status", "sector"):
+            value = repo_filters.get(field)
+            if value is not None and value != MISSING_VALUE:
+                missing_data[field] = repo.count_students_missing_field(field, repo_filters)
+
+        # 7. Auditoría sobre datos sensibles del menor
+        sensitive = any(
+            repo_filters.get(f) not in (None, MISSING_VALUE)
+            for f in ("gender", "academic_status")
+        )
+        if sensitive:
+            log_audit(
+                user=current_user,
+                action="FILTER_STUDENTS",
+                resource_type="students",
+                resource_id="list",
+                details={k: str(v) for k, v in repo_filters.items() if k not in ("page", "limit", "section_ids")},
+            )
+
+        return {
+            "items": items,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "missing_data": missing_data,
+        }
 
 

@@ -6,6 +6,27 @@ from app.api.health import health_bp
 from app import models  # noqa: F401
 
 
+# Flask-Session registers its own table (`flask_session_store`) on the shared
+# SQLAlchemy MetaData every time init_app runs. Building more than one app in
+# the same process — which the test suite needs — would raise
+# "Table already defined". The interface is created once and reused, creating
+# the table per engine so apps pointing to different databases keep working.
+_session_interface = None
+
+
+def _init_session_interface(app) -> None:
+    global _session_interface
+    if _session_interface is None:
+        session.init_app(app)
+        _session_interface = app.session_interface
+        return
+    app.session_interface = _session_interface
+    with app.app_context():
+        _session_interface.sql_session_model.__table__.create(
+            bind=db.engine, checkfirst=True
+        )
+
+
 def create_app(config_class=Config):
     application = Flask(__name__)
     application.config.from_object(config_class)
@@ -18,7 +39,7 @@ def create_app(config_class=Config):
     migrate.init_app(application, db)
     openapi_api.init_app(application)
     application.config['SESSION_SQLALCHEMY'] = db
-    session.init_app(application)
+    _init_session_interface(application)
 
     # Registro de funciones de compatibilidad para dialecto SQLite
     with application.app_context():
@@ -46,7 +67,7 @@ def create_app(config_class=Config):
     from app.api.v1.sections import sections_bp
     from app.api.v1.readings import readings_bp, single_readings_bp
     from app.api.v1.imports import import_bp
-    from app.api.v1.students import students_bp
+    from app.api.v1.students import students_bp, students_list_bp
     from app.api.v1.exports import exports_bp
     from app.api.v1.centers import centers_bp
     from app.api.v1.directory import directory_bp
@@ -58,6 +79,7 @@ def create_app(config_class=Config):
     openapi_api.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
     openapi_api.register_blueprint(books_bp, url_prefix="/api/v1/books")
     openapi_api.register_blueprint(results_bp, url_prefix="/api/v1/students")
+    openapi_api.register_blueprint(students_list_bp, url_prefix="/api/v1/students")
     openapi_api.register_blueprint(single_results_bp, url_prefix="/api/v1/results")
     openapi_api.register_blueprint(sections_bp, url_prefix="/api/v1/sections")
     openapi_api.register_blueprint(users_bp, url_prefix="/api/v1/users")

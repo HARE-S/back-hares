@@ -4,13 +4,35 @@ Provides idempotent access to the student data model: creation and
 upserts resolved by `external_id` (BE-05 / BE-07), get-or-create
 helpers for centers and sections, and enrollment management.
 """
-from typing import List, Optional, Tuple
+import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
+
+# Valor reservado para filtrar alumnos cuyo campo no está informado (BE-27).
+MISSING_VALUE = "__missing__"
+
+
+def _shift_years(value: datetime.date, years: int) -> datetime.date:
+    """Shifts a date by a whole number of years (Feb 29 rolls to Feb 28)."""
+    try:
+        return value.replace(year=value.year - years)
+    except ValueError:
+        return value.replace(year=value.year - years, day=28)
+
+
+def birth_date_upper_bound(age: int, today: datetime.date) -> datetime.date:
+    """Latest birth_date that still yields an age >= ``age`` on ``today``."""
+    return _shift_years(today, age)
+
+
+def birth_date_lower_bound(age: int, today: datetime.date) -> datetime.date:
+    """Earliest birth_date that still yields an age <= ``age`` on ``today``."""
+    return _shift_years(today, age + 1) + datetime.timedelta(days=1)
 
 
 class StudentRepository:
@@ -192,3 +214,94 @@ class StudentRepository:
     def count_enrollments(self) -> int:
         """Returns the total number of student-section enrollments."""
         return int(self.session.scalar(select(func.count(StudentSection.student_id))) or 0)
+
+    # ------------------------------------------------------------------ filtering (BE-27)
+
+    @staticmethod
+    def _student_filter_query(filters: Dict[str, Any]) -> select:
+        """
+        Builds a SELECT of distinct, active students applying combinable
+        multi-criteria filters (T-BE27-02/03/04/05).
+
+        Returns the statement without ORDER or LIMIT so callers can reuse it
+        for both the count query and the final paged fetch.
+        """
+        stmt = (
+            select(Student)
+            .join(Student.student_sections)
+            .join(StudentSection.section)
+            .where(Student.disabled_at.is_(None))
+            .distinct()
+        )
+
+        center_id = filters.get("center_id")
+        if center_id is not None:
+            stmt = stmt.where(Section.center_id == center_id)
+
+        section_ids = filters.get("section_ids")
+        if section_ids:
+            stmt = stmt.where(StudentSection.section_id.in_(section_ids))
+
+        for field in ("gender", "academic_status", "sector"):
+            value = filters.get(field)
+            if value == MISSING_VALUE:
+                stmt = stmt.where(getattr(Student, field).is_(None))
+            elif value is not None:
+                stmt = stmt.where(getattr(Student, field) == value)
+
+        today = datetime.date.today()
+
+        min_age = filters.get("min_age")
+        if min_age is not None:
+            stmt = stmt.where(
+                Student.birth_date <= birth_date_upper_bound(min_age, today)
+            )
+
+        max_age = filters.get("max_age")
+        if max_age is not None:
+            stmt = stmt.where(
+                Student.birth_date >= birth_date_lower_bound(max_age, today)
+            )
+
+        return stmt
+
+    def filter_students(
+        self,
+        filters: Optional[Dict[str, Any]] = None,
+        page: int = 1,
+        limit: int = 10,
+    ) -> Tuple[List[Student], int]:
+        """
+        Returns a page of active students matching all supplied filters and the
+        total count of students matching those filters (without pagination).
+
+        The ``section_ids`` key in filters can represent an explicit section
+        filter **or** the scope enforced by the user's role.
+        """
+        base = self._student_filter_query(filters or {})
+        sub = base.subquery()
+        total = int(self.session.scalar(select(func.count()).select_from(sub)) or 0)
+
+        stmt = base.order_by(Student.name.asc(), Student.external_id.asc())
+        stmt = stmt.offset((page - 1) * limit).limit(limit)
+        return list(self.session.scalars(stmt).all()), total
+
+    def count_students_missing_field(
+        self,
+        field: str,
+        filters: Optional[Dict[str, Any]] = None,
+    ) -> int:
+        """
+        Counts active students where ``field IS NULL`` within the scope defined
+        by ``filters`` **excluding** the equality constraint on ``field``
+        itself (BE-27, Escenario 5 — "sin datos").
+
+        Returns the number so the API response can indicate that those students
+        were not silently omitted from the result.
+        """
+        base_filters = dict(filters or {})
+        base_filters.pop(field, None)
+        base = self._student_filter_query(base_filters)
+        stmt = base.where(getattr(Student, field).is_(None))
+        sub = stmt.subquery()
+        return int(self.session.scalar(select(func.count()).select_from(sub)) or 0)

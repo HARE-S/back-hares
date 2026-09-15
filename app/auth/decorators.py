@@ -61,6 +61,7 @@ def get_current_user():
             "email": dev_email,
             "role": dev_role,
             "area": session.get("dev_area", "Desarrollo"),
+            "sections": session.get("dev_sections") or [],
             "is_dev": True,
         }
         g.current_user = dev_user

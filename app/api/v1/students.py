@@ -1,10 +1,50 @@
 from flask import Blueprint, jsonify, request
+from flask.views import MethodView
+from flask_smorest import Blueprint as SmorestBlueprint
 from app.auth.decorators import get_current_user, require_role
 from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
 from app.extensions import db
+from app.schemas.common import ErrorSchema, StudentFilterArgsSchema
+from app.schemas.student_schema import StudentListResponseSchema
 from app.services.student_service import StudentService
 
 students_bp = Blueprint("students_v1", __name__)
+
+students_list_bp = SmorestBlueprint(
+    "students_list_v1",
+    __name__,
+    description="Listado paginado y filtrado multicriterio del alumnado (BE-27)",
+)
+
+
+@students_list_bp.route("")
+class StudentList(MethodView):
+    """Listado del alumnado con filtros combinables (BE-27)."""
+
+    @require_role("tutor", "coordinator", "coordinador", "admin")
+    @students_list_bp.arguments(StudentFilterArgsSchema, location="query")
+    @students_list_bp.response(200, StudentListResponseSchema)
+    @students_list_bp.alt_response(400, schema=ErrorSchema)
+    @students_list_bp.alt_response(403, schema=ErrorSchema)
+    def get(self, filters):
+        """
+        Devuelve el alumnado activo que cumple todos los criterios (AND).
+
+        - Tutor: ámbito restringido a sus secciones asignadas (Escenario 6).
+        - `__missing__` en gender/academic_status/sector selecciona los alumnos
+          sin ese campo informado; `missing_data` indica cuántos se omitieron
+          por no tenerlo (Escenario 5).
+        - 403 Forbidden si el rol es 'pendiente' o si el tutor no tiene secciones.
+        """
+        current_user = get_current_user()
+        service = StudentService(db.session)
+
+        try:
+            return service.list_students(filters=filters, current_user=current_user), 200
+        except ValidationError as e:
+            return {"error": str(e), "field": getattr(e, "field", None)}, 400
+        except ForbiddenError as e:
+            return {"error": "FORBIDDEN", "message": str(e)}, 403
 
 
 @students_bp.route("/no-progress", methods=["GET"])

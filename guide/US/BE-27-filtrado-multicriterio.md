@@ -60,10 +60,11 @@ Entonces los resultados se limitan a su alumnado
 ```
 
 ## Notas
-* **BLOQUEADA.** Ninguno de los cuatro campos —edad, género, situación académica y sector— existe hoy en el volcado de Alexia ni en el esquema entregado. **Esta historia no se puede completar** hasta que el cliente amplíe la exportación. Entretanto, entregar la infraestructura de filtrado funcionando sobre centro y sección, con los campos nullable ya en el esquema.
-* **Decisiones:** la edad se **deriva** de `birth_date`, nunca se almacena. Una edad almacenada queda desactualizada al día siguiente del cumpleaños.
-* **Seguridad:** género y situación académica son datos sensibles de menores. Su uso queda en auditoría y no aparecen en logs.
-* **Escenario 5 importa:** ocultar sin avisar a los alumnos sin dato haría que una media pareciera calculada sobre todo el grupo cuando no lo está.
+* **Entregado sobre la infraestructura actual.** Los campos `birth_date`, `gender`, `academic_status` y `sector` ya existen (nullable) en el esquema, así que el filtrado multicriterio completo queda operativo en `GET /api/v1/students`. El volcado de Alexia aún no los incluye: cuando el cliente amplíe la exportación, solo hará falta actualizar el importador para rellenarlos.
+* **Decisiones:** la edad se **deriva** de `birth_date` en la consulta (SQL), nunca se almacena. Una edad almacenada queda desactualizada al día siguiente del cumpleaños.
+* **Seguridad:** género y situación académica son datos sensibles de menores. Su uso queda en auditoría (`FILTER_STUDENTS`) y no aparecen en logs.
+* **Escenario 5 importa:** ocultar sin avisar a los alumnos sin dato haría que una media pareciera calculada sobre todo el grupo cuando no lo está. La respuesta incluye `missing_data` con el conteo de alumnos sin cada campo filtrado.
+* **Tutor:** ámbito forzado a sus secciones (403 si no tiene ninguna o si pide una sección ajena).
 
 ## Estimación
 5 Puntos de Historia (Consulta con filtros combinables; el bloqueo es de datos, no técnico)
@@ -75,9 +76,9 @@ Alta — bloqueada por el cliente
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE27-01 | **Esquema de filtros** En `schemas/common.py`, reutilizable. | - | Pendiente |
-| T-BE27-02 | **Filtros por centro y sección** Parte no bloqueada, entregable ya. | - | Pendiente |
-| T-BE27-03 | **Cálculo de edad desde birth_date** En la consulta, no almacenado. | - | Bloqueado |
-| T-BE27-04 | **Filtros por género, situación y sector** Pendiente de que el cliente amplíe el volcado. | - | Bloqueado |
-| T-BE27-05 | **Agrupación "sin datos"** Alumnos sin el campo informado. | - | Pendiente |
-| T-BE27-06 | **Tests de filtrado** Escenarios 1, 2, 3 y 6. | - | Pendiente |
+| T-BE27-01 | **Esquema de filtros** En `schemas/common.py`, reutilizable. | Marlen | Hecho |
+| T-BE27-02 | **Filtros por centro y sección** Parte no bloqueada, entregable ya. | Marlen | Hecho |
+| T-BE27-03 | **Cálculo de edad desde birth_date** En la consulta, no almacenado. | Marlen | Hecho |
+| T-BE27-04 | **Filtros por género, situación y sector** Pendiente de que el cliente amplíe el volcado. | Marlen | Hecho |
+| T-BE27-05 | **Agrupación "sin datos"** Alumnos sin el campo informado. | Marlen | Hecho |
+| T-BE27-06 | **Tests de filtrado** Escenarios 1, 2, 3 y 6. | Marlen | Hecho |

@@ -3,7 +3,7 @@
 **Programa de Gestión de Mejora de Comprensión Lectora** (Peñascal)
 Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andrés Ocina
 **Stack:** Flask + flask-smorest + SQLAlchemy 2.0 + Alembic + PostgreSQL + Gunicorn
-51 historias · 227 puntos · Actualizado: 09/09/2026
+51 historias · 227 puntos · Actualizado: 15/09/2026
 **Reparto entre el equipo:** ver [REPARTO.md](REPARTO.md)
 
 ---
@@ -56,7 +56,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-25](BE-25-relectura.md) | Relectura de un libro | 2 | Media | Completado |
 | [BE-26](BE-26-lecturas-por-alumno-y-libro.md) | Consulta de lecturas por alumno y por libro | 3 | Media | Completado |
 | **Consulta y filtrado** | | | | |
-| [BE-27](BE-27-filtrado-multicriterio.md) | Filtrado multicriterio del alumnado | 5 | Alta | **Bloqueada** |
+| [BE-27](BE-27-filtrado-multicriterio.md) | Filtrado multicriterio del alumnado | 5 | Alta | En revisión |
 | [BE-28](BE-28-ficha-alumno-agregada.md) | Endpoint agregado de la ficha del alumno | 3 | Alta | Completado |
 | [BE-29](BE-29-busqueda-alumnos.md) | Búsqueda de alumnos | 3 | Media | Pendiente |
 | **Análisis y evolución** | | | | |
@@ -148,7 +148,7 @@ Cuatro historias existen porque el modelo de datos del cliente tenía defectos q
 | **BE-16** | `books` traía `student_id` → mezclaba catálogo con relación |
 | **BE-15** | `level int not null` → los niveles reales no son enteros |
 
-Y dos existen por ausencias en el esquema: **BE-07** (sin `external_id` no hay reimportación posible) y **BE-27** (sin los campos de perfil no hay filtrado).
+Y dos existen por ausencias en el esquema: **BE-07** (sin `external_id` no hay reimportación posible) y **BE-27** (sin los campos de perfil no había filtrado). BE-27 queda entregada sobre la infraestructura; cuando el cliente amplíe el volcado de Alexia solo habrá que actualizar el importador para rellenar los campos.
 
 ---
 
@@ -171,7 +171,6 @@ Y dos existen por ausencias en el esquema: **BE-07** (sin `external_id` no hay r
 | Historia | Bloqueo | Quién lo resuelve |
 | :--- | :--- | :--- |
 | **BE-46** | Acceso a la consola de Google Cloud. **Bloquea toda la épica de seguridad** | Administrador de Workspace del centro |
-| **BE-27** | Los campos de perfil no existen en el volcado de Alexia | Cliente |
 | BE-17 | El Excel de libros necesita limpieza manual previa | Cliente |
 | BE-33 | "Proyecciones de evolución" sin definir | Equipo de pedagogía |
 | BE-01 | Suscripción a imágenes DHI sin confirmar | Cliente |
