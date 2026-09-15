@@ -6,7 +6,7 @@
 
 services:
   database:
-    image: ${POSTGRES_IMAGE:-postgres:18-alpine}
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
     container_name: hares_database
     restart: always
     environment:
@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hares_pass}
       POSTGRES_DB: ${POSTGRES_DB:-hares_db}
     volumes:
-      - data_dir:/var/lib/postgresql
+      - data_dir:/var/lib/postgresql/data
     networks:
       - db-network
     healthcheck:
@@ -74,7 +74,7 @@ services:
       - frontend-network
 
   proxy:
-    image: ${NGINX_IMAGE:-nginx:1.31.5-alpine}
+    image: ${NGINX_IMAGE:-nginx:1.27-alpine}
     container_name: hares_proxy
     restart: always
     ports:
