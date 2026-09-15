@@ -25,6 +25,13 @@ class StudentListResponseSchema(Schema):
     missing_data = fields.Dict(keys=fields.Str(), values=fields.Int(), allow_none=True)
 
 
+class StudentErrorResponseSchema(Schema):
+    """Respuesta de error del listado (formato flask-smorest: code/status/message)."""
+    code = fields.Int()
+    status = fields.Str()
+    message = fields.Str()
+
+
 class StudentDetailSchema:
     """
     Serializador agregado para la ficha completa del alumno (BE-28).

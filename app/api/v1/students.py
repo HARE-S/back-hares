@@ -1,11 +1,11 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, abort, jsonify, request
 from flask.views import MethodView
 from flask_smorest import Blueprint as SmorestBlueprint
 from app.auth.decorators import get_current_user, require_role
 from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
 from app.extensions import db
-from app.schemas.common import ErrorSchema, StudentFilterArgsSchema
-from app.schemas.student_schema import StudentListResponseSchema
+from app.schemas.common import StudentFilterArgsSchema
+from app.schemas.student_schema import StudentErrorResponseSchema, StudentListResponseSchema
 from app.services.student_service import StudentService
 
 students_bp = Blueprint("students_v1", __name__)
@@ -24,8 +24,9 @@ class StudentList(MethodView):
     @require_role("tutor", "coordinator", "coordinador", "admin")
     @students_list_bp.arguments(StudentFilterArgsSchema, location="query")
     @students_list_bp.response(200, StudentListResponseSchema)
-    @students_list_bp.alt_response(400, schema=ErrorSchema)
-    @students_list_bp.alt_response(403, schema=ErrorSchema)
+    @students_list_bp.alt_response(400, schema=StudentErrorResponseSchema)
+    @students_list_bp.alt_response(403, schema=StudentErrorResponseSchema)
+    @students_list_bp.alt_response(422, schema=StudentErrorResponseSchema)
     def get(self, filters):
         """
         Devuelve el alumnado activo que cumple todos los criterios (AND).
@@ -40,11 +41,11 @@ class StudentList(MethodView):
         service = StudentService(db.session)
 
         try:
-            return service.list_students(filters=filters, current_user=current_user), 200
+            return service.list_students(filters=filters, current_user=current_user)
         except ValidationError as e:
-            return {"error": str(e), "field": getattr(e, "field", None)}, 400
+            abort(400, description=str(e))
         except ForbiddenError as e:
-            return {"error": "FORBIDDEN", "message": str(e)}, 403
+            abort(403, description=str(e))
 
 
 @students_bp.route("/no-progress", methods=["GET"])
