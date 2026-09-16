@@ -33,6 +33,30 @@ class StudentErrorResponseSchema(Schema):
     message = fields.Str()
 
 
+class StudentSearchSectionItemSchema(Schema):
+    """Sección activa de un alumno en resultados de búsqueda (BE-29)."""
+    id = fields.UUID()
+    name = fields.Str()
+    center = fields.Str()
+
+
+class StudentSearchItemSchema(Schema):
+    """Un alumno en los resultados de búsqueda por nombre (BE-29)."""
+    id = fields.UUID()
+    name = fields.Str()
+    external_id = fields.Str()
+    sections = fields.List(fields.Nested(StudentSearchSectionItemSchema))
+
+
+class StudentSearchResponseSchema(Schema):
+    """Respuesta paginada de la búsqueda de alumnos (BE-29)."""
+    items = fields.List(fields.Nested(StudentSearchItemSchema))
+    total = fields.Int()
+    page = fields.Int()
+    limit = fields.Int()
+    pages = fields.Int()
+
+
 class StudentDetailSchema:
     """
     Serializador agregado para la ficha completa del alumno (BE-28).

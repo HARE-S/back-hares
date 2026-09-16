@@ -36,6 +36,46 @@ class StudentService:
         self.result_service = ResultService(session)
         self.reading_service = ReadingService(session)
 
+    # ------------------------------------------------------------------ scope
+
+    @staticmethod
+    def _resolve_scope(
+        current_user: Optional[Dict[str, Any]],
+        requested_section_id: Optional[uuid.UUID] = None,
+    ) -> Optional[List[uuid.UUID]]:
+        """
+        Resuelve el ámbito de secciones por rol (compartido BE-27 / BE-29).
+
+        - ``pendiente`` → ``ForbiddenError``.
+        - Tutor → lista de secciones asignadas; ``ForbiddenError`` si vacía.
+          Si ``requested_section_id`` se proporciona, verifica que pertenece al ámbito.
+        - Coordinator / admin → acceso total (``None``).
+
+        Returns la lista de secciones del tutor o ``None`` para coordinador/admin.
+        """
+        user_role = str((current_user or {}).get("role", "")).strip().lower()
+        if user_role == "pendiente":
+            raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar el alumnado")
+
+        if current_user and user_role not in ("coordinator", "coordinador", "admin"):
+            assigned = {
+                uuid.UUID(str(s).strip())
+                for s in (current_user.get("sections") or [])
+                if str(s).strip()
+            }
+            if not assigned:
+                raise ForbiddenError("El tutor no tiene secciones asignadas")
+            if requested_section_id is not None:
+                if requested_section_id not in assigned:
+                    raise ForbiddenError("El tutor no tiene permiso sobre la sección especificada")
+                return [requested_section_id]
+            return list(assigned)
+        if requested_section_id is not None:
+            return [requested_section_id]
+        return None
+
+    # ------------------------------------------------------------------ list (BE-27)
+
     def _classify_sections(
         self, student: Student
     ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
@@ -400,35 +440,16 @@ class StudentService:
         - ``missing_data`` indica cuántos alumnos del ámbito no tenían
           informado cada campo filtrado (Escenario 5).
         """
-        # 1. Rol inválido
-        user_role = str((current_user or {}).get("role", "")).strip().lower()
-        if user_role == "pendiente":
-            raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar el alumnado")
-
-        # 2. Resolución del ámbito por rol (Escenario 6)
+        # 1. Resolución del ámbito por rol (Escenario 6)
         repo_filters = dict(filters)
         section_id = repo_filters.pop("section_id", None)
         page = repo_filters.pop("page", 1)
         limit = repo_filters.pop("limit", 10)
 
-        if current_user and user_role not in ("coordinator", "coordinador", "admin"):
-            assigned = {
-                uuid.UUID(str(s).strip())
-                for s in (current_user.get("sections") or [])
-                if str(s).strip()
-            }
-            if not assigned:
-                raise ForbiddenError("El tutor no tiene secciones asignadas")
-            if section_id is not None:
-                parsed = uuid.UUID(str(section_id))
-                if parsed not in assigned:
-                    raise ForbiddenError("El tutor no tiene permiso sobre la sección especificada")
-                repo_filters["section_ids"] = [parsed]
-            else:
-                repo_filters["section_ids"] = list(assigned)
-        else:
-            if section_id is not None:
-                repo_filters["section_ids"] = [uuid.UUID(str(section_id))]
+        parsed_section = uuid.UUID(str(section_id)) if section_id is not None else None
+        section_ids = self._resolve_scope(current_user, parsed_section)
+        if section_ids is not None:
+            repo_filters["section_ids"] = section_ids
 
         # 3. Consulta al repositorio
         repo = StudentRepository(self.session)
@@ -501,6 +522,54 @@ class StudentService:
             "limit": limit,
             "pages": math.ceil(total / limit) if total > 0 else 1,
             "missing_data": missing_data,
+        }
+
+    # ------------------------------------------------------------------ search (BE-29)
+
+    def search_students(
+        self,
+        term: str,
+        page: int,
+        limit: int,
+        current_user: Optional[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """
+        Búsqueda de alumnos por fragmento de nombre (BE-29).
+
+        - Normalización de acentos y mayúsculas en la consulta (T-BE29-01).
+        - Respuesta incluye secciones activas con su centro (T-BE29-02).
+        - Tutor: ámbito restringido a sus secciones (T-BE29-03 / Esc. 5).
+        """
+        section_ids = self._resolve_scope(current_user)
+        repo = StudentRepository(self.session)
+        students, total = repo.search_students(
+            term, section_ids=section_ids, page=page, limit=limit,
+        )
+
+        items: List[Dict[str, Any]] = []
+        for s in students:
+            active_sections = [
+                {
+                    "id": ss.section.id,
+                    "name": ss.section.name,
+                    "center": ss.section.center.name if ss.section.center else None,
+                }
+                for ss in (s.student_sections or [])
+                if ss.section and ss.section.disabled_at is None
+            ]
+            items.append({
+                "id": s.id,
+                "name": s.name,
+                "external_id": s.external_id,
+                "sections": active_sections,
+            })
+
+        return {
+            "items": items,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "pages": math.ceil(total / limit) if total > 0 else 1,
         }
 
 

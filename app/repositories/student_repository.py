@@ -8,10 +8,11 @@ import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
+from app.schemas.common import remove_accents
 
 # Valor reservado para filtrar alumnos cuyo campo no está informado (BE-27).
 MISSING_VALUE = "__missing__"
@@ -305,3 +306,56 @@ class StudentRepository:
         stmt = base.where(getattr(Student, field).is_(None))
         sub = stmt.subquery()
         return int(self.session.scalar(select(func.count()).select_from(sub)) or 0)
+
+    # ------------------------------------------------------------------ search (BE-29)
+
+    def search_students(
+        self,
+        term: str,
+        section_ids: Optional[List] = None,
+        page: int = 1,
+        limit: int = 10,
+    ) -> Tuple[List[Student], int]:
+        """
+        Returns a page of active students whose name contains ``term``,
+        normalized for accents and case (BE-29).
+
+        If ``section_ids`` is provided, only students enrolled in at least
+        one of those sections are returned (tutor scope).
+        """
+        clean_term = f"%{remove_accents(term).strip().lower()}%"
+
+        name_normalized = func.translate(
+            func.lower(Student.name),
+            "áéíóúüñ",
+            "aeiouun",
+        )
+
+        base = (
+            select(Student)
+            .join(Student.student_sections)
+            .join(StudentSection.section)
+            .join(Section.center)
+            .where(Student.disabled_at.is_(None))
+            .where(name_normalized.like(clean_term))
+            .options(
+                selectinload(Student.student_sections)
+                .joinedload(StudentSection.section)
+                .joinedload(Section.center)
+            )
+            .distinct()
+        )
+
+        if section_ids:
+            base = base.where(StudentSection.section_id.in_(section_ids))
+
+        sub = base.subquery()
+        total = int(self.session.scalar(select(func.count()).select_from(sub)) or 0)
+
+        stmt = (
+            base
+            .order_by(Student.name.asc(), Student.external_id.asc())
+            .offset((page - 1) * limit)
+            .limit(limit)
+        )
+        return list(self.session.scalars(stmt).all()), total

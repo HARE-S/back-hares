@@ -3,7 +3,7 @@
 **Programa de Gestión de Mejora de Comprensión Lectora** (Peñascal)
 Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andrés Ocina
 **Stack:** Flask + flask-smorest + SQLAlchemy 2.0 + Alembic + PostgreSQL + Gunicorn
-51 historias · 227 puntos · Actualizado: 15/09/2026
+51 historias · 227 puntos · Actualizado: 16/09/2026
 **Reparto entre el equipo:** ver [REPARTO.md](REPARTO.md)
 
 ---
@@ -58,7 +58,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Consulta y filtrado** | | | | |
 | [BE-27](BE-27-filtrado-multicriterio.md) | Filtrado multicriterio del alumnado | 5 | Alta | En revisión |
 | [BE-28](BE-28-ficha-alumno-agregada.md) | Endpoint agregado de la ficha del alumno | 3 | Alta | Completado |
-| [BE-29](BE-29-busqueda-alumnos.md) | Búsqueda de alumnos | 3 | Media | Pendiente |
+| [BE-29](BE-29-busqueda-alumnos.md) | Búsqueda de alumnos | 3 | Media | En revisión |
 | **Análisis y evolución** | | | | |
 | [BE-30](BE-30-metricas-derivadas.md) | Métricas derivadas de comprensión lectora | 3 | Crítica | Completado |
 | [BE-31](BE-31-evolucion-individual.md) | Evolución individual de un alumno | 5 | Alta | Completado |

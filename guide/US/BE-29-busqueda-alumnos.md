@@ -58,6 +58,14 @@ Entonces ese alumno no aparece en sus resultados
 * **Seguridad:** escenario 5 obligatorio. La búsqueda no puede ser una vía para enumerar alumnado de otros centros.
 * **Testing:** escenarios 2, 4 y 5.
 
+### Decisiones de implementación
+
+* **Endpoint dedicado:** `GET /api/v1/students/search?q=<fragmento>&page=&limit=` documentado en OpenAPI (BE-48). El contrato de respuesta (centro + sección) es distinto del listado de BE-27, así que no se mezcla un `q` con los filtros.
+* **`q` mínimo de 1 carácter** (Esc. 3) y `422` si va vacío o con solo espacios.
+* **Normalización en la consulta** con `translate(lower(name), 'áéíóúüñ', 'aeiouun')` y `remove_accents()` (mismo patrón que BE-14); los datos se conservan con su ortografía.
+* **Cada resultado** lleva `sections: [{id, name, center}]` para distinguir homónimos sin abrir la ficha (Esc. 4).
+* **Ámbito reutilizado:** el resuelve-de-ámbito de BE-27 se extrajo a `_resolve_scope()` y lo usan `list_students` y `search_students` (Esc. 5).
+
 ## Estimación
 3 Puntos de Historia (Consulta con normalización y filtro por ámbito)
 
@@ -68,7 +76,7 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE29-01 | **Consulta insensible a acentos** Normalización en la consulta, no en los datos. | - | Pendiente |
-| T-BE29-02 | **Respuesta con centro y sección** Para desambiguar homónimos. | - | Pendiente |
-| T-BE29-03 | **Filtro por ámbito del usuario** El tutor solo busca en sus secciones. | - | Pendiente |
-| T-BE29-04 | **Tests de búsqueda** Escenarios 1 a 5. | - | Pendiente |
+| T-BE29-01 | **Consulta insensible a acentos** Normalización en la consulta, no en los datos. | Marlen | Hecho |
+| T-BE29-02 | **Respuesta con centro y sección** Para desambiguar homónimos. | Marlen | Hecho |
+| T-BE29-03 | **Filtro por ámbito del usuario** El tutor solo busca en sus secciones. | Marlen | Hecho |
+| T-BE29-04 | **Tests de búsqueda** Escenarios 1 a 5. | Marlen | Hecho |

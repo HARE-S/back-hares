@@ -104,6 +104,26 @@ class ErrorSchema(Schema):
     error = fields.Str()
 
 
+class StudentSearchQuerySchema(Schema):
+    """
+    Parámetros de la búsqueda de alumnos por nombre (BE-29).
+    - q: fragmento de nombre a buscar (requerido, mínimo 1 carácter).
+    - page / limit: paginación reutilizando los rangos canónicos.
+    """
+    q = fields.Str(required=True, validate=validate.Length(min=1))
+    page = fields.Int(load_default=1, validate=validate.Range(min=1))
+    limit = fields.Int(load_default=10, validate=validate.Range(min=1, max=100))
+
+    @validates_schema
+    def _validate_q_non_blank(self, data, **kwargs):
+        q = data.get("q")
+        if q is None or not str(q).strip():
+            raise ValidationError(
+                "El término de búsqueda no puede estar vacío",
+                field_names=["q"],
+            )
+
+
 def translate_marshmallow_errors(messages: dict) -> str:
     """
     Convierte mensajes de error de Marshmallow a un formato amigable en español.

@@ -4,8 +4,12 @@ from flask_smorest import Blueprint as SmorestBlueprint
 from app.auth.decorators import get_current_user, require_role
 from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
 from app.extensions import db
-from app.schemas.common import StudentFilterArgsSchema
-from app.schemas.student_schema import StudentErrorResponseSchema, StudentListResponseSchema
+from app.schemas.common import StudentFilterArgsSchema, StudentSearchQuerySchema
+from app.schemas.student_schema import (
+    StudentErrorResponseSchema,
+    StudentListResponseSchema,
+    StudentSearchResponseSchema,
+)
 from app.services.student_service import StudentService
 
 students_bp = Blueprint("students_v1", __name__)
@@ -14,6 +18,12 @@ students_list_bp = SmorestBlueprint(
     "students_list_v1",
     __name__,
     description="Listado paginado y filtrado multicriterio del alumnado (BE-27)",
+)
+
+students_search_bp = SmorestBlueprint(
+    "students_search_v1",
+    __name__,
+    description="Búsqueda de alumnos por fragmento de nombre (BE-29)",
 )
 
 
@@ -42,6 +52,41 @@ class StudentList(MethodView):
 
         try:
             return service.list_students(filters=filters, current_user=current_user)
+        except ValidationError as e:
+            abort(400, description=str(e))
+        except ForbiddenError as e:
+            abort(403, description=str(e))
+
+
+@students_search_bp.route("/search")
+class StudentSearch(MethodView):
+    """Búsqueda de alumnos por fragmento de nombre (BE-29)."""
+
+    @require_role("tutor", "coordinator", "coordinador", "admin")
+    @students_search_bp.arguments(StudentSearchQuerySchema, location="query")
+    @students_search_bp.response(200, StudentSearchResponseSchema)
+    @students_search_bp.alt_response(400, schema=StudentErrorResponseSchema)
+    @students_search_bp.alt_response(403, schema=StudentErrorResponseSchema)
+    @students_search_bp.alt_response(422, schema=StudentErrorResponseSchema)
+    def get(self, args):
+        """
+        Busca alumnos cuyo nombre contiene el fragmento dado.
+
+        - Normalización insensible a acentos y mayúsculas (Esc. 2).
+        - Sin mínimo de caracteres; acepta 1 o 2 caracteres (Esc. 3).
+        - Cada resultado incluye secciones activas con su centro (Esc. 4).
+        - Tutor: ámbito restringido a sus secciones asignadas (Esc. 5).
+        """
+        current_user = get_current_user()
+        service = StudentService(db.session)
+
+        try:
+            return service.search_students(
+                term=args["q"],
+                page=args.get("page", 1),
+                limit=args.get("limit", 10),
+                current_user=current_user,
+            )
         except ValidationError as e:
             abort(400, description=str(e))
         except ForbiddenError as e:
