@@ -63,8 +63,8 @@ Crítica
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE01-01 | **Dockerfile del backend** Base Python DHI, dependencias de compilación en una sola capa, `PYTHONPATH=/app/src`, arranque con Gunicorn. | - | Pendiente |
-| T-BE01-02 | **Servicio database** Imagen PostgreSQL, volumen `data_dir`, `healthcheck` con `pg_isready`. | - | Pendiente |
-| T-BE01-03 | **Redes internas** `db-network` y `backend-network`; ningún `ports:` en backend ni database. | - | Pendiente |
-| T-BE01-04 | **Endpoint /api/health** Comprobación de vida sin autenticación. | - | Pendiente |
-| T-BE01-05 | **Perfiles para import y pgadmin** `profiles: ["tools"]` para que no arranquen por defecto. | - | Pendiente |
+| T-BE01-01 | **Dockerfile del backend** Base Python DHI, dependencias de compilación en una sola capa, `PYTHONPATH=/app/src`, arranque con Gunicorn. | Marlen | Hecho |
+| T-BE01-02 | **Servicio database** Imagen PostgreSQL, volumen `data_dir`, `healthcheck` con `pg_isready`. | Marlen | Hecho |
+| T-BE01-03 | **Redes internas** `db-network` y `backend-network`; ningún `ports:` en backend ni database. | Marlen | Hecho |
+| T-BE01-04 | **Endpoint /api/health** Comprobación de vida sin autenticación. | Marlen | Hecho |
+| T-BE01-05 | **Perfiles para import y pgadmin** `profiles: ["tools"]` para que no arranquen por defecto. | Marlen | Hecho |

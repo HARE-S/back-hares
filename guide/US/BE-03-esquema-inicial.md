@@ -90,10 +90,10 @@ Crítica — bloquea todo el desarrollo posterior
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE03-01 | **Configuración de Alembic** `alembic.ini` y `env.py` apuntando a la metadata y a `DATABASE_URL`. | - | Pendiente |
-| T-BE03-02 | **Modelos de datos maestros** `Center`, `Section`, `Student`, `StudentSection` con `external_id` y `disabled_at`. | - | Pendiente |
-| T-BE03-03 | **Modelos de pruebas y resultados** `Test` con `level` y `type`; `Result` con PK subrogada y unicidad por fecha. | - | Pendiente |
-| T-BE03-04 | **Modelos de libros y lecturas** `Book` como catálogo puro; `ReadBook` con PK subrogada. | - | Pendiente |
-| T-BE03-05 | **Modelos de usuarios y auditoría** `User` con `google_sub` único, `UserSection`, `AuditLog`. | - | Pendiente |
-| T-BE03-06 | **Migración inicial e índices** Generar, **revisar a mano** lo autogenerado y verificar el `downgrade`. | - | Pendiente |
-| T-BE03-07 | **Tests de restricciones** Escenarios 3 a 6 contra PostgreSQL real. | - | Pendiente |
+| T-BE03-01 | **Configuración de Alembic** `alembic.ini` y `env.py` apuntando a la metadata y a `DATABASE_URL`. | Marlen | Hecho |
+| T-BE03-02 | **Modelos de datos maestros** `Center`, `Section`, `Student`, `StudentSection` con `external_id` y `disabled_at`. | Marlen | Hecho |
+| T-BE03-03 | **Modelos de pruebas y resultados** `Test` con `level` y `type`; `Result` con PK subrogada y unicidad por fecha. | Marlen | Hecho |
+| T-BE03-04 | **Modelos de libros y lecturas** `Book` como catálogo puro; `ReadBook` con PK subrogada. | Marlen | Hecho |
+| T-BE03-05 | **Modelos de usuarios y auditoría** `User` con `google_sub` único, `UserSection`, `AuditLog`. | Marlen | Hecho |
+| T-BE03-06 | **Migración inicial e índices** Generar, **revisar a mano** lo autogenerado y verificar el `downgrade`. | Marlen | Hecho |
+| T-BE03-07 | **Tests de restricciones** Escenarios 3 a 6 contra PostgreSQL real. | Marlen | Hecho |

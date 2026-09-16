@@ -22,7 +22,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | ID | Título | Puntos | Prioridad | Estado |
 | :--- | :--- | :---: | :--- | :--- |
 | **Infraestructura** | | | | |
-| [BE-01](BE-01-stack-contenedorizado.md) | Stack contenedorizado del backend | 5 | Crítica | En revisión |
+| [BE-01](BE-01-stack-contenedorizado.md) | Stack contenedorizado del backend | 5 | Crítica | Completado |
 | [BE-02](BE-02-variables-entorno.md) | Configuración por variables de entorno | 3 | Alta | Completado |
 
 | **Modelo de datos** | | | | |
