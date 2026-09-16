@@ -65,7 +65,17 @@ Y devuelve 403 Forbidden
 * **Escenarios 2, 3 y 5 son lo importante.** Una media sin el tamaño de la muestra invita a conclusiones falsas: dos alumnos de una sección pueden dar una media espectacular que no significa nada. Y un grupo sin datos representado como cero parecería el peor del centro cuando simplemente no ha hecho pruebas.
 * **Decisiones:** el mínimo de representatividad es configurable, no una constante. Lo que es razonable en un centro grande no lo es en un grupo de mejora lectora de seis alumnos.
 * **Seguridad:** comparativas entre centros solo para coordinador y responsable pedagógico.
-* **Testing:** escenarios 3 y 5.
+* **Testing:** escenarios 1 a 6, más perfil por sector, acotación por fechas y auditoría.
+
+### Decisiones de implementación
+
+* **Endpoint:** `GET /api/v1/comparison/groups?group_by=<section|center|profile>&section_ids[]=&center_id=&min_sample=&start_date=&end_date=`.
+* **Perfil = `Student.sector`** (Funcional / Literario). Alumnos sin sector se agrupan bajo "Sin perfil".
+* **Umbra de representatividad** configurable por env `COMPARE_MIN_SAMPLE_SIZE` (default 5) y sobreescrito por query param `min_sample`. El umbral se aplica sobre el número de alumnos con datos (participantes), no sobre el censo total.
+* **Reutilización de BE-37** (`calculate_group_aggregates`) para medias, conteos y distribución. El módulo `analytics/comparison.py` añade la marca de representatividad y el warning encima de esos agregados.
+* **Grupos sin datos** devuelven `has_data=false`, medias `null` y `students_count=0` (Esc. 5: no un cero).
+* **Alcance por rol:** comparativas entre centros solo coordinador/admin (Esc. 6). Tutores y profesores comparan solo dentro de sus secciones asignadas; si piden secciones ajenas → 403.
+* **Auditoría:** se registra `GENERATE_GROUP_COMPARISON` con `group_by`, nº grupos, nº resultados, `min_sample`.
 
 ## Estimación
 8 Puntos de Historia (Agrupaciones flexibles y tratamiento cuidadoso de muestras pequeñas)
@@ -77,9 +87,9 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE32-01 | **Agrupación configurable** Por sección, centro o perfil. | - | Pendiente |
-| T-BE32-02 | **Cálculo de medias con tamaño** Media siempre acompañada de n y del número de pruebas. | - | Pendiente |
-| T-BE32-03 | **Umbral de representatividad** Configurable, con marca en la respuesta. | - | Pendiente |
-| T-BE32-04 | **Grupos vacíos sin media** Distinguir ausencia de datos de un valor cero. | - | Pendiente |
-| T-BE32-05 | **Restricción por rol** Comparativas entre centros limitadas. | - | Pendiente |
-| T-BE32-06 | **Tests de comparativa** Escenarios 2, 3, 5 y 6. | - | Pendiente |
+| T-BE32-01 | **Agrupación configurable** Por sección, centro o perfil (sector). | Marlen | Hecho |
+| T-BE32-02 | **Cálculo de medias con tamaño** Media siempre acompañada de n (alumnos con datos) y nº de pruebas. | Marlen | Hecho |
+| T-BE32-03 | **Umbral de representatividad** Configurable (`COMPARE_MIN_SAMPLE_SIZE`, env + param `min_sample`), con marca en la respuesta. | Marlen | Hecho |
+| T-BE32-04 | **Grupos vacíos sin media** `has_data=false`, medias `null`, nunca un cero. | Marlen | Hecho |
+| T-BE32-05 | **Restricción por rol** Comparativas entre centros limitadas a coordinador/admin (tutor → 403). Tutores restringidos a sus secciones en modos section/profile. | Marlen | Hecho |
+| T-BE32-06 | **Tests de comparativa** Escenarios 1 a 6 + perfil + fechas + auditoría + permisos (19 tests). | Marlen | Hecho |

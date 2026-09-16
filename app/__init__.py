@@ -73,9 +73,12 @@ def create_app(config_class=Config):
     from app.api.v1.directory import directory_bp
     from app.api.v1.users import users_bp
     from app.api.v1.audit import audit_bp
+    from app.api.v1.comparison import comparison_bp
 
     openapi_api.register_blueprint(auth_bp, url_prefix="/api/v1")
     openapi_api.register_blueprint(audit_bp, url_prefix="/api/v1")
+    openapi_api.register_blueprint(comparison_bp, url_prefix="/api/v1/comparison")
+    application.register_blueprint(comparison_bp, url_prefix="/api/comparison", name="comparison_direct")
     openapi_api.register_blueprint(tests_bp, url_prefix="/api/v1/tests")
     openapi_api.register_blueprint(books_bp, url_prefix="/api/v1/books")
     openapi_api.register_blueprint(results_bp, url_prefix="/api/v1/students")

@@ -57,6 +57,12 @@ class Config:
         os.getenv("IMPORT_UPLOAD_MAX_BYTES", str(2 * 1024 * 1024))
     )
 
+    # Comparativa de grupos (BE-32)
+    # Mínimo de alumnos por grupo para considerarlo representativo en comparativas.
+    COMPARE_MIN_SAMPLE_SIZE = int(
+        os.getenv("COMPARE_MIN_SAMPLE_SIZE", "5")
+    )
+
     # OpenAPI / flask-smorest (BE-48)
     API_TITLE = "Hares API"
     API_VERSION = "v1"

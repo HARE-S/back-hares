@@ -62,7 +62,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | **Análisis y evolución** | | | | |
 | [BE-30](BE-30-metricas-derivadas.md) | Métricas derivadas de comprensión lectora | 3 | Crítica | Completado |
 | [BE-31](BE-31-evolucion-individual.md) | Evolución individual de un alumno | 5 | Alta | Completado |
-| [BE-32](BE-32-comparativa-grupos.md) | Comparativa de evolución por grupos | 8 | Media | En revisión |
+| [BE-32](BE-32-comparativa-grupos.md) | Comparativa de evolución por grupos | 8 | Media | Completado |
 | [BE-33](BE-33-proyeccion-evolucion.md) | Proyección de evolución | 8 | Media | Completado |
 | [BE-34](BE-34-alumnos-sin-progreso.md) | Detección de alumnos sin progreso | 5 | Baja | Completado |
 | **Exportación e informes** | | | | |
