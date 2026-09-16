@@ -1,4 +1,5 @@
 import datetime
+import math
 from typing import Any, Dict, List, Optional, Tuple, Union
 import uuid
 from sqlalchemy import select
@@ -498,6 +499,7 @@ class StudentService:
             "total": total,
             "page": page,
             "limit": limit,
+            "pages": math.ceil(total / limit) if total > 0 else 1,
             "missing_data": missing_data,
         }
 

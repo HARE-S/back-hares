@@ -452,6 +452,30 @@ class TestCombinacionFiltros:
         assert data["total"] == 1
         assert data["items"][0]["name"] == "Ana García"
 
+    def test_sector_academic_status_literal(self, client, session):
+        # Escenario 2 literal del Gherkin: filtro por sector y situación
+        # académica a la vez (AND).
+        _set_dev_session(client, role="admin")
+        resp = client.get("/api/v1/students?sector=Tecnología&academic_status=Activo")
+        data = resp.get_json()
+        assert resp.status_code == 200
+        # Tecnología + Activo: s1 y s5 = 2 (s2 es Salud, s3 no tiene sector)
+        assert data["total"] == 2
+        names = {item["name"] for item in data["items"]}
+        assert "Ana García" in names
+        assert "Elena Díaz" in names
+
+    def test_pages_coincide_con_paginacion(self, client, session):
+        _set_dev_session(client, role="admin")
+        resp = client.get("/api/v1/students?page=1&limit=2")
+        data = resp.get_json()
+        assert resp.status_code == 200
+        assert data["pages"] == 3  # 5 alumnos, limit=2 -> 3 páginas
+        resp2 = client.get("/api/v1/students?limit=100")
+        data2 = resp2.get_json()
+        assert resp2.status_code == 200
+        assert data2["pages"] == 1
+
 
 # ---------------------------------------------------------------------------
 # Auditoría FILTER_STUDENTS
@@ -517,3 +541,26 @@ class TestResultadosVacios:
         assert resp.status_code == 200
         assert data["total"] == 5
         assert data["items"] == []
+
+
+# ---------------------------------------------------------------------------
+# OpenAPI (BE-48): el endpoint del listado está documentado en el spec
+# ---------------------------------------------------------------------------
+
+class TestOpenAPISpec:
+    def test_path_students_documentada(self, app):
+        from app.extensions import api as openapi_api
+
+        paths = openapi_api.spec.to_dict().get("paths", {})
+        assert "/api/v1/students" in paths
+        get_op = paths["/api/v1/students"]["get"]
+        param_names = {p["name"] for p in get_op.get("parameters", [])}
+        expected = {
+            "center_id", "section_id", "gender", "academic_status",
+            "sector", "min_age", "max_age", "page", "limit",
+        }
+        assert expected.issubset(param_names)
+        assert "200" in get_op.get("responses", {})
+        assert "400" in get_op.get("responses", {})
+        assert "403" in get_op.get("responses", {})
+        assert "422" in get_op.get("responses", {})

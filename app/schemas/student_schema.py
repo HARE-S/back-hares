@@ -22,6 +22,7 @@ class StudentListResponseSchema(Schema):
     total = fields.Int()
     page = fields.Int()
     limit = fields.Int()
+    pages = fields.Int()
     missing_data = fields.Dict(keys=fields.Str(), values=fields.Int(), allow_none=True)
 
 
