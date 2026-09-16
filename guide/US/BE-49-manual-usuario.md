@@ -55,8 +55,9 @@ Entonces el manual se actualiza en el mismo commit
 
 ## Notas
 * **Alcance:** este manual cubre las operaciones de administración que tienen su origen en el servidor —importación, usuarios, auditoría—. El uso diario de tutores y coordinadores se documenta desde la interfaz.
+* **Entregable:** el manual vive en `guide/manual-administrador.md`.
 * **Escenario 5 es lo que evita que el manual muera.** Un documento que se actualiza "cuando haya tiempo" queda obsoleto en un mes y deja de consultarse.
-* **Decisiones:** en castellano y sin jerga. El destinatario no es un desarrollador; si necesita entender qué es un endpoint para importar un fichero, el manual ha fallado.
+* **Estado de la revocación:** documenta la revocación actual (cambio a rol `pendiente`). La desactivación total e inmediata depende de BE-44 (revocación de sesiones); la sección se ampliará cuando esa historia esté disponible.
 
 ## Estimación
 2 Puntos de Historia (Redacción sobre funcionalidad ya construida)
@@ -68,7 +69,7 @@ Media
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE49-01 | **Procedimiento de importación** Paso a paso, con el tratamiento de errores. | - | Pendiente |
-| T-BE49-02 | **Guía de gestión de usuarios** Roles, asignación de secciones y revocación. | - | Pendiente |
-| T-BE49-03 | **Consulta de auditoría** Cómo y para qué. | - | Pendiente |
+| T-BE49-01 | **Procedimiento de importación** Paso a paso, con el tratamiento de errores. | Marlen | Hecho |
+| T-BE49-02 | **Guía de gestión de usuarios** Roles, asignación de secciones y revocación. | Marlen | Hecho |
+| T-BE49-03 | **Consulta de auditoría** Cómo y para qué. | Marlen | Hecho |
 | T-BE49-04 | **Revisión de comprensión** Que lo lea alguien ajeno al equipo de desarrollo. | - | Pendiente |
