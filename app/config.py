@@ -17,12 +17,12 @@ def _get_bool_env(var_name: str, default: bool = False) -> bool:
 class Config:
     """Configuración base de la aplicación (BE-02)."""
     APP_ENV = os.getenv("APP_ENV", "development").lower()
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-hares-penascal-2026-min-32-chars")
+    SECRET_KEY = os.getenv("SECRET_KEY")
     DEV_AUTH_BYPASS = _get_bool_env("DEV_AUTH_BYPASS", False)
 
     # Base de datos PostgreSQL
     DB_USER = os.getenv("POSTGRES_USER", "hares_user")
-    DB_PASS = os.getenv("POSTGRES_PASSWORD", "hares_pass")
+    DB_PASS = os.getenv("POSTGRES_PASSWORD")
     DB_HOST = os.getenv("POSTGRES_HOST", "db")
     DB_PORT = os.getenv("POSTGRES_PORT", "5432")
     DB_NAME = os.getenv("POSTGRES_DB", "hares_db")

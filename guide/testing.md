@@ -2,7 +2,7 @@
 
 > Estrategia de pruebas del **backend** — Programa de Gestión de Mejora de Comprensión Lectora (Peñascal).
 > Define qué se prueba, cómo y contra qué. Todo código que llega a `main` ha pasado por lo aquí descrito.
-> Las pruebas de la interfaz están en `frontend/guides/testing.md`.
+> Las pruebas de la interfaz están en `../front-hares/guide/testing.md`.
 
 ---
 
@@ -92,7 +92,7 @@ El resultado es el peor escenario posible: pruebas verdes que no detectan errore
 
 ### Servicio dedicado
 
-En `docker-compose.override.yml`:
+En `../infra-hares/docker-compose.override.yml`:
 
 ```yaml
 database-test:
@@ -278,7 +278,7 @@ pytest --cov=src/app --cov-report=term-missing --cov-fail-under=80
 ## 10. Ejecución
 
 ```bash
-# Todo
+# Todo (desde ../infra-hares, donde vive la orquestación)
 docker compose --profile test run --rm backend pytest
 
 # Solo unitarias, durante el desarrollo
@@ -365,4 +365,4 @@ Comprobaciones manuales que ninguna prueba automática cubre:
 
 ---
 
-*Última actualización: 08/09/2026 · Ver también `deployment.md`, `structure.md` y `workflow.md` de esta carpeta.*
+*Última actualización: 08/09/2026 · Ver `structure.md` y `workflow.md` de esta carpeta, y el despliegue en `../infra-hares/guide/deployment.md`.*

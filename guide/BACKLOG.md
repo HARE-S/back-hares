@@ -27,7 +27,7 @@ Versión: v2 — 09/09/2026
 **Como** desarrollador **quiero** levantar el entorno de servidor con un comando **para** que los tres trabajemos sobre la misma base.
 
 - `docker compose up` levanta `database` y `backend`; `import` y `pgadmin` quedan bajo perfil.
-- Imágenes DHI indicadas en `guides/deployment.md`.
+- Imágenes DHI indicadas en `../infra-hares/guide/deployment.md`.
 - Redes internas: `database` solo alcanzable desde `backend` e `import`.
 - `database` con `healthcheck`; el backend no arranca hasta que responda.
 - Volumen `data_dir` persistente.
@@ -604,4 +604,4 @@ El equipo de frontend puede avanzar con simulacros, pero estas son las que neces
 
 ---
 
-*Ver `guides/structure.md`, `guides/testing.md`, `guides/deployment.md` y `guides/workflow.md` · Interfaz en `frontend/BACKLOG.md`*
+*Ver `guides/structure.md`, `guides/testing.md` y `guides/workflow.md`; despliegue en `../infra-hares/guide/deployment.md` · Interfaz en `frontend/BACKLOG.md`*

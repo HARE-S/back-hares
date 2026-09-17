@@ -225,7 +225,7 @@ def test_postgresql_unique_constraint_direct():
     la restricción uq_read_books_student_book_start.
     """
     db_user = os.getenv("POSTGRES_USER", "hares_user")
-    db_pass = os.getenv("POSTGRES_PASSWORD", "hares_pass")
+    db_pass = os.getenv("POSTGRES_PASSWORD")
     db_host = os.getenv("POSTGRES_HOST", "db")
     db_port = os.getenv("POSTGRES_PORT", "5432")
     db_name = os.getenv("POSTGRES_DB", "hares_db")

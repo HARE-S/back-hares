@@ -182,4 +182,4 @@ Los bloqueos que dependen del cliente se escalan a Andrés Ocina.
 
 ---
 
-*Ver `guides/structure.md`, `guides/testing.md`, `guides/deployment.md` y `guides/workflow.md`*
+*Ver `guides/structure.md`, `guides/testing.md` y `guides/workflow.md`; despliegue en `../infra-hares/guide/deployment.md`*

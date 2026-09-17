@@ -48,7 +48,7 @@ Y el volumen data_dir conserva el estado
 ```
 
 ## Notas
-* **Imágenes:** las DHI indicadas por el cliente. Son de suscripción; si no hay acceso, se pactan las oficiales equivalentes. Ver `guides/deployment.md`.
+* **Imágenes:** las DHI indicadas por el cliente. Son de suscripción; si no hay acceso, se pactan las oficiales equivalentes. Ver `../infra-hares/guide/deployment.md`.
 * **Alpine y PostgreSQL:** Alpine usa musl; el conector puede necesitar compilación. Instalar y desinstalar las dependencias de compilación en la misma capa del Dockerfile.
 * **Decisiones:** sin `healthcheck`, `depends_on` solo garantiza que el contenedor arrancó, no que PostgreSQL responda. Es la causa más común de fallo en el primer despliegue.
 * **Testing:** escenario 3 verificable con `docker compose exec`.

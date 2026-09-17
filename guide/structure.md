@@ -3,7 +3,7 @@
 > Estructura del **backend** — Programa de Gestión de Mejora de Comprensión Lectora (Peñascal).
 > **Stack: Flask + flask-smorest + SQLAlchemy 2.0 + Alembic + PostgreSQL.**
 > Define dónde vive cada cosa y qué puede importar qué. Ante la duda sobre dónde colocar un fichero nuevo, manda este documento. Si hay que crear una carpeta que no aparece aquí, primero se añade aquí y luego se crea.
-> La estructura de la interfaz está en `frontend/guides/structure.md`.
+> La estructura de la interfaz está en `../front-hares/guide/structure.md`.
 
 ---
 
@@ -56,121 +56,53 @@ Es exactamente el mismo razonamiento por el que se descartó JWT. Si se usa la s
 
 ## 2. Árbol de directorios
 
-El repositorio tiene dos áreas independientes, `backend/` y `frontend/`, cada una con su propio `Dockerfile` y sus propias guías. Este documento cubre `backend/`.
+El proyecto se organiza en **cuatro repositorios** independientes desplegados como carpetas hermanas; la orquestación Docker vive en `infra-hares`:
 
 ```
-comprension-lectora/
-├── docker-compose.yml
-├── docker-compose.override.yml
-├── .env.example
-├── scripts/
-├── pgadmin/
-├── proxy/
-├── frontend/                       # ver frontend/guides/structure.md
-│
-└── backend/
-    ├── Dockerfile
-    ├── pyproject.toml
+HARE-S/
+├── infra-hares/                    # orquestación: docker-compose, .env, pgadmin, despliegue
+├── proxy-hares/                    # reverse proxy nginx (único punto de entrada)
+├── front-hares/                    # interfaz (ver front-hares/guide/structure.md)
+└── back-hares/                     # este repositorio (API y capas de dominio)
+    ├── app.py                      # punto de entrada WSGI
     ├── requirements.txt
-    ├── requirements-dev.txt
     ├── alembic.ini
-    ├── guides/                     # esta documentación
-    │   ├── deployment.md
+    ├── Dockerfile                  # imagen del backend
+    ├── guide/                      # esta documentación
     │   ├── structure.md
     │   ├── testing.md
     │   └── workflow.md
     ├── migrations/
     │   ├── env.py
     │   └── versions/               # una migración por cambio de esquema
-    ├── src/
-    │   └── app/
-    │       ├── __init__.py
-    │       ├── app.py              # create_app(): fábrica de la aplicación
-    │       ├── extensions.py       # instancias de db, api, session, migrate
-    │       ├── config.py           # clases de configuración por entorno
-    │       ├── database.py         # motor y sesiones de SQLAlchemy
-    │       ├── decorators.py       # @login_required, @require_role
-    │       │
-    │       ├── api/
-    │       │   ├── __init__.py     # registra todos los blueprints de v1
-    │       │   └── v1/
-    │       │       ├── auth.py
-    │       │       ├── centers.py
-    │       │       ├── sections.py
-    │       │       ├── students.py
-    │       │       ├── tests.py
-    │       │       ├── books.py
-    │       │       ├── results.py
-    │       │       ├── readings.py
-    │       │       ├── reports.py
-    │       │       └── users.py
-    │       │
-    │       ├── models/             # tablas (SQLAlchemy)
-    │       │   ├── base.py
-    │       │   ├── center.py
-    │       │   ├── section.py
-    │       │   ├── student.py
-    │       │   ├── student_section.py
-    │       │   ├── test.py
-    │       │   ├── result.py
-    │       │   ├── book.py
-    │       │   ├── read_book.py
-    │       │   ├── user.py
-    │       │   └── audit_log.py
-    │       │
-    │       ├── schemas/            # entrada y salida de la API (Marshmallow)
-    │       │   ├── center.py
-    │       │   ├── section.py
-    │       │   ├── student.py
-    │       │   ├── test.py
-    │       │   ├── result.py
-    │       │   ├── book.py
-    │       │   ├── reading.py
-    │       │   ├── user.py
-    │       │   └── common.py       # paginación, filtros, errores
-    │       │
-    │       ├── repositories/       # consultas a la base de datos
-    │       │   ├── base.py
-    │       │   ├── student_repository.py
-    │       │   ├── result_repository.py
-    │       │   ├── book_repository.py
-    │       │   └── user_repository.py
-    │       │
-    │       ├── services/           # lógica de negocio
-    │       │   ├── student_service.py
-    │       │   ├── result_service.py
-    │       │   ├── reading_service.py
-    │       │   ├── catalog_service.py
-    │       │   └── user_service.py
-    │       │
-    │       ├── analytics/          # métricas y evolución (EP-09)
-    │       │   ├── metrics.py      # PPM, porcentaje de aciertos
-    │       │   ├── evolution.py    # series temporales
-    │       │   └── projection.py   # tendencia y proyección
-    │       │
-    │       ├── exports/            # salidas (EP-10)
-    │       │   ├── excel.py
-    │       │   └── report.py
-    │       │
-    │       ├── importer/           # carga de datos maestros (EP-03)
-    │       │   ├── __main__.py     # punto de entrada del servicio "import"
-    │       │   ├── parser.py       # lectura y validación del CSV
-    │       │   └── loader.py       # alta y actualización idempotente
-    │       │
-    │       ├── auth/               # autenticación (EP-12)
-    │       │   ├── google.py       # flujo OIDC y validación del ID token
-    │       │   ├── session.py      # sesiones de servidor
-    │       │   └── permissions.py  # comprobación de roles
-    │       │
-    │       └── core/
-    │           ├── exceptions.py   # excepciones propias del dominio
-    │           ├── logging.py
-    │           └── audit.py        # registro de auditoría (US-49)
-    │
+    ├── app/
+    │   ├── __init__.py             # create_app(): fábrica de la aplicación
+    │   ├── extensions.py           # instancias de db, api, session, migrate
+    │   ├── config.py               # clases de configuración por entorno
+    │   ├── database.py             # motor y sesiones de SQLAlchemy
+    │   ├── api/
+    │   │   └── v1/
+    │   │       ├── auth.py
+    │   │       ├── centers.py
+    │   │       ├── sections.py
+    │   │       ├── students.py
+    │   │       ├── tests.py
+    │   │       ├── books.py
+    │   │       ├── results.py
+    │   │       ├── readings.py
+    │   │       ├── reports.py
+    │   │       └── users.py
+    │   ├── models/                 # tablas (SQLAlchemy)
+    │   ├── schemas/                # entrada y salida de la API (Marshmallow)
+    │   ├── repositories/           # consultas a la base de datos
+    │   ├── services/               # lógica de negocio
+    │   ├── analytics/              # métricas y evolución (EP-09)
+    │   ├── exports/                # salidas (EP-10)
+    │   ├── importer/               # carga de datos maestros (EP-03)
+    │   ├── auth/                   # autenticación (EP-12)
+    │   └── core/                   # exceptions, logging, audit
     └── tests/
         ├── conftest.py
-        ├── unit/
-        ├── integration/
         └── fixtures/
 ```
 
@@ -387,4 +319,4 @@ Recordatorio del documento de despliegue: si un secreto llega a subirse, borrarl
 
 ---
 
-*Última actualización: 08/09/2026 · Ver también `deployment.md`, `testing.md` y `workflow.md` de esta carpeta.*
+*Última actualización: 08/09/2026 · Ver también `testing.md` y `workflow.md` de esta carpeta, y el despliegue en `../infra-hares/guide/deployment.md`.*

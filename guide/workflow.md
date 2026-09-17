@@ -2,7 +2,7 @@
 
 > Programa de Gestión de Mejora de Comprensión Lectora (Peñascal).
 > Cómo se pasa de una historia de usuario a código en `main`.
-> El apartado 4 (Git) es **común a todo el equipo** y está duplicado en `frontend/guides/workflow.md`. Si cambia, se cambia en los dos ficheros **en el mismo commit**.
+> El apartado 4 (Git) es **común a todo el equipo** y está duplicado en `../front-hares/guide/workflow.md`. Si cambia, se cambia en los dos ficheros **en el mismo commit**.
 
 ---
 
@@ -77,7 +77,7 @@ Body: ResultCreate { test_id, section_id, test_date, time, successes, mistakes }
 
 **d. Implementación**
 
-1. **Migración primero**, si el esquema cambia:
+1. **Migración primero**, si el esquema cambia. Los comandos `docker compose` se ejecutan desde **`../infra-hares`** (donde vive la orquestación):
    ```bash
    docker compose run --rm backend alembic revision --autogenerate -m "add results table"
    ```
@@ -92,7 +92,7 @@ Body: ResultCreate { test_id, section_id, test_date, time, successes, mistakes }
 
    Todo endpoint lleva `@blp.arguments` y `@blp.response`: sin ellos no aparece en la especificación OpenAPI que consume el equipo de interfaz.
 
-**e. Ejecución y depuración** — siempre dentro del contenedor, contra PostgreSQL:
+**e. Ejecución y depuración** — siempre dentro del contenedor, contra PostgreSQL. Desde `../infra-hares`:
 ```bash
 docker compose --profile test run --rm backend pytest -x
 ```
@@ -163,7 +163,7 @@ Tipos: `feat`, `fix`, `test`, `docs`, `refactor`, `chore`, `style`. Un commit, u
 ```bash
 git fetch origin && git rebase origin/develop
 ruff check . && ruff format --check .
-docker compose --profile test run --rm backend pytest
+cd ../infra-hares && docker compose --profile test run --rm backend pytest
 git push -u origin feature/US-19-register-test-result
 ```
 
@@ -187,7 +187,7 @@ POST /api/students/{id}/results -> 201 | 400 | 403 | 409
 - [x] Valores negativos devuelven 400
 
 ## Cómo probarlo
-docker compose --profile test run --rm backend pytest tests/integration/test_results_endpoints.py
+cd ../infra-hares && docker compose --profile test run --rm backend pytest tests/integration/test_results_endpoints.py
 
 ## Notas
 La sección se guarda en el resultado a propósito (foto del momento).
@@ -264,4 +264,4 @@ Un bloqueo que depende del cliente se escala a Andrés Ocina. No se resuelve inv
 
 ---
 
-*Última actualización: 08/09/2026 · Ver también `deployment.md`, `structure.md` y `testing.md` de esta carpeta.*
+*Última actualización: 08/09/2026 · Ver también `structure.md` y `testing.md` de esta carpeta, y el despliegue en `../infra-hares/guide/deployment.md`.*

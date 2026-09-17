@@ -73,4 +73,4 @@ Crítica — bloquea toda la épica de seguridad
 | T-BE46-02 | **Crear el proyecto y las credenciales OAuth** Identificador y secreto de cliente. | - | Bloqueado |
 | T-BE46-03 | **Pantalla de consentimiento interna** Restringida al dominio. | - | Bloqueado |
 | T-BE46-04 | **Registrar URIs de redirección** Desarrollo y producción, con el protocolo exacto. | - | Bloqueado |
-| T-BE46-05 | **Documentar el procedimiento** En `guides/deployment.md`. | - | Pendiente |
+| T-BE46-05 | **Documentar el procedimiento** En `../infra-hares/guide/deployment.md`. | - | Pendiente |
