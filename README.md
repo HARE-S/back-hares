@@ -30,6 +30,10 @@ cp .env.example .env
 docker compose up -d
 ```
 
+> ⚠️ **No existe `docker compose` en `back-hares`.** Si ejecutas `docker compose ps` aquí verás
+> `no configuration file provided`. Para ver los contenedores desde cualquier carpeta usa `docker ps`.
+> Guía de comandos: `../infra-hares/guide/comandos.md`.
+
 Documentación del backend: `guide/` (structure, testing, workflow). Despliegue: `../infra-hares/guide/deployment.md`.
 
 ## Scripts
