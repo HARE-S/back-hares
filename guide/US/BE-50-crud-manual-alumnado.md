@@ -75,7 +75,7 @@ Entonces el sistema devuelve 400 Bad Request
 
 * **Esta historia resuelve una contradicción entre dos documentos del cliente.** El papel de presentación pide expresamente *"pantallas que permitan la carga manual (y también las modificaciones pertinentes de dichos datos)"*. Pero la especificación de API entregada declara `students`, `centers` y `sections` **solo con `GET`**. Ambos son del cliente y dicen cosas distintas.
 
-* **Decisión propuesta:** se permite el CRUD manual, pero **Alexia sigue siendo la fuente de verdad** para los registros que ella trae. El escenario 4 fija esa regla: si un dato viene de Alexia, una reimportación lo restaura. Sin esa regla, cada importación destruiría trabajo manual o lo perpetuaría en conflicto, y nadie sabría qué valor es el bueno.
+* **Decisión adoptada (T-BE50-01):** se asume la "Decisión propuesta": el CRUD manual está permitido; Alexia sigue siendo la fuente de verdad para lo que trae (una reimportación restaura esos valores, quedando la sobrescritura auditada); un alta manual se conserva y vive solo en esta aplicación (no vuelve a Alexia). A falta de confirmación del cliente, que no cambia la política de conflictos.
 
 * **Origen del registro:** cada alumno, centro y sección guarda si procede de importación o de alta manual. Es lo que permite aplicar el escenario 3 sin borrar altas manuales en cada sincronización.
 
@@ -97,10 +97,10 @@ Alta
 
 | Código | Nombre | Responsable | Estado |
 | :--- | :--- | :--- | :--- |
-| T-BE50-01 | **Confirmar la política con el cliente** Qué prevalece ante conflicto y si los altas manuales vuelven a Alexia. | - | Bloqueado |
-| T-BE50-02 | **Campo de origen del registro** Importado o manual, en centros, secciones y alumnos. | - | Pendiente |
-| T-BE50-03 | **Esquemas de alta y modificación** Para las tres entidades, con validación de referencias. | - | Pendiente |
-| T-BE50-04 | **Endpoints CRUD** `POST`, `PATCH` y `DELETE` lógico, restringidos a administrador. | - | Pendiente |
-| T-BE50-05 | **Política de conflictos en la importación** Alexia prevalece sobre lo modificado a mano; los altas manuales se conservan. | - | Pendiente |
-| T-BE50-06 | **Auditoría de altas y cambios** Con el valor anterior. | - | Pendiente |
-| T-BE50-07 | **Tests de CRUD y conflictos** Escenarios 1 a 7. | - | Pendiente |
+| T-BE50-01 | **Confirmar la política con el cliente** Qué prevalece ante conflicto y si los altas manuales vuelven a Alexia. | Marlen | Hecho |
+| T-BE50-02 | **Campo de origen del registro** Importado o manual, en centros, secciones y alumnos. | Marlen | Hecho |
+| T-BE50-03 | **Esquemas de alta y modificación** Para las tres entidades, con validación de referencias. | Marlen | Hecho |
+| T-BE50-04 | **Endpoints CRUD** `POST`, `PATCH` y `DELETE` lógico, restringidos a administrador. | Marlen | Hecho |
+| T-BE50-05 | **Política de conflictos en la importación** Alexia prevalece sobre lo modificado a mano; los altas manuales se conservan. | Marlen | Hecho |
+| T-BE50-06 | **Auditoría de altas y cambios** Con el valor anterior. | Marlen | Hecho |
+| T-BE50-07 | **Tests de CRUD y conflictos** Escenarios 1 a 7. | Marlen | Hecho |

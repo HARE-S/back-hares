@@ -213,7 +213,7 @@ def confirm_import():
         return jsonify({"error": "El fichero subido no existe o ha caducado"}), 404
 
     try:
-        summary = StudentImporter(db.session).import_from_csv(
+        summary = StudentImporter(db.session, current_user=get_current_user()).import_from_csv(
             entry["content"], commit=True
         )
     except Exception as exc:  # noqa: BLE001 - se conserva el fichero para reintentar

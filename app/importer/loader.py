@@ -6,10 +6,11 @@ always resolved by `external_id`, never by name.
 BE-07 adds row-level tolerance: an invalid row is rejected and recorded in
 the error details while the rest of the file keeps processing.
 """
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
+from app.core.audit import log_audit
 from app.importer.parser import parse_students_csv_collect
 from app.models.import_report import ImportReport
 from app.repositories.student_repository import StudentRepository
@@ -33,9 +34,10 @@ def _empty_summary() -> Dict[str, Any]:
 class StudentImporter:
     """Loads students, centers, sections and enrollments idempotently."""
 
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, current_user: Optional[Dict[str, Any]] = None):
         self.session = session
         self.repo = StudentRepository(session)
+        self.current_user = current_user
 
     def _merge(self, summary: Dict[str, Any], deltas: Dict[str, int]) -> None:
         for key, value in deltas.items():
@@ -53,10 +55,21 @@ class StudentImporter:
         """
         with self.session.begin_nested():
             center, center_created = self.repo.get_or_create_center(row["center"])
+            previous = self.repo.get_student_by_external_id(row["student_id"])
+            previous_name = previous.name if previous is not None else None
             student, student_created, student_changed = self.repo.upsert_student(
                 external_id=row["student_id"],
                 name=row["student_name"],
             )
+
+            if student_changed and previous_name is not None:
+                log_audit(
+                    self.current_user,
+                    action="IMPORT_OVERWRITE_STUDENT",
+                    resource_type="student",
+                    resource_id=student.id,
+                    details={"anterior": previous_name, "nuevo": student.name},
+                )
 
             section_deltas = {"centers_created": 0, "sections_created": 0, "enrollments_created": 0}
             if center_created:

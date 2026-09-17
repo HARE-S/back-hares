@@ -131,7 +131,7 @@ La numeración `BE-XX` es propia del backend. El backlog que ve el cliente y el 
 | **7 — Salidas** | BE-33, BE-35, BE-36, BE-37, BE-47 | 29 | Exportación e informes |
 | **8 — Cierre** | BE-34, BE-44, BE-49, BE-51 | 15 | Auditoría, historial de grupo y documentación |
 
-**BE-50** se sitúa en el Sprint 3 o 4, junto a la importación y los permisos, en cuanto el cliente confirme la política de conflictos.
+**BE-50** se sitúa en el Sprint 3 o 4, junto a la importación y los permisos. La política de conflictos quedó resuelta con la decisión adoptada (Alexia prevalece sobre lo que trae; un alta manual vive solo en la aplicación), asumida a falta de confirmación del cliente.
 
 **La autenticación va en el Sprint 2 a propósito.** Cada endpoint escrito después nace ya protegido. Dejarla para el final obliga a repasar todos los endpoints uno a uno, y ahí es donde se cuela el que se quedó abierto.
 
@@ -176,7 +176,7 @@ Y dos existen por ausencias en el esquema: **BE-07** (sin `external_id` no hay r
 | BE-01 | Suscripción a imágenes DHI sin confirmar | Cliente |
 | BE-09 | `import` como job puntual o mecanismo permanente | Cliente |
 | BE-12 | Significado de F/L en los códigos de prueba | Equipo de pedagogía |
-| **BE-50** | Contradicción entre el papel (pide CRUD manual) y la especificación de API (solo `GET`). Falta definir qué prevalece ante conflicto con Alexia | Cliente |
+| BE-50 | Contradicción entre el papel (pide CRUD manual) y la especificación de API (solo `GET`). **Resuelta**: decisión adoptada (Alexia prevalece sobre lo que trae; el alta manual vive solo en la app); falta ratificación del cliente | Cliente |
 
 Los bloqueos que dependen del cliente se escalan a Andrés Ocina.
 

@@ -22,6 +22,7 @@ class Student(BaseModel):
     sector = db.Column(db.String(100), nullable=True)
     disabled_at = db.Column(db.Date, nullable=True)
     area = db.Column(db.String(255), nullable=False, default="Sin área", server_default="Sin área")
+    origin = db.Column(db.String(20), nullable=False, server_default="alexia", default="alexia")
     created_by_user_id = db.Column(
         db.Uuid(as_uuid=True),
         db.ForeignKey("users.id", ondelete="SET NULL"),
