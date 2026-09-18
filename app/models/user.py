@@ -14,6 +14,7 @@ class UserRole(Enum):
     TUTOR = "tutor"
     COORDINATOR = "coordinador"
     ADMIN = "admin"
+    SUPERADMIN = "superadmin"
     DIRECTOR = "director"
 
 

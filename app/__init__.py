@@ -80,7 +80,7 @@ def create_app(config_class=Config):
         sections_manual_bp,
     )
 
-    openapi_api.register_blueprint(auth_bp, url_prefix="/api/v1")
+    openapi_api.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
     openapi_api.register_blueprint(audit_bp, url_prefix="/api/v1")
     openapi_api.register_blueprint(students_manual_bp, url_prefix="/api/v1")
     openapi_api.register_blueprint(centers_manual_bp, url_prefix="/api/v1")

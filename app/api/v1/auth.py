@@ -5,6 +5,7 @@ from flask import session
 from flask.views import MethodView
 from flask_smorest import Blueprint
 from app.extensions import db
+from app.models.user import User
 from app.services.auth_service import AuthService
 from app.services.session_service import SessionService
 from app.schemas.auth_schema import (
@@ -18,7 +19,6 @@ from app.core.exceptions import ValidationError, UnauthorizedError, ConflictErro
 auth_bp = Blueprint(
     "auth_v1",
     __name__,
-    url_prefix="/auth",
     description="Autenticación con login local",
 )
 
@@ -80,6 +80,25 @@ class Login(MethodView):
             return result, 200
         except UnauthorizedError as e:
             return {"error": str(e)}, 401
+
+
+@auth_bp.route("/me")
+class CurrentUser(MethodView):
+    """Obtener usuario actual."""
+
+    @auth_bp.response(200, UserResponseSchema)
+    def get(self):
+        """Retorna los datos del usuario autenticado."""
+        user_id = session.get("user_id")
+        if not user_id:
+            return {"error": "No autenticado"}, 401
+
+        user = db.session.query(User).filter(User.id == user_id).first()
+        if not user:
+            return {"error": "Usuario no encontrado"}, 404
+
+        auth_service = AuthService(db.session)
+        return auth_service._user_to_dict(user), 200
 
 
 @auth_bp.route("/logout")

@@ -7,7 +7,7 @@ class UserRegisterSchema(Schema):
     """Schema para registro de nuevo usuario (login tradicional)."""
     email = fields.Email(required=True)
     name = fields.Str(required=True, validate=validate.Length(min=1, max=255))
-    lastname = fields.Str(required=True, validate=validate.Length(min=1, max=255))
+    lastname = fields.Str(required=False, allow_none=True, missing=None)
     password = fields.Str(
         required=True,
         validate=validate.Length(min=6),

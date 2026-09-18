@@ -29,14 +29,14 @@ class AuthService:
         if len(password) < 6:
             raise ValidationError("La contraseña debe tener al menos 6 caracteres")
 
-        # Crear usuario con rol "tutor" por defecto (en lugar de "pendiente")
+        # Crear usuario con rol "pendiente" (requiere aprobación del superadmin)
         user = User(
             email=email,
             name=name,
             lastname=lastname,
             area=area,
         )
-        user.role = "tutor"  # login tradicional asigna rol tutor por defecto
+        user.role = "pendiente"  # login tradicional inicia con rol pendiente
         user.set_password(password)
         self.session.add(user)
         self.session.commit()
@@ -109,6 +109,6 @@ class AuthService:
             "area": user.area,
             "role": user.role,
             "is_active": user.is_active,
-            "created_at": user.created_at.isoformat() if user.created_at else None,
-            "updated_at": user.updated_at.isoformat() if user.updated_at else None,
+            "created_at": user.created_at,
+            "updated_at": user.updated_at,
         }

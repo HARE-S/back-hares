@@ -26,7 +26,7 @@ class SessionService:
             user_id=user_id,
             user_email=user.email,
             user_role=user.role,
-            user_area=getattr(user, "area", "Sin área"),
+            user_area=user.area or "Sin área",
             expires_at=expires_at,
             is_active=True,
         )
@@ -38,7 +38,7 @@ class SessionService:
             "user_id": str(user.id),
             "email": user.email,
             "role": user.role,
-            "area": getattr(user, "area", "Sin área"),
+            "area": user.area or "Sin área",
             "expires_at": expires_at.isoformat(),
         }
 
