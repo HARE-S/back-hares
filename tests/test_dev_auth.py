@@ -14,6 +14,7 @@ class DevAuthConfig(TestingConfig):
 class ProductionBypassConfig(Config):
     TESTING = True
     APP_ENV = "production"
+    SECRET_KEY = "a" * 32
     DEV_AUTH_BYPASS = True
     SQLALCHEMY_DATABASE_URI = "postgresql://test_user:test_password@db-test:5432/hares_test"
 

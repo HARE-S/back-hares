@@ -76,6 +76,7 @@ class DevelopmentConfig(Config):
     """Configuración para entorno de desarrollo."""
     DEBUG = True
     APP_ENV = "development"
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev_secret_key_change_in_production_" + "x" * 20)
     DEV_AUTH_BYPASS = _get_bool_env("DEV_AUTH_BYPASS", True)
 
 
@@ -89,6 +90,7 @@ class TestingConfig(Config):
     """
     TESTING = True
     APP_ENV = "testing"
+    SECRET_KEY = os.getenv("SECRET_KEY", "test_secret_key_for_testing_only_" + "x" * 32)
     DEV_AUTH_BYPASS = _get_bool_env("DEV_AUTH_BYPASS", True)
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "TEST_DATABASE_URL",
@@ -100,6 +102,7 @@ class ProductionConfig(Config):
     """Configuración para entorno de producción en Google Cloud / Docker."""
     DEBUG = False
     APP_ENV = "production"
+    SECRET_KEY = os.getenv("SECRET_KEY")  # Obligatoria en producción
     DEV_AUTH_BYPASS = False
     # En producción CORS se deshabilita porque el proxy sirve interfaz y API en el mismo origen
     CORS_ORIGINS = []

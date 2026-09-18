@@ -78,6 +78,7 @@ def test_cors_with_explicit_origins_in_dev_scenario_6():
 def test_invalid_session_type_scenario_7():
     """Escenario 7: SESSION_TYPE no apuntando a servidor se niega a arrancar."""
     class BadSessionConfig(Config):
+        SECRET_KEY = "a" * 32
         SESSION_TYPE = "invalid_type"
 
     with pytest.raises(RuntimeError) as exc_info:
