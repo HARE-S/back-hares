@@ -15,27 +15,28 @@ class AuthService:
         self.session = session
 
     def register(self, email: str, name: str, lastname: str, password: str, area: str) -> dict:
-        """Registra un nuevo usuario."""
-        # Validar dominio de email
-        if not email.endswith("@grupopenascal.com"):
-            raise ValidationError("Solo se permiten emails del dominio @grupopenascal.com")
+        """Registra un nuevo usuario (login tradicional, sin restricción de dominio)."""
+        # Validar email
+        if not email or "@" not in email:
+            raise ValidationError("Email inválido")
 
         # Verificar que el email no exista
         existing = self.session.query(User).filter(User.email == email).first()
         if existing:
             raise ConflictError(f"El email '{email}' ya está registrado")
 
-        # Validar contraseña
-        if len(password) < 8:
-            raise ValidationError("La contraseña debe tener al menos 8 caracteres")
+        # Validar contraseña (mínimo 6 caracteres)
+        if len(password) < 6:
+            raise ValidationError("La contraseña debe tener al menos 6 caracteres")
 
-        # Crear usuario
+        # Crear usuario con rol "tutor" por defecto (en lugar de "pendiente")
         user = User(
             email=email,
             name=name,
             lastname=lastname,
             area=area,
         )
+        user.role = "tutor"  # login tradicional asigna rol tutor por defecto
         user.set_password(password)
         self.session.add(user)
         self.session.commit()

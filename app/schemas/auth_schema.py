@@ -4,16 +4,16 @@ from marshmallow import Schema, fields, validate, ValidationError
 
 
 class UserRegisterSchema(Schema):
-    """Schema para registro de nuevo usuario."""
+    """Schema para registro de nuevo usuario (login tradicional)."""
     email = fields.Email(required=True)
     name = fields.Str(required=True, validate=validate.Length(min=1, max=255))
     lastname = fields.Str(required=True, validate=validate.Length(min=1, max=255))
     password = fields.Str(
         required=True,
-        validate=validate.Length(min=8),
+        validate=validate.Length(min=6),
         load_only=True,
     )
-    area = fields.Str(required=True, validate=validate.Length(min=1, max=255))
+    area = fields.Str(required=False, validate=validate.Length(min=1, max=255), allow_none=True)
 
 
 class UserLoginSchema(Schema):
