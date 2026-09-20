@@ -49,7 +49,15 @@ def setup_data(session):
         name="Única",
         center_id=center_disabled.id,
     )
-    session.add_all([section_a, section_b, section_empty, section_disabled, section_other_center])
+    center_other = Center(name="Colegio Altamira")
+    session.add(center_other)
+    session.flush()
+    section_foreign = Section(
+        name="1º Primaria",
+        center_id=center_other.id,
+        academic_year="2025-2026",
+    )
+    session.add_all([section_a, section_b, section_empty, section_disabled, section_other_center, section_foreign])
     session.flush()
 
     s1 = Student(name="Aitor Ortiz", external_id="AIT-001")
@@ -74,11 +82,12 @@ def setup_data(session):
     return {
         "center_active": center_active,
         "center_disabled": center_disabled,
+        "center_other": center_other,
         "section_a": section_a,
         "section_b": section_b,
         "section_empty": section_empty,
         "section_disabled": section_disabled,
-        "section_other_center": section_other_center,
+        "section_foreign": section_foreign,
         "students": [s1, s2, s3, s4_disabled],
     }
 
@@ -98,16 +107,19 @@ def test_scenario_1_list_active_centers(client, setup_data):
 
     data = resp.get_json()
     assert isinstance(data, list)
-    assert len(data) == 1
+    assert len(data) == 2
     center = data[0]
-    assert center["id"] == str(setup_data["center_active"].id)
-    assert center["name"] == "Colegio Cervantes"
+    assert center["name"] == "Colegio Altamira"
+    assert center["id"] == str(setup_data["center_other"].id)
     assert "external_id" in center
+
+    cervical = next(c for c in data if c["name"] == "Colegio Cervantes")
+    assert cervical["id"] == str(setup_data["center_active"].id)
 
     # Ruta directa sin prefijo v1
     resp_direct = client.get("/api/centers")
     assert resp_direct.status_code == 200
-    assert len(resp_direct.get_json()) == 1
+    assert len(resp_direct.get_json()) == 2
 
 
 def test_scenario_2_sections_of_center(client, setup_data):
@@ -121,7 +133,7 @@ def test_scenario_2_sections_of_center(client, setup_data):
     center_active = setup_data["center_active"]
     section_disabled = setup_data["section_disabled"]
 
-    client.post("/api/dev/session", json={"role": "tutor", "sections": []})
+    client.post("/api/dev/session", json={"role": "coordinator", "sections": []})
 
     resp = client.get(f"/api/v1/centers/{center_active.id}/sections")
     assert resp.status_code == 200
@@ -136,6 +148,7 @@ def test_scenario_2_sections_of_center(client, setup_data):
     assert section["id"] == str(setup_data["section_a"].id)
     assert section["center_id"] == str(center_active.id)
     assert section["academic_year"] == "2025-2026"
+    assert section["students_count"] == 2
 
     # La sección deshabilitada no aparece
     ids = [s["id"] for s in data]
@@ -353,3 +366,100 @@ def test_center_sections_exclude_disabled_center_sections(client, setup_data):
 
     resp = client.get(f"/api/v1/centers/{center_disabled.id}/sections")
     assert resp.status_code == 404
+
+
+def test_centers_include_sections_count(client, setup_data):
+    """Escenario 1 (FE-25): cada centro incluye sections_count de secciones activas."""
+    client.post("/api/dev/session", json={"role": "coordinator", "sections": []})
+
+    resp = client.get("/api/v1/centers")
+    assert resp.status_code == 200
+
+    by_name = {c["name"]: c for c in resp.get_json()}
+    assert by_name["Colegio Cervantes"]["sections_count"] == 3
+    assert by_name["Colegio Altamira"]["sections_count"] == 1
+
+
+def test_sections_include_students_count(client, setup_data):
+    """Escenario 2 (FE-25): cada sección incluye students_count de alumnos activos."""
+    center_active = setup_data["center_active"]
+
+    client.post("/api/dev/session", json={"role": "coordinator", "sections": []})
+
+    resp = client.get(f"/api/v1/centers/{center_active.id}/sections")
+    assert resp.status_code == 200
+
+    by_name = {s["name"]: s for s in resp.get_json()}
+    assert by_name["1º ESO A"]["students_count"] == 2
+    assert by_name["1º ESO B"]["students_count"] == 1
+    assert by_name["1º ESO C"]["students_count"] == 0
+
+
+def test_tutor_sees_only_centers_and_sections_assigned(client, setup_data):
+    """
+    Escenario 4 (FE-25): tutor con dos secciones asignadas solo ve su centro
+    y sus secciones, con sus conteos.
+    """
+    section_a = setup_data["section_a"]
+    section_b = setup_data["section_b"]
+
+    client.post(
+        "/api/dev/session",
+        json={"role": "tutor", "sections": [str(section_a.id), str(section_b.id)]},
+    )
+
+    resp = client.get("/api/v1/centers")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert [c["name"] for c in data] == ["Colegio Cervantes"]
+    assert data[0]["sections_count"] == 2
+
+    resp_sections = client.get(f"/api/v1/centers/{setup_data['center_active'].id}/sections")
+    assert resp_sections.status_code == 200
+    sections = resp_sections.get_json()
+    assert [s["name"] for s in sections] == ["1º ESO A", "1º ESO B"]
+    by_name = {s["name"]: s for s in sections}
+    assert by_name["1º ESO A"]["students_count"] == 2
+    assert by_name["1º ESO B"]["students_count"] == 1
+
+
+def test_tutor_cannot_access_foreign_center_sections(client, setup_data):
+    """
+    Escenario 4 (FE-25): un tutor asignado a secciones de otro centro recibe
+    403 al consultar las secciones de un centro ajeno.
+    """
+    section_b = setup_data["section_b"]
+
+    client.post(
+        "/api/dev/session",
+        json={"role": "tutor", "sections": [str(section_b.id)]},
+    )
+
+    resp = client.get(f"/api/v1/centers/{setup_data['center_other'].id}/sections")
+    assert resp.status_code == 403
+    assert resp.get_json()["error"] == "FORBIDDEN"
+
+    # En su centro solo ve su sección asignada
+    resp_ok = client.get(f"/api/v1/centers/{setup_data['center_active'].id}/sections")
+    assert resp_ok.status_code == 200
+    assert [s["name"] for s in resp_ok.get_json()] == ["1º ESO B"]
+
+
+def test_tutor_without_sections_gets_403_on_center_sections(client, setup_data):
+    """Un tutor sin secciones asignadas recibe 403 en un centro y lista vacía de centros."""
+    client.post("/api/dev/session", json={"role": "tutor", "sections": []})
+
+    resp = client.get(f"/api/v1/centers/{setup_data['center_active'].id}/sections")
+    assert resp.status_code == 403
+
+    resp_centers = client.get("/api/v1/centers")
+    assert resp_centers.status_code == 200
+    assert resp_centers.get_json() == []
+
+
+def test_pending_role_gets_403_on_centers_and_sections(client, setup_data):
+    """El rol 'pendiente' recibe 403 también al listar centros y sus secciones."""
+    client.post("/api/dev/session", json={"role": "pendiente", "sections": []})
+
+    assert client.get("/api/v1/centers").status_code == 403
+    assert client.get(f"/api/v1/centers/{setup_data['center_active'].id}/sections").status_code == 403

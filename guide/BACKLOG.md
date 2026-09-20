@@ -154,6 +154,7 @@ Versión: v2 — 09/09/2026
 - `GET /api/centers`, `/api/centers/{id}`, `/api/centers/{id}/sections`, `/api/sections/{id}/students`.
 - Solo lectura: su origen es Alexia.
 - `200` / `404` según la especificación.
+- FE-25 (navegación): los centros incluyen `sections_count` y las secciones `students_count`; el tutor solo ve sus centros y secciones asignadas.
 
 **Puntos:** 3 · **Alta**
 

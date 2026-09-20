@@ -19,6 +19,7 @@ Consulta de centros, secciones y su alumnado
 Dado un usuario con sesión activa y rol asignado
 Cuando consulta GET /api/centers
 Entonces recibe la lista de centros activos
+Y cada centro incluye sections_count con sus secciones activas
 Y devuelve 200 OK
 ```
 
@@ -27,6 +28,7 @@ Y devuelve 200 OK
 Dado un centro existente
 Cuando consulta GET /api/centers/{id}/sections
 Entonces recibe las secciones de ese centro
+Y cada sección incluye students_count con su alumnado activo matriculado
 Y devuelve 200 OK
 ```
 
@@ -61,6 +63,17 @@ Entonces el sistema deniega la operación
 Y devuelve 403 Forbidden
 ```
 
+### Escenario 7: Ámbito del tutor en los listados (FE-25)
+```gherkin
+Dado un tutor con varias secciones asignadas
+Cuando consulta GET /api/centers
+Entonces solo ve los centros que contienen alguna de sus secciones
+Y cada centro muestra sections_count con el número de secciones asignadas
+Cuando consulta GET /api/centers/{id}/sections
+Entonces solo ve las secciones que tiene asignadas
+Y devuelve 403 Forbidden si consulta un centro sin ninguna sección asignada
+```
+
 ## Notas
 * **Decisiones:** centros, secciones y alumnado **son de solo lectura**. Su origen es Alexia y se mantienen allí; permitir su edición aquí crearía dos fuentes de verdad. Coincide con la especificación de API entregada por el cliente, donde esos recursos solo declaran `GET`.
 * **Seguridad:** escenario 6 es obligatorio — es el aislamiento entre centros.
@@ -81,3 +94,4 @@ Alta
 | T-BE10-03 | **Blueprints de centros y secciones** Solo `GET`; rutas anidadas de la especificación. | Marlen | Completado |
 | T-BE10-04 | **Filtrado por secciones asignadas** El tutor solo ve las suyas. | Marlen | Completado |
 | T-BE10-05 | **Tests de consulta y permisos** Escenarios 1 a 6. | Marlen | Completado |
+| T-BE10-06 | **Conteos para FE-25** `sections_count` en centros y `students_count` en secciones, y ámbito del tutor aplicado a los listados. | Marlen | Completado |

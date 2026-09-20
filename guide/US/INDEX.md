@@ -34,7 +34,7 @@ Equipo: Marlen Álvarez, Santiago Patiño, Yeremi Peralta · Coordinación: Andr
 | [BE-07](BE-07-importacion-idempotente.md) | Importación idempotente | 5 | Crítica | Completado |
 | [BE-08](BE-08-informe-errores-importacion.md) | Informe de errores de importación | 3 | Media | Completado |
 | [BE-09](BE-09-endpoint-subida-fichero.md) | Endpoint de subida del fichero | 5 | Alta | Pendiente |
-| [BE-10](BE-10-consulta-centros-secciones.md) | Consulta de centros, secciones y alumnado | 3 | Alta | Pendiente |
+| [BE-10](BE-10-consulta-centros-secciones.md) | Consulta de centros, secciones y alumnado | 3 | Alta | Completado |
 | **Catálogo de pruebas** | | | | |
 | [BE-11](BE-11-alta-prueba.md) | Alta de prueba en el catálogo | 3 | Alta | Completado |
 | [BE-12](BE-12-importar-catalogo-pruebas.md) | Importar el catálogo de pruebas | 5 | Alta | Completado |
