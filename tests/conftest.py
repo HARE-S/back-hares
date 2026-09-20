@@ -45,3 +45,9 @@ def client(app):
 def session(app):
     with app.app_context():
         yield db.session
+
+
+@pytest.fixture
+def db_session(session):
+    """Alias de `session` para los tests que usan `db_session` directamente."""
+    return session

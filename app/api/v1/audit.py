@@ -7,6 +7,7 @@ from app.auth.decorators import require_role, get_current_user
 from app.extensions import db
 from app.services.audit_service import AuditService
 from marshmallow import Schema, fields
+from app.schemas.fields import DateTimeOrString
 
 audit_bp = Blueprint(
     "audit_v1",
@@ -26,7 +27,7 @@ class AuditLogSchema(Schema):
     details = fields.Str(allow_none=True)
     ip_address = fields.Str(allow_none=True)
     status = fields.Str()
-    timestamp = fields.DateTime()
+    timestamp = DateTimeOrString()
 
 
 @audit_bp.route("/logs")

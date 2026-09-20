@@ -2,6 +2,8 @@
 
 from marshmallow import Schema, fields
 
+from app.schemas.fields import DateOrString
+
 
 class SectionResultResponseSchema(Schema):
     """Resultado de una sección."""
@@ -12,7 +14,7 @@ class SectionResultResponseSchema(Schema):
     test_name = fields.Str()
     test_words = fields.Int()
     test_letter = fields.Str(allow_none=True)
-    test_date = fields.Date()
+    test_date = DateOrString()
     time = fields.Int()
     successes = fields.Int()
     mistakes = fields.Int()

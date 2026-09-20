@@ -1,6 +1,8 @@
 """Schemas Marshmallow para resultados (flask-smorest)."""
 
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields
+
+from app.schemas.fields import DateOrString, DateTimeOrString
 
 
 class ResultCreateRequestSchema(Schema):
@@ -8,9 +10,9 @@ class ResultCreateRequestSchema(Schema):
     test_id = fields.UUID(required=True)
     section_id = fields.UUID(required=True)
     test_date = fields.Date(required=True)
-    time = fields.Int(required=True, validate=validate.Range(min=1))
-    successes = fields.Int(required=True, validate=validate.Range(min=0))
-    mistakes = fields.Int(required=True, validate=validate.Range(min=0))
+    time = fields.Int(required=True)
+    successes = fields.Int(required=True)
+    mistakes = fields.Int(required=True)
 
 
 class ResultUpdateRequestSchema(Schema):
@@ -18,17 +20,17 @@ class ResultUpdateRequestSchema(Schema):
     test_id = fields.UUID()
     section_id = fields.UUID()
     test_date = fields.Date()
-    time = fields.Int(validate=validate.Range(min=1))
-    successes = fields.Int(validate=validate.Range(min=0))
-    mistakes = fields.Int(validate=validate.Range(min=0))
+    time = fields.Int()
+    successes = fields.Int()
+    mistakes = fields.Int()
 
 
 class ResultBatchItemSchema(Schema):
     """Un resultado en lote."""
     student_id = fields.UUID(required=True)
-    time = fields.Int()
-    successes = fields.Int()
-    mistakes = fields.Int()
+    time = fields.Int(allow_none=True)
+    successes = fields.Int(allow_none=True)
+    mistakes = fields.Int(allow_none=True)
     absent = fields.Bool()
 
 
@@ -46,14 +48,14 @@ class ResultResponseSchema(Schema):
     student_id = fields.UUID()
     test_id = fields.UUID()
     section_id = fields.UUID()
-    test_date = fields.Date()
+    test_date = DateOrString()
     time = fields.Int()
     successes = fields.Int()
     mistakes = fields.Int()
     ppm = fields.Float(allow_none=True)
     accuracy = fields.Float(allow_none=True)
-    created_at = fields.DateTime(allow_none=True)
-    updated_at = fields.DateTime(allow_none=True)
+    created_at = DateTimeOrString(allow_none=True)
+    updated_at = DateTimeOrString(allow_none=True)
 
 
 class ResultHistoryResponseSchema(Schema):
@@ -64,7 +66,7 @@ class ResultHistoryResponseSchema(Schema):
     test_words = fields.Int()
     test_letter = fields.Str(allow_none=True)
     test_type = fields.Str(allow_none=True)
-    test_date = fields.Date()
+    test_date = DateOrString()
     time = fields.Int()
     successes = fields.Int()
     mistakes = fields.Int()

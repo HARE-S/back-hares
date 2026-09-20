@@ -35,7 +35,7 @@ def test_register_user(app, db_session):
     assert result["name"] == "John"
     assert result["lastname"] == "Doe"
     assert result["area"] == "Electricidad"
-    assert result["role"] == "tutor"
+    assert result["role"] == "pendiente"
     assert "password_hash" not in result
 
 
@@ -180,5 +180,5 @@ def test_token_verification(app, db_session):
     payload = service.verify_token(token)
 
     assert payload["email"] == "token@example.com"
-    assert payload["role"] == "tutor"
+    assert payload["role"] == "pendiente"
     assert payload["area"] == "Hostelería"

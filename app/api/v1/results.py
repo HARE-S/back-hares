@@ -1,5 +1,6 @@
 """Endpoints de resultados de pruebas con flask-smorest."""
 
+from flask import Response, jsonify
 from flask.views import MethodView
 from flask_smorest import Blueprint
 from app.auth.decorators import get_current_user, require_role
@@ -59,13 +60,13 @@ class StudentResults(MethodView):
                 data=payload,
                 current_user=current_user,
             )
-            return result_data, 201
+            return jsonify(result_data), 201
         except ValidationError as e:
-            return {"error": str(e), "field": getattr(e, "field", None)}, 400
+            return jsonify({"error": str(e), "field": getattr(e, "field", None)}), 400
         except ForbiddenError as e:
-            return {"error": "FORBIDDEN", "message": str(e)}, 403
+            return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
         except ConflictError as e:
-            return {"error": "CONFLICT", "message": str(e)}, 409
+            return jsonify({"error": "CONFLICT", "message": str(e)}), 409
 
     @require_role("tutor", "coordinator", "coordinador", "admin")
     @results_bp.response(200, ResultHistoryResponseSchema(many=True))
@@ -82,13 +83,13 @@ class StudentResults(MethodView):
                 student_id=student_id,
                 current_user=current_user,
             )
-            return history, 200
+            return jsonify(history), 200
         except ValidationError as e:
-            return {"error": str(e), "field": getattr(e, "field", None)}, 400
+            return jsonify({"error": str(e), "field": getattr(e, "field", None)}), 400
         except NotFoundError as e:
-            return {"error": "NOT_FOUND", "message": str(e)}, 404
+            return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
         except ForbiddenError as e:
-            return {"error": "FORBIDDEN", "message": str(e)}, 403
+            return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
 
 
 @results_bp.route("/<student_id>/results/<result_id>")
@@ -156,19 +157,21 @@ class BatchResults(MethodView):
                 data=payload,
                 current_user=current_user,
             )
-            return summary, 201
+            return jsonify(summary), 201
         except BatchValidationError as e:
-            return {
-                "error": "BATCH_VALIDATION_ERROR",
-                "message": e.message,
-                "errors": e.errors,
-            }, 400
+            return jsonify(
+                {
+                    "error": "BATCH_VALIDATION_ERROR",
+                    "message": e.message,
+                    "errors": e.errors,
+                }
+            ), 400
         except ValidationError as e:
-            return {"error": str(e), "field": getattr(e, "field", None)}, 400
+            return jsonify({"error": str(e), "field": getattr(e, "field", None)}), 400
         except ForbiddenError as e:
-            return {"error": "FORBIDDEN", "message": str(e)}, 403
+            return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
         except ConflictError as e:
-            return {"error": "CONFLICT", "message": str(e)}, 409
+            return jsonify({"error": "CONFLICT", "message": str(e)}), 409
 
 
 # Funciones auxiliares privadas
@@ -183,17 +186,17 @@ def _update_result(payload, result_id):
             data=payload,
             current_user=current_user,
         )
-        return updated, 200
+        return jsonify(updated), 200
     except SchemaValidationError as e:
-        return {"error": "UNPROCESSABLE_ENTITY", "message": str(e)}, 422
+        return jsonify({"error": "UNPROCESSABLE_ENTITY", "message": str(e)}), 422
     except ValidationError as e:
-        return {"error": "VALIDATION_ERROR", "message": str(e)}, 400
+        return jsonify({"error": "VALIDATION_ERROR", "message": str(e)}), 400
     except NotFoundError as e:
-        return {"error": "NOT_FOUND", "message": str(e)}, 404
+        return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
     except ForbiddenError as e:
-        return {"error": "FORBIDDEN", "message": str(e)}, 403
+        return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
     except ConflictError as e:
-        return {"error": "CONFLICT", "message": str(e)}, 409
+        return jsonify({"error": "CONFLICT", "message": str(e)}), 409
 
 
 def _delete_result(result_id):
@@ -206,8 +209,8 @@ def _delete_result(result_id):
             result_id=result_id,
             current_user=current_user,
         )
-        return "", 204
+        return Response(status=204)
     except NotFoundError as e:
-        return {"error": "NOT_FOUND", "message": str(e)}, 404
+        return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
     except ForbiddenError as e:
-        return {"error": "FORBIDDEN", "message": str(e)}, 403
+        return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403

@@ -34,7 +34,7 @@ def session(app):
 def test_student_pair_series_complete(client, session):
     """Serie completa: alumno con pares funcional+literario para I, A."""
     center = Center(name="Test Center")
-    section = Section(name="Test Section", center_id=center.id)
+    section = Section(name="Test Section", center=center)
     student = Student(name="Test Student")
     test_if = Test(code="1IF", name="Test I-F", words=100, course=1, test_letter="I", type="F")
     test_il = Test(code="1IL", name="Test I-L", words=100, course=1, test_letter="I", type="L")
@@ -108,7 +108,7 @@ def test_student_pair_series_complete(client, session):
 def test_student_pair_series_incomplete(client, session):
     """Serie incompleta: alumno sin el tipo literario de la prueba."""
     center = Center(name="Test Center")
-    section = Section(name="Test Section", center_id=center.id)
+    section = Section(name="Test Section", center=center)
     student = Student(name="Test Student")
     test_if = Test(code="1IF", name="Test I-F", words=100, course=1, test_letter="I", type="F")
 
@@ -160,7 +160,7 @@ def test_student_without_results(client, session):
 def test_student_progress_transitions(client, session):
     """Progresión individual con transiciones I-A, A-B."""
     center = Center(name="Test Center")
-    section = Section(name="Test Section", center_id=center.id)
+    section = Section(name="Test Section", center=center)
     student = Student(name="Test Student")
 
     # Crear 3 pruebas: I, A, B con pares completos
@@ -220,7 +220,7 @@ def test_student_progress_transitions(client, session):
 def test_transition_without_data_returns_none(client, session):
     """Transición sin datos en ambas pruebas devuelve None, nunca 0."""
     center = Center(name="Test Center")
-    section = Section(name="Test Section", center_id=center.id)
+    section = Section(name="Test Section", center=center)
     student = Student(name="Test Student")
 
     # Solo prueba I, no hay A ni B
