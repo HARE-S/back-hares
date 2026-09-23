@@ -45,7 +45,7 @@ class DirectoryService:
         user_role = str(current_user.get("role", "")).strip().lower()
         if user_role == "pendiente":
             raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar el directorio")
-        if user_role in ("coordinator", "coordinador", "admin"):
+        if user_role in ("coordinator", "coordinador", "admin", "superadmin"):
             return None
         return {str(s).strip() for s in (current_user.get("sections") or [])}
 

@@ -45,7 +45,7 @@ class ExportService:
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para exportar datos")
 
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
                 target_sec = filters.get("section_id")
 

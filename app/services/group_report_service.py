@@ -73,7 +73,7 @@ class GroupReportService:
                 raise ForbiddenError(
                     "El usuario con rol pendiente no tiene permisos para consultar informes"
                 )
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = {
                     str(s).strip() for s in (current_user.get("sections") or [])
                 }
@@ -180,7 +180,7 @@ class GroupReportService:
                 raise ForbiddenError(
                     "El usuario con rol pendiente no tiene permisos para consultar informes"
                 )
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 raise ForbiddenError(
                     "Se requiere rol de coordinador o administrador para consultar el informe de centro"
                 )

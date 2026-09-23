@@ -58,7 +58,7 @@ class ReadingService:
             user_role = str(current_user.get("role", "")).strip().lower()
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para asignar libros")
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
                 student_sections = {str(ss.section_id).strip() for ss in student.student_sections}
                 if not (assigned_sections & student_sections):
@@ -143,7 +143,7 @@ class ReadingService:
             user_role = str(current_user.get("role", "")).strip().lower()
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para modificar lecturas")
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
                 student = reading.student
                 student_sections = {
@@ -208,7 +208,7 @@ class ReadingService:
             user_role = str(current_user.get("role", "")).strip().lower()
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar lecturas")
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
                 student_sections = {str(ss.section_id).strip() for ss in student.student_sections}
                 if not (assigned_sections & student_sections):

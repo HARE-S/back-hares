@@ -77,14 +77,14 @@ class ComparisonService:
             )
 
         if group_by == "center":
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 raise ForbiddenError(
                     "Las comparativas entre centros solo están disponibles para el "
                     "coordinador o responsable pedagógico"
                 )
             return None
 
-        if user_role in ("coordinator", "coordinador", "admin"):
+        if user_role in ("coordinator", "coordinador", "admin", "superadmin"):
             return None
 
         assigned = {

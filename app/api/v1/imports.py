@@ -141,17 +141,71 @@ def upload_import_file():
     else:
         raw = file.stream.read()
 
-    try:
-        content = raw.decode("utf-8")
-    except UnicodeDecodeError:
-        return jsonify({"error": "El fichero debe estar codificado en UTF-8"}), 400
+    extra_data = None
+    if extension in (".xlsx", ".xls"):
+        try:
+            import openpyxl
+            from app.importer.lectura_eficaz_parser import is_lectura_eficaz_excel, parse_lectura_eficaz_workbook
+
+            wb = openpyxl.load_workbook(io.BytesIO(raw), data_only=True)
+            if is_lectura_eficaz_excel(wb):
+                students_list, evaluations_list, csv_content = parse_lectura_eficaz_workbook(wb)
+                content = csv_content
+                extra_data = {
+                    "is_lectura_eficaz": True,
+                    "evaluations": evaluations_list,
+                    "students_count": len(students_list),
+                    "evaluations_count": len(evaluations_list),
+                }
+            else:
+                sheet = wb.active
+                csv_lines = []
+                first_row = True
+                header_aliases = {
+                    "student_id": "student_id",
+                    "id": "student_id",
+                    "identificador": "student_id",
+                    "codigo": "student_id",
+                    "student_name": "student_name",
+                    "nombre": "student_name",
+                    "alumno": "student_name",
+                    "nombre_alumno": "student_name",
+                    "sections": "sections",
+                    "secciones": "sections",
+                    "seccion": "sections",
+                    "grupo": "sections",
+                    "grupos": "sections",
+                    "center": "center",
+                    "centro": "center",
+                    "colegio": "center",
+                }
+                for row in sheet.iter_rows(values_only=True):
+                    if any(cell is not None for cell in row):
+                        if first_row:
+                            first_row = False
+                            mapped = []
+                            for cell in row:
+                                val = str(cell if cell is not None else "").strip().lower()
+                                mapped.append(header_aliases.get(val, val))
+                            line = ";".join(mapped)
+                        else:
+                            line = ";".join(str(cell if cell is not None else "").strip() for cell in row)
+                        csv_lines.append(line)
+                content = "\n".join(csv_lines)
+        except Exception as exc:
+            return jsonify({"error": f"Error al procesar el archivo Excel: {str(exc)}"}), 400
+    else:
+        try:
+            content = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            return jsonify({"error": "El fichero debe estar codificado en UTF-8"}), 400
 
     try:
         rows, errors = parse_students_csv_collect(content)
     except ValidationError as exc:
         return jsonify({"error": str(exc)}), 400
 
-    token = upload_store.put(file.filename, content)
+    token = upload_store.put(file.filename, content, extra=extra_data)
 
     preview = [
         {
@@ -175,21 +229,23 @@ def upload_import_file():
         },
     )
 
-    return (
-        jsonify(
-            {
-                "token": token,
-                "filename": file.filename,
-                "preview": preview,
-                "total_rows": len(rows) + len(errors),
-                "errors": len(errors),
-                "error_details": errors[:ERROR_DETAILS_MAX],
-                "allowed_extensions": sorted(allowed_extensions),
-                "max_bytes": max_bytes,
-            }
-        ),
-        200,
-    )
+    resp_payload = {
+        "token": token,
+        "filename": file.filename,
+        "preview": preview,
+        "total_rows": len(rows) + len(errors),
+        "errors": len(errors),
+        "error_details": errors[:ERROR_DETAILS_MAX],
+        "allowed_extensions": sorted(allowed_extensions),
+        "max_bytes": max_bytes,
+    }
+    if extra_data and extra_data.get("is_lectura_eficaz"):
+        resp_payload["meta"] = {
+            "type": "lectura_eficaz",
+            "students_count": extra_data["students_count"],
+            "evaluations_count": extra_data["evaluations_count"],
+        }
+    return jsonify(resp_payload), 200
 
 
 @import_bp.route("/confirm", methods=["POST"])
@@ -216,6 +272,55 @@ def confirm_import():
         summary = StudentImporter(db.session, current_user=get_current_user()).import_from_csv(
             entry["content"], commit=True
         )
+
+        extra = entry.get("extra") or {}
+        if extra.get("is_lectura_eficaz"):
+            evaluations = extra.get("evaluations", [])
+            evaluations_created = 0
+            if evaluations:
+                from app.models.student import Student
+                from app.models.center import Section
+                from app.models.test import Test, Result
+                from datetime import date
+
+                tests_by_code = {t.code: t for t in db.session.execute(select(Test)).scalars().all()}
+                students_by_ext_id = {s.external_id: s for s in db.session.execute(select(Student)).scalars().all()}
+                sections_by_name = {sec.name: sec for sec in db.session.execute(select(Section)).scalars().all()}
+
+                for ev in evaluations:
+                    student = students_by_ext_id.get(ev["student_id"])
+                    test = tests_by_code.get(ev["test_code"])
+                    section = sections_by_name.get(ev["section_name"])
+
+                    if not section and student and student.student_sections:
+                        section = student.student_sections[0].section
+
+                    if student and test and section:
+                        test_date = date.fromisoformat(ev["test_date"])
+                        existing = db.session.execute(
+                            select(Result).where(
+                                Result.student_id == student.id,
+                                Result.test_id == test.id,
+                                Result.test_date == test_date,
+                            )
+                        ).scalar_one_or_none()
+
+                        if not existing:
+                            new_res = Result(
+                                student_id=student.id,
+                                section_id=section.id,
+                                test_id=test.id,
+                                test_date=test_date,
+                                time=ev["time"],
+                                successes=ev["successes"],
+                                mistakes=ev["mistakes"],
+                                anomalous=False,
+                            )
+                            db.session.add(new_res)
+                            evaluations_created += 1
+
+                db.session.commit()
+                summary["evaluations_created"] = evaluations_created
     except Exception as exc:  # noqa: BLE001 - se conserva el fichero para reintentar
         db.session.rollback()
         return jsonify({"error": f"Error durante la importación: {exc}"}), 500

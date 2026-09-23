@@ -59,6 +59,56 @@ def assign_student_book(student_id):
     return jsonify(reading_data), 201
 
 
+@single_readings_bp.route("", methods=["GET"])
+@require_role("tutor", "coordinator", "coordinador", "admin")
+def list_readings():
+    """Listado general de lecturas activas/finalizadas."""
+    import uuid
+    from app.models.book import ReadBook
+    status_filter = request.args.get("status")
+    student_id_filter = request.args.get("student_id")
+
+    query = db.session.query(ReadBook)
+    if student_id_filter:
+        try:
+            query = query.filter(ReadBook.student_id == uuid.UUID(str(student_id_filter).strip()))
+        except (ValueError, TypeError):
+            pass
+
+    readings = query.order_by(ReadBook.start_date.desc()).all()
+
+    items = []
+    for r in readings:
+        is_completed = r.end_date is not None
+        st = "finalizada" if is_completed else "en_curso"
+        if status_filter and st != status_filter:
+            continue
+        items.append({
+            "id": str(r.id),
+            "student_id": str(r.student_id),
+            "student_name": r.student.name if r.student else "Alumno",
+            "book_id": str(r.book_id),
+            "book_title": r.book.title if r.book and r.book.title else (r.book.book if r.book else "Libro"),
+            "book_level": r.book.level if r.book else "0",
+            "start_date": r.start_date.isoformat() if r.start_date else None,
+            "end_date": r.end_date.isoformat() if r.end_date else None,
+            "status": st
+        })
+
+    return jsonify({"items": items, "total": len(items)}), 200
+
+
+@single_readings_bp.route("", methods=["POST"])
+@require_role("tutor", "coordinator", "coordinador", "admin")
+def create_reading():
+    """Alias para asignar lectura directamente desde /api/v1/readings."""
+    data = request.get_json(silent=True) or {}
+    student_id = data.get("student_id")
+    if not student_id:
+        return jsonify({"error": "student_id es obligatorio"}), 400
+    return assign_student_book(student_id)
+
+
 @single_readings_bp.route("/<reading_id>", methods=["PATCH"])
 @require_role("tutor", "coordinator", "coordinador", "admin")
 def update_reading(reading_id):

@@ -1,6 +1,7 @@
 """Schemas Marshmallow para usuarios."""
 
 from marshmallow import Schema, fields, validate
+from app.schemas.fields import DateTimeOrString
 
 
 class UserCreateSchema(Schema):
@@ -29,8 +30,8 @@ class UserResponseSchema(Schema):
     name = fields.Str()
     role = fields.Str()
     is_active = fields.Bool()
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
+    created_at = DateTimeOrString()
+    updated_at = DateTimeOrString()
     sections = fields.List(fields.UUID(), allow_none=True)
 
 

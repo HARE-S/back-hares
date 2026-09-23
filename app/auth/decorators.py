@@ -81,6 +81,9 @@ def require_role(*allowed_roles):
                 return jsonify({"error": "UNAUTHORIZED"}), 401
 
             user_role = str(user.get("role", "")).strip().lower()
+            if user_role == "superadmin":
+                return f(*args, **kwargs)
+
             allowed_normalized = set()
             for r in allowed_roles:
                 r_low = r.strip().lower()
@@ -88,6 +91,8 @@ def require_role(*allowed_roles):
                 if r_low in ("coordinator", "coordinador"):
                     allowed_normalized.add("coordinator")
                     allowed_normalized.add("coordinador")
+                if r_low == "admin":
+                    allowed_normalized.add("superadmin")
 
             if allowed_roles and user_role not in allowed_normalized:
                 return (

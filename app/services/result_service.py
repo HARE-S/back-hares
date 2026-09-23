@@ -77,7 +77,7 @@ class ResultService:
         if current_user:
             user_role = str(current_user.get("role", "")).strip().lower()
             # Coordinadores y administradores tienen acceso irrestricto
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = current_user.get("sections") or []
                 assigned_strs = {str(s).strip() for s in assigned_sections}
                 target_sec_str = str(validated["section_id"]).strip()
@@ -151,7 +151,7 @@ class ResultService:
             user_role = str(current_user.get("role", "")).strip().lower()
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar resultados")
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
                 student_sections = {str(ss.section_id).strip() for ss in student.student_sections}
                 result_sections = {str(r.section_id).strip() for r in student.results}
@@ -216,7 +216,7 @@ class ResultService:
             user_role = str(current_user.get("role", "")).strip().lower()
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para modificar resultados")
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
                 student_sections = {str(ss.section_id).strip() for ss in result.student.student_sections}
                 if not (assigned_sections & {str(result.section_id).strip()} or assigned_sections & student_sections):
@@ -238,7 +238,7 @@ class ResultService:
                 raise ValidationError("La sección especificada no existe", field="section_id")
             if current_user:
                 user_role = str(current_user.get("role", "")).strip().lower()
-                if user_role not in ("coordinator", "coordinador", "admin"):
+                if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                     assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
                     if str(validated["section_id"]).strip() not in assigned_sections:
                         raise ForbiddenError("El tutor no tiene permiso sobre la nueva sección especificada")
@@ -319,7 +319,7 @@ class ResultService:
             user_role = str(current_user.get("role", "")).strip().lower()
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para anular resultados")
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
                 student_sections = {str(ss.section_id).strip() for ss in result.student.student_sections}
                 if not (assigned_sections & {str(result.section_id).strip()} or assigned_sections & student_sections):
@@ -376,7 +376,7 @@ class ResultService:
             user_role = str(current_user.get("role", "")).strip().lower()
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para registrar resultados")
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = current_user.get("sections") or []
                 assigned_strs = {str(s).strip() for s in assigned_sections}
                 target_sec_str = str(validated["section_id"]).strip()
@@ -523,7 +523,7 @@ class ResultService:
             user_role = str(current_user.get("role", "")).strip().lower()
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar resultados")
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
                 if str(parsed_section_id).strip() not in assigned_sections:
                     raise ForbiddenError("El tutor no tiene permiso sobre la sección especificada")

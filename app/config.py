@@ -52,7 +52,7 @@ class Config:
     SESSION_SQLALCHEMY_TABLE = "flask_session_store"
 
     # Subida de ficheros (BE-09)
-    IMPORT_ALLOWED_EXTENSIONS = {".csv"}
+    IMPORT_ALLOWED_EXTENSIONS = {".csv", ".xlsx", ".xls"}
     IMPORT_UPLOAD_MAX_BYTES = int(
         os.getenv("IMPORT_UPLOAD_MAX_BYTES", str(2 * 1024 * 1024))
     )
@@ -96,6 +96,7 @@ class TestingConfig(Config):
         "TEST_DATABASE_URL",
         "postgresql://test_user:test_password@db-test:5432/hares_test",
     )
+    IMPORT_ALLOWED_EXTENSIONS = {".csv"}
 
 
 class ProductionConfig(Config):

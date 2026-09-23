@@ -17,7 +17,7 @@ python scripts/init_db.py || echo "⚠️  Base de datos ya inicializada"
 
 # Cargar datos de prueba
 echo "📊 Cargando datos de prueba..."
-python scripts/seed_data.py || echo "⚠️  Datos de prueba ya cargados"
+# python scripts/seed_data.py || echo "⚠️  Datos de prueba ya cargados"
 
 # Crear usuario admin (si no existe)
 echo "👤 Creando usuario admin..."

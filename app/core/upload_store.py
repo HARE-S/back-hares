@@ -28,7 +28,7 @@ class UploadStore:
         self._order: List[str] = []
 
     # ------------------------------------------------------------------
-    def put(self, filename: str, content: str) -> str:
+    def put(self, filename: str, content: str, extra: Optional[Dict[str, Any]] = None) -> str:
         """Stores content under a new random token and returns it.
 
         Prunes expired entries first and evicts the oldest if over capacity.
@@ -42,6 +42,7 @@ class UploadStore:
         self._entries[token] = {
             "filename": filename,
             "content": content,
+            "extra": extra or {},
             "uploaded_at": time.monotonic(),
         }
         self._order.append(token)

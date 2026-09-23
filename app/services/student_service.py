@@ -57,7 +57,7 @@ class StudentService:
         if user_role == "pendiente":
             raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar el alumnado")
 
-        if current_user and user_role not in ("coordinator", "coordinador", "admin"):
+        if current_user and user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
             assigned = {
                 uuid.UUID(str(s).strip())
                 for s in (current_user.get("sections") or [])
@@ -168,7 +168,7 @@ class StudentService:
             user_role = str(current_user.get("role", "")).strip().lower()
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar la ficha del alumno")
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 assigned_sections = {str(s).strip() for s in (current_user.get("sections") or [])}
                 student_sections = {str(ss.section_id).strip() for ss in student.student_sections}
                 if not (assigned_sections & student_sections):
@@ -281,7 +281,7 @@ class StudentService:
             if user_role == "pendiente":
                 raise ForbiddenError("El usuario con rol pendiente no tiene permisos para consultar alumnos")
 
-            if user_role not in ("coordinator", "coordinador", "admin"):
+            if user_role not in ("coordinator", "coordinador", "admin", "superadmin"):
                 # Tutor: ámbito restringido
                 assigned_raw = current_user.get("sections") or []
                 assigned_sections = {str(s).strip() for s in assigned_raw if str(s).strip()}

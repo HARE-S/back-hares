@@ -17,7 +17,12 @@ def require_role(*allowed_roles):
             # Obtener rol de la cabecera (o por defecto coordinator)
             role = request.headers.get("X-User-Role", "coordinator").strip().lower()
 
+            if role == "superadmin":
+                return f(*args, **kwargs)
+
             allowed_lower = [r.lower() for r in allowed_roles]
+            if "admin" in allowed_lower:
+                allowed_lower.append("superadmin")
             if role not in allowed_lower:
                 return (
                     jsonify({
