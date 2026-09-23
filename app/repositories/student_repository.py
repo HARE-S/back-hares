@@ -289,12 +289,25 @@ class StudentRepository:
         if section_ids:
             stmt = stmt.where(StudentSection.section_id.in_(section_ids))
 
-        for field in ("academic_status", "sector"):
-            value = filters.get(field)
-            if value == MISSING_VALUE:
-                stmt = stmt.where(getattr(Student, field).is_(None))
-            elif value is not None:
-                stmt = stmt.where(getattr(Student, field) == value)
+        academic_status = filters.get("academic_status")
+        if academic_status == MISSING_VALUE:
+            stmt = stmt.where(Student.academic_status.is_(None))
+        elif academic_status is not None:
+            stmt = stmt.where(Student.academic_status == academic_status)
+
+        sector = filters.get("sector")
+        if sector == MISSING_VALUE:
+            stmt = stmt.where(Student.sector.is_(None) & Section.sector.is_(None))
+        elif sector is not None:
+            stmt = stmt.where((Student.sector == sector) | (Section.sector == sector))
+
+        name_filter = filters.get("name") or filters.get("q")
+        if name_filter:
+            stmt = stmt.where(Student.name.ilike(f"%{name_filter.strip()}%"))
+
+        academic_year = filters.get("academic_year")
+        if academic_year:
+            stmt = stmt.where(Section.academic_year == academic_year)
 
         return stmt
 

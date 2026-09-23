@@ -3,7 +3,7 @@
 Recursos de solo lectura: únicamente se exponen GET; cualquier otro
 método devuelve 405 Method Not Allowed automáticamente.
 """
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 
 from app.auth.decorators import get_current_user, require_role
 from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
@@ -47,14 +47,22 @@ def get_center_sections(center_id):
 
     Devuelve 200 OK con las secciones del centro no deshabilitadas.
     Devuelve 404 Not Found si el centro no existe o está deshabilitado.
+    Permite filtrar opcionalmente por sector, academic_year y active (vigentes).
     """
     current_user = get_current_user()
     service = DirectoryService(db.session)
+    sector = request.args.get("sector")
+    academic_year = request.args.get("academic_year")
+    active_arg = request.args.get("active")
+    active_only = str(active_arg).strip().lower() in ("true", "1") if active_arg is not None else False
 
     try:
         sections = service.get_center_sections(
             center_id=center_id,
             current_user=current_user,
+            sector=sector,
+            academic_year=academic_year,
+            active_only=active_only,
         )
     except ValidationError as e:
         payload = {"error": str(e)}

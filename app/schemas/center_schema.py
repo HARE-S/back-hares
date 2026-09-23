@@ -22,6 +22,9 @@ class SectionSchema(Schema):
     external_id = fields.Str(attribute="external_id", allow_none=True)
     name = fields.Str(attribute="name")
     academic_year = fields.Str(attribute="academic_year", allow_none=True)
+    start_date = fields.Date(attribute="start_date", allow_none=True)
+    end_date = fields.Date(attribute="end_date", allow_none=True)
+    sector = fields.Str(attribute="sector", allow_none=True)
     center_id = fields.Function(lambda obj: str(obj.center_id))
     students_count = fields.Int(attribute="students_count", missing=0)
 

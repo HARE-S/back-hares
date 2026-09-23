@@ -47,6 +47,9 @@ class Section(BaseModel):
     external_id = db.Column(db.String(255), unique=True, nullable=True)
     name = db.Column(db.String(255), nullable=False)
     academic_year = db.Column(db.String(20), nullable=True)
+    start_date = db.Column(db.Date, nullable=True)
+    end_date = db.Column(db.Date, nullable=True)
+    sector = db.Column(db.String(100), nullable=True)
     disabled_at = db.Column(db.Date, nullable=True)
     origin = db.Column(db.String(20), nullable=False, server_default="alexia", default="alexia")
 

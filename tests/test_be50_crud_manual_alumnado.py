@@ -308,6 +308,34 @@ def test_crud_manual_secciones_duplicado_y_400(client, setup_data):
     assert _audit("DEACTIVATE_SECTION", "section")
 
 
+def test_crud_manual_secciones_penascal_dates_and_sector(client, setup_data):
+    _login(client, "admin")
+    created = client.post(
+        "/api/v1/sections",
+        json={
+            "name": "Soldadura 1 A",
+            "center_id": str(setup_data["c1"].id),
+            "academic_year": "2025-2026",
+            "start_date": "2025-09-01",
+            "end_date": "2026-06-30",
+            "sector": "Metal",
+        },
+    )
+    assert created.status_code == 201, created.get_json()
+    data = created.get_json()
+    assert data["sector"] == "Metal"
+    assert data["start_date"] == "2025-09-01"
+    assert data["end_date"] == "2026-06-30"
+
+    updated = client.patch(
+        f"/api/v1/sections/{data['id']}",
+        json={"sector": "Soldadura Avanzada", "end_date": "2026-07-15"},
+    )
+    assert updated.status_code == 200, updated.get_json()
+    assert updated.get_json()["sector"] == "Soldadura Avanzada"
+    assert updated.get_json()["end_date"] == "2026-07-15"
+
+
 def test_seccion_centro_inexistente_404(client):
     _login(client, "admin")
     resp = client.post(

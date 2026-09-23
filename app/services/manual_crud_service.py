@@ -268,14 +268,28 @@ class ManualCrudService:
             raise ConflictError("Ya existe una sección activa con ese nombre en ese centro.")
 
     def create_section(
-        self, name: str, center_id, academic_year: Optional[str], current_user,
+        self,
+        name: str,
+        center_id,
+        academic_year: Optional[str] = None,
+        current_user = None,
+        start_date: Optional[datetime.date] = None,
+        end_date: Optional[datetime.date] = None,
+        sector: Optional[str] = None,
     ) -> Section:
         if center_id is None:
             raise ValidationError("El centro es obligatorio para crear una sección.")
         center = self._get_active_center(center_id)
         self._get_unique_section_name(center.id, name)
-        section = Section(center_id=center.id, name=name,
-                          academic_year=academic_year, origin="manual")
+        section = Section(
+            center_id=center.id,
+            name=name,
+            academic_year=academic_year,
+            start_date=start_date,
+            end_date=end_date,
+            sector=sector,
+            origin="manual",
+        )
         self.session.add(section)
         self.session.flush()
         self._log(current_user, "CREATE_SECTION_MANUAL", "section", section.id, {
@@ -290,9 +304,10 @@ class ManualCrudService:
             self._get_unique_section_name(section.center_id, updates["name"])
             prev["name"] = {"anterior": section.name, "nuevo": updates["name"]}
             section.name = updates["name"]
-        if "academic_year" in updates and updates["academic_year"] != section.academic_year:
-            prev["academic_year"] = {"anterior": section.academic_year, "nuevo": updates["academic_year"]}
-            section.academic_year = updates["academic_year"]
+        for field in ("academic_year", "start_date", "end_date", "sector"):
+            if field in updates and updates[field] != getattr(section, field):
+                prev[field] = {"anterior": str(getattr(section, field)), "nuevo": str(updates[field])}
+                setattr(section, field, updates[field])
         if prev:
             self.session.flush()
             self._log(current_user, "UPDATE_SECTION", "section", section.id, prev)

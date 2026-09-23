@@ -80,6 +80,9 @@ class StudentFilterArgsSchema(Schema):
     section_id = fields.UUID(load_default=None, data_key="section_id")
     academic_status = fields.Str(load_default=None, validate=validate.Length(max=100))
     sector = fields.Str(load_default=None, validate=validate.Length(max=100))
+    name = fields.Str(load_default=None)
+    q = fields.Str(load_default=None)
+    academic_year = fields.Str(load_default=None)
     page = fields.Int(load_default=1, validate=validate.Range(min=1))
     limit = fields.Int(load_default=10, validate=validate.Range(min=1, max=100))
 

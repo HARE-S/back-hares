@@ -4,6 +4,7 @@ Recursos de solo lectura: su origen es Alexia. El servicio centraliza
 la localización de recursos activos (excluyendo deshabilitados) y el
 filtrado por secciones asignadas del tutor (Escenario 6).
 """
+import datetime
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
@@ -81,6 +82,9 @@ class DirectoryService:
         self,
         center_id: Union[str, uuid.UUID],
         current_user: Optional[Dict[str, Any]] = None,
+        sector: Optional[str] = None,
+        academic_year: Optional[str] = None,
+        active_only: bool = False,
     ) -> List[Dict[str, Any]]:
         """Devuelve las secciones activas de un centro (Escenario 2).
 
@@ -98,6 +102,18 @@ class DirectoryService:
             sections = [s for s in sections if str(s.id) in restricted]
             if not sections:
                 raise ForbiddenError("El tutor no tiene permiso para consultar las secciones de este centro")
+
+        if sector:
+            sections = [s for s in sections if getattr(s, "sector", None) == sector]
+        if academic_year:
+            sections = [s for s in sections if getattr(s, "academic_year", None) == academic_year]
+        if active_only:
+            today = datetime.date.today()
+            sections = [
+                s for s in sections
+                if (s.start_date is None or s.start_date <= today) and
+                   (s.end_date is None or s.end_date >= today)
+            ]
 
         counts = self.repo.count_enrolled_students_by_section([s.id for s in sections])
         data = SectionSchema(many=True).dump(sections)

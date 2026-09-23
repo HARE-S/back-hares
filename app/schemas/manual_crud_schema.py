@@ -58,12 +58,18 @@ class ManualSectionCreateSchema(Schema):
     name = fields.Str(required=True)
     center_id = fields.UUID()
     academic_year = fields.Str(allow_none=True)
+    start_date = fields.Date(allow_none=True)
+    end_date = fields.Date(allow_none=True)
+    sector = fields.Str(allow_none=True)
 
 
 class ManualSectionUpdateSchema(Schema):
     """Modificación de una sección. Solo campos presentes."""
     name = fields.Str()
     academic_year = fields.Str(allow_none=True)
+    start_date = fields.Date(allow_none=True)
+    end_date = fields.Date(allow_none=True)
+    sector = fields.Str(allow_none=True)
 
 
 class ManualSectionItemSchema(Schema):
@@ -103,6 +109,9 @@ class ManualSectionResponseSchema(Schema):
     external_id = fields.Str(allow_none=True)
     name = fields.Str()
     academic_year = fields.Str(allow_none=True)
+    start_date = fields.Date(allow_none=True)
+    end_date = fields.Date(allow_none=True)
+    sector = fields.Str(allow_none=True)
     origin = fields.Str()
     disabled_at = fields.Date(allow_none=True)
 

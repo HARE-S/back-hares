@@ -232,6 +232,9 @@ class ManualSections(MethodView):
                 center_id=payload.get("center_id"),
                 academic_year=payload.get("academic_year"),
                 current_user=get_current_user(),
+                start_date=payload.get("start_date"),
+                end_date=payload.get("end_date"),
+                sector=payload.get("sector"),
             )
             db.session.commit()
             return section, 201
