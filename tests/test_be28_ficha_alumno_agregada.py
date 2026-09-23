@@ -46,8 +46,6 @@ def setup_data(session):
     s1 = Student(
         name="Aitor Ortiz",
         external_id="AIT-001",
-        birth_date=datetime.date(2012, 5, 15),
-        gender="M",
         academic_status="Ordinario",
         sector="Sector 1",
     )
@@ -55,8 +53,6 @@ def setup_data(session):
     s2_empty = Student(
         name="Leire Blanco",
         external_id="LEI-002",
-        birth_date=datetime.date(2013, 3, 20),
-        gender="F",
         academic_status="ACNEAE",
         sector="Sector 2",
     )
@@ -152,11 +148,8 @@ def test_scenario_1_and_2_complete_student_card(client, setup_data):
     # 1. Datos personales
     assert data["id"] == str(s1.id)
     assert data["name"] == "Aitor Ortiz"
-    assert data["birth_date"] == "2012-05-15"
-    assert data["gender"] == "M"
     assert data["academic_status"] == "Ordinario"
     assert data["sector"] == "Sector 1"
-    assert "age" in data
 
     # 2. Secciones actuales e históricas
     assert "sections" in data or "current_sections" in data

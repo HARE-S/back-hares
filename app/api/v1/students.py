@@ -42,7 +42,7 @@ class StudentList(MethodView):
         Devuelve el alumnado activo que cumple todos los criterios (AND).
 
         - Tutor: ámbito restringido a sus secciones asignadas (Escenario 6).
-        - `__missing__` en gender/academic_status/sector selecciona los alumnos
+        - `__missing__` en academic_status/sector selecciona los alumnos
           sin ese campo informado; `missing_data` indica cuántos se omitieron
           por no tenerlo (Escenario 5).
         - 403 Forbidden si el rol es 'pendiente' o si el tutor no tiene secciones.

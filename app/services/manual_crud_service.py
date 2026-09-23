@@ -104,7 +104,7 @@ class ManualCrudService:
             origin="manual",
             created_by_user_id=self._extract_user_id(current_user),
         )
-        for field in ("birth_date", "gender", "academic_status", "sector", "area"):
+        for field in ("academic_status", "sector", "area"):
             val = profile_fields.get(field)
             if val is not None:
                 setattr(student, field, val)
@@ -129,7 +129,7 @@ class ManualCrudService:
     ) -> Student:
         student = self._get_active_student(student_id)
         prev = {}
-        for field in ("name", "birth_date", "gender", "academic_status", "sector", "area"):
+        for field in ("name", "academic_status", "sector", "area"):
             if field in updates:
                 old = getattr(student, field)
                 new = updates[field]
@@ -212,8 +212,6 @@ class ManualCrudService:
             "name": student.name,
             "origin": student.origin,
             "area": student.area,
-            "birth_date": student.birth_date,
-            "gender": student.gender,
             "academic_status": student.academic_status,
             "sector": student.sector,
             "disabled_at": student.disabled_at,

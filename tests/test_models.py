@@ -41,8 +41,6 @@ def test_student_and_sections(session):
     section = Section(name="1CARMED2", center=center)
     student = Student(
         name="STU01 - Juan Pérez",
-        birth_date=datetime.date(2008, 5, 20),
-        gender="M",
         academic_status="1º Grado Medio",
         sector="Mecanizado",
     )
@@ -60,15 +58,11 @@ def test_student_and_sections(session):
     assert len(student.student_sections) == 1
     assert student.student_sections[0].section.name == "1CARMED2"
     assert len(section.student_sections) == 1
-    assert student.gender == "M"
     assert student.sector == "Mecanizado"
-    assert student.age is not None
-    assert student.age > 0
 
     data = student.to_dict()
     assert data["name"] == "STU01 - Juan Pérez"
-    assert data["gender"] == "M"
-    assert data["age"] == student.age
+    assert data["sector"] == "Mecanizado"
 
 
 def test_test_and_results(session):

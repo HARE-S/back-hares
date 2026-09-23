@@ -17,8 +17,6 @@ class ManualStudentCreateSchema(Schema):
         validate=validate.Length(min=1),
         metadata={"description": "Secciones del alumno (al menos una)."},
     )
-    birth_date = fields.Date(allow_none=True)
-    gender = fields.Str(allow_none=True)
     academic_status = fields.Str(allow_none=True)
     sector = fields.Str(allow_none=True)
     area = fields.Str(allow_none=True)
@@ -31,8 +29,6 @@ class ManualStudentUpdateSchema(Schema):
     anterior de cada campo modificado.
     """
     name = fields.Str(allow_none=False)
-    birth_date = fields.Date(allow_none=True)
-    gender = fields.Str(allow_none=True)
     academic_status = fields.Str(allow_none=True)
     sector = fields.Str(allow_none=True)
     area = fields.Str(allow_none=True)
@@ -85,8 +81,6 @@ class ManualStudentResponseSchema(Schema):
     name = fields.Str()
     origin = fields.Str()
     area = fields.Str()
-    birth_date = fields.Date(allow_none=True)
-    gender = fields.Str(allow_none=True)
     academic_status = fields.Str(allow_none=True)
     sector = fields.Str(allow_none=True)
     disabled_at = fields.Date(allow_none=True)

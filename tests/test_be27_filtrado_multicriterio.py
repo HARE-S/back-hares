@@ -27,10 +27,7 @@ from app.extensions import db as _db
 from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
 from app.models.test import Result, Test
-from app.repositories.student_repository import (
-    birth_date_lower_bound,
-    birth_date_upper_bound,
-)
+
 
 
 # ---------------------------------------------------------------------------
@@ -85,28 +82,23 @@ def setup_db(app):
         # ---- Students ----
         s1 = Student(
             id=uuid.uuid4(), external_id="EXT-S1", name="Ana García",
-            gender="Femenino", academic_status="Activo", sector="Tecnología",
-            birth_date=datetime.date(2014, 5, 10),  # 12 years on 15 Sep 2026
+            academic_status="Activo", sector="Tecnología",
         )
         s2 = Student(
             id=uuid.uuid4(), external_id="EXT-S2", name="Luis Martínez",
-            gender="Masculino", academic_status="Activo", sector="Salud",
-            birth_date=datetime.date(2013, 10, 20),  # 12 years
+            academic_status="Activo", sector="Salud",
         )
         s3 = Student(
             id=uuid.uuid4(), external_id="EXT-S3", name="María López",
-            gender="Femenino", academic_status="Activo", sector=None,
-            birth_date=datetime.date(2016, 1, 5),  # 10 years
+            academic_status="Activo", sector=None,
         )
         s4 = Student(
             id=uuid.uuid4(), external_id="EXT-S4", name="Carlos Ruiz",
-            gender=None, academic_status=None, sector=None,
-            birth_date=datetime.date(2012, 3, 15),  # 14 years
+            academic_status=None, sector=None,
         )
         s5 = Student(
             id=uuid.uuid4(), external_id="EXT-S5", name="Elena Díaz",
-            gender="Femenino", academic_status="Activo", sector="Tecnología",
-            birth_date=datetime.date(2015, 12, 25),  # 10 years
+            academic_status="Activo", sector="Tecnología",
         )
         _db.session.add_all([s1, s2, s3, s4, s5])
         _db.session.flush()
@@ -272,29 +264,6 @@ class TestFiltroSeccion:
 # Escenario 4 – Filtro por género
 # ---------------------------------------------------------------------------
 
-class TestFiltroGenero:
-    def test_solo_alumnos_femeninos(self, client, session):
-        _set_dev_session(client, role="admin")
-        resp = client.get("/api/v1/students?gender=Femenino")
-        data = resp.get_json()
-        assert resp.status_code == 200
-        assert data["total"] == 3  # s1, s3, s5
-        for item in data["items"]:
-            assert item["name"] in ("Ana García", "María López", "Elena Díaz")
-        assert "gender" in data.get("missing_data", {})
-
-    def test_solo_alumnos_masculinos(self, client, session):
-        _set_dev_session(client, role="admin")
-        resp = client.get("/api/v1/students?gender=Masculino")
-        data = resp.get_json()
-        assert data["total"] == 1  # s2
-        assert data["items"][0]["name"] == "Luis Martínez"
-
-
-# ---------------------------------------------------------------------------
-# Escenario 5 – Filtro __missing__ y conteo missing_data
-# ---------------------------------------------------------------------------
-
 class TestFiltroMissing:
     def test_sector_missing_devuelve_alumnos_sin_sector(self, client, session):
         _set_dev_session(client, role="admin")
@@ -306,26 +275,12 @@ class TestFiltroMissing:
         assert "María López" in names
         assert "Carlos Ruiz" in names
 
-    def test_gender_missing_devuelve_alumnos_sin_genero(self, client, session):
-        _set_dev_session(client, role="admin")
-        resp = client.get("/api/v1/students?gender=__missing__")
-        data = resp.get_json()
-        assert resp.status_code == 200
-        assert data["total"] == 1  # s4
-        assert data["items"][0]["name"] == "Carlos Ruiz"
-
     def test_missing_data_count_para_sector_activo(self, client, session):
         _set_dev_session(client, role="admin")
         resp = client.get("/api/v1/students?sector=Tecnología")
         data = resp.get_json()
         assert resp.status_code == 200
         assert data["missing_data"]["sector"] == 2  # s3 y s4 no tienen sector
-
-    def test_missing_data_count_para_gender_activo(self, client, session):
-        _set_dev_session(client, role="admin")
-        resp = client.get("/api/v1/students?gender=Femenino")
-        data = resp.get_json()
-        assert data["missing_data"]["gender"] == 1  # s4 no tiene género
 
 
 # ---------------------------------------------------------------------------
@@ -376,79 +331,29 @@ class TestTutorScope:
 # Filtro por edad (min_age / max_age)
 # ---------------------------------------------------------------------------
 
-class TestFiltroEdad:
-    def test_alumnos_entre_10_y_12_anios(self, client, session):
-        _set_dev_session(client, role="admin")
-        resp = client.get("/api/v1/students?min_age=10&max_age=12")
-        data = resp.get_json()
-        assert resp.status_code == 200
-        # s1(12), s2(12), s3(10), s5(10) = 4
-        assert data["total"] == 4
-
-    def test_alumnos_mayores_de_13(self, client, session):
-        _set_dev_session(client, role="admin")
-        resp = client.get("/api/v1/students?min_age=13")
-        data = resp.get_json()
-        assert resp.status_code == 200
-        # s4(14) = 1
-        assert data["total"] == 1
-        assert data["items"][0]["name"] == "Carlos Ruiz"
-
-    def test_alumnos_menores_de_11(self, client, session):
-        _set_dev_session(client, role="admin")
-        resp = client.get("/api/v1/students?max_age=10")
-        data = resp.get_json()
-        assert resp.status_code == 200
-        # s3(10), s5(10) = 2
-        assert data["total"] == 2
-
-    def test_rango_edad_invalido_min_mayor_que_max(self, client, session):
-        _set_dev_session(client, role="admin")
-        # La validación de query via flask-smorest responde 422.
-        resp = client.get("/api/v1/students?min_age=15&max_age=10")
-        assert resp.status_code == 422
-
-    def test_birth_date_cutoff_logic(self):
-        """Unit test for age boundary calculations."""
-        today = datetime.date(2026, 9, 15)
-        # min_age=10: upper_bound = 2016-09-15 (born on this day → 10 today)
-        assert birth_date_upper_bound(10, today) == datetime.date(2016, 9, 15)
-        # max_age=10: lower_bound = 2015-09-16 (anyone born on/after is age <= 10)
-        assert birth_date_lower_bound(10, today) == datetime.date(2015, 9, 16)
-        # Feb 29 edge case
-        assert birth_date_upper_bound(8, datetime.date(2026, 3, 1)) == datetime.date(2018, 3, 1)
-
-
-# ---------------------------------------------------------------------------
-# Combinación de filtros (AND)
-# ---------------------------------------------------------------------------
-
 class TestCombinacionFiltros:
-    def test_centro_genero(self, client, session):
+    def test_centro_sector(self, client, session):
         c_a = session.execute(
             _db.text("SELECT id FROM centers WHERE name = 'Centro A' LIMIT 1")
         ).scalar()
         _set_dev_session(client, role="admin")
-        resp = client.get(f"/api/v1/students?center_id={c_a}&gender=Femenino")
+        resp = client.get(f"/api/v1/students?center_id={c_a}&sector=Tecnología")
         data = resp.get_json()
         assert resp.status_code == 200
-        # Centro A + Femenino: s1, s3 = 2
-        assert data["total"] == 2
-        names = {item["name"] for item in data["items"]}
-        assert "Ana García" in names
-        assert "María López" in names
+        # Centro A + Tecnología: s1 = 1
+        assert data["total"] == 1
+        assert data["items"][0]["name"] == "Ana García"
 
-    def test_seccion_edad_genero(self, client, session):
+    def test_seccion_sector(self, client, session):
         sec_a1 = session.execute(
             _db.text("SELECT id FROM sections WHERE name = 'Sección A1' LIMIT 1")
         ).scalar()
         _set_dev_session(client, role="admin")
         resp = client.get(
-            f"/api/v1/students?section_id={sec_a1}&gender=Femenino&min_age=11"
+            f"/api/v1/students?section_id={sec_a1}&sector=Tecnología"
         )
         data = resp.get_json()
         assert resp.status_code == 200
-        # Sec A1 + Femenino + age>=11: s1 (12) = 1
         assert data["total"] == 1
         assert data["items"][0]["name"] == "Ana García"
 
@@ -482,12 +387,12 @@ class TestCombinacionFiltros:
 # ---------------------------------------------------------------------------
 
 class TestAuditoria:
-    def test_audit_register_on_gender_filter(self, client, session):
+    def test_audit_register_on_academic_status_filter(self, client, session):
         from unittest.mock import patch
 
         _set_dev_session(client, role="admin")
         with patch("app.services.student_service.log_audit") as mock_audit:
-            resp = client.get("/api/v1/students?gender=Femenino")
+            resp = client.get("/api/v1/students?academic_status=Activo")
             assert resp.status_code == 200
             mock_audit.assert_called_once()
             call_args = mock_audit.call_args
@@ -498,7 +403,7 @@ class TestAuditoria:
 
         _set_dev_session(client, role="admin")
         with patch("app.services.student_service.log_audit") as mock_audit:
-            resp = client.get("/api/v1/students?min_age=10")
+            resp = client.get("/api/v1/students?sector=Tecnología")
             assert resp.status_code == 200
             mock_audit.assert_not_called()
 
@@ -528,7 +433,7 @@ class TestSeguridad:
 class TestResultadosVacios:
     def test_filtro_sin_resultados(self, client, session):
         _set_dev_session(client, role="admin")
-        resp = client.get("/api/v1/students?gender=OtroGenero")
+        resp = client.get("/api/v1/students?sector=OtroSector")
         data = resp.get_json()
         assert resp.status_code == 200
         assert data["total"] == 0
@@ -556,8 +461,8 @@ class TestOpenAPISpec:
         get_op = paths["/api/v1/students"]["get"]
         param_names = {p["name"] for p in get_op.get("parameters", [])}
         expected = {
-            "center_id", "section_id", "gender", "academic_status",
-            "sector", "min_age", "max_age", "page", "limit",
+            "center_id", "section_id", "academic_status",
+            "sector", "page", "limit",
         }
         assert expected.issubset(param_names)
         assert "200" in get_op.get("responses", {})

@@ -34,31 +34,26 @@ def setup_data(session):
     s_negative = Student(
         name="Carlos Empeora",
         external_id="CAR-001",
-        birth_date=datetime.date(2012, 1, 1),
     )
     # Alumno 2 (sec1): Tendencia PLANA (130 -> 130 -> 130 PPM)
     s_flat = Student(
         name="Paula Plana",
         external_id="PAU-002",
-        birth_date=datetime.date(2012, 2, 2),
     )
     # Alumno 3 (sec1): Tendencia POSITIVA (100 -> 140 -> 180 PPM)
     s_improving = Student(
         name="Iker Mejora",
         external_id="IKE-003",
-        birth_date=datetime.date(2012, 3, 3),
     )
     # Alumno 4 (sec1): Datos INSUFICIENTES (1 sola prueba registrada)
     s_single = Student(
         name="Sofia UnaPrueba",
         external_id="SOF-004",
-        birth_date=datetime.date(2012, 4, 4),
     )
     # Alumno 5 (sec2): Alumno en otra sección (tendencia negativa)
     s_sec2_negative = Student(
         name="Marcos OtraSeccion",
         external_id="MAR-005",
-        birth_date=datetime.date(2012, 5, 5),
     )
 
     session.add_all([s_negative, s_flat, s_improving, s_single, s_sec2_negative])

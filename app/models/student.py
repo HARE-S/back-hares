@@ -16,8 +16,6 @@ class Student(BaseModel):
     )
     external_id = db.Column(db.String(255), unique=True, nullable=True)
     name = db.Column(db.String(255), nullable=False)
-    birth_date = db.Column(db.Date, nullable=True)
-    gender = db.Column(db.String(20), nullable=True)
     academic_status = db.Column(db.String(100), nullable=True)
     sector = db.Column(db.String(100), nullable=True)
     disabled_at = db.Column(db.Date, nullable=True)
@@ -28,22 +26,6 @@ class Student(BaseModel):
         db.ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
     )
-
-    @property
-    def age(self):
-        if not self.birth_date:
-            return None
-        today = datetime.date.today()
-        return (
-            today.year
-            - self.birth_date.year
-            - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
-        )
-
-    def to_dict(self):
-        data = super().to_dict()
-        data["age"] = self.age
-        return data
 
     # Relaciones
     student_sections = db.relationship(

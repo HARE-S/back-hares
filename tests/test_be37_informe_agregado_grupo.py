@@ -34,9 +34,9 @@ def setup_data(session):
     session.add_all([sec1, sec2, sec_empty])
     session.flush()
 
-    s1 = Student(name="Aitor Ortiz", external_id="AIT-001", birth_date=datetime.date(2012, 5, 15))
-    s2 = Student(name="Leire Blanco", external_id="LEI-002", birth_date=datetime.date(2013, 3, 20))
-    s3 = Student(name="Lucía Morales", external_id="LUC-003", birth_date=datetime.date(2012, 8, 20))
+    s1 = Student(name="Aitor Ortiz", external_id="AIT-001")
+    s2 = Student(name="Leire Blanco", external_id="LEI-002")
+    s3 = Student(name="Lucía Morales", external_id="LUC-003")
     session.add_all([s1, s2, s3])
     session.flush()
 

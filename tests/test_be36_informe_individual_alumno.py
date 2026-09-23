@@ -35,8 +35,6 @@ def setup_data(session):
     s1 = Student(
         name="Aitor Ortiz",
         external_id="AIT-001",
-        birth_date=datetime.date(2012, 5, 15),
-        gender="M",
         academic_status="Ordinario",
         sector="Sector 1",
     )
@@ -44,8 +42,6 @@ def setup_data(session):
     s2_single = Student(
         name="Leire Blanco",
         external_id="LEI-002",
-        birth_date=datetime.date(2013, 3, 20),
-        gender="F",
         academic_status="ACNEAE",
         sector="Sector 2",
     )
@@ -53,8 +49,6 @@ def setup_data(session):
     s3_other = Student(
         name="Lucía Morales",
         external_id="LUC-003",
-        birth_date=datetime.date(2012, 8, 20),
-        gender="F",
     )
     session.add_all([s1, s2_single, s3_other])
     session.flush()
@@ -152,8 +146,6 @@ def test_scenario_1_and_2_complete_report_and_generation_date(client, setup_data
     student_info = data.get("student") or data
     assert student_info["id"] == str(s1.id)
     assert student_info["name"] == "Aitor Ortiz"
-    assert student_info["birth_date"] == "2012-05-15"
-    assert "age" in student_info
 
     # 2. Histórico de pruebas con métricas
     assert "results" in data

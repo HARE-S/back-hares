@@ -289,26 +289,12 @@ class StudentRepository:
         if section_ids:
             stmt = stmt.where(StudentSection.section_id.in_(section_ids))
 
-        for field in ("gender", "academic_status", "sector"):
+        for field in ("academic_status", "sector"):
             value = filters.get(field)
             if value == MISSING_VALUE:
                 stmt = stmt.where(getattr(Student, field).is_(None))
             elif value is not None:
                 stmt = stmt.where(getattr(Student, field) == value)
-
-        today = datetime.date.today()
-
-        min_age = filters.get("min_age")
-        if min_age is not None:
-            stmt = stmt.where(
-                Student.birth_date <= birth_date_upper_bound(min_age, today)
-            )
-
-        max_age = filters.get("max_age")
-        if max_age is not None:
-            stmt = stmt.where(
-                Student.birth_date >= birth_date_lower_bound(max_age, today)
-            )
 
         return stmt
 

@@ -436,7 +436,7 @@ class StudentService:
         - Tutor: ámbito forzado a sus secciones; 403 si no tiene ninguna o
           si solicita una sección fuera de su ámbito (Escenario 6).
         - Registro de auditoría ``FILTER_STUDENTS`` cuando se filtra por
-          ``gender`` o ``academic_status`` por contener datos sensibles del menor.
+          ``academic_status`` por contener datos sensibles del menor.
         - ``missing_data`` indica cuántos alumnos del ámbito no tenían
           informado cada campo filtrado (Escenario 5).
         """
@@ -496,7 +496,7 @@ class StudentService:
 
         # 6. Conteo de alumnos sin datos (Escenario 5)
         missing_data: Dict[str, int] = {}
-        for field in ("gender", "academic_status", "sector"):
+        for field in ("academic_status", "sector"):
             value = repo_filters.get(field)
             if value is not None and value != MISSING_VALUE:
                 missing_data[field] = repo.count_students_missing_field(field, repo_filters)
@@ -504,7 +504,7 @@ class StudentService:
         # 7. Auditoría sobre datos sensibles del menor
         sensitive = any(
             repo_filters.get(f) not in (None, MISSING_VALUE)
-            for f in ("gender", "academic_status")
+            for f in ("academic_status",)
         )
         if sensitive:
             log_audit(

@@ -66,8 +66,6 @@ class ManualStudents(MethodView):
                 center_id=payload["center_id"],
                 section_ids=payload["section_ids"],
                 current_user=get_current_user(),
-                birth_date=payload.get("birth_date"),
-                gender=payload.get("gender"),
                 academic_status=payload.get("academic_status"),
                 sector=payload.get("sector"),
                 area=payload.get("area"),

@@ -54,7 +54,6 @@ def test_escenario1_alta_manual_alumno_201(client, session, setup_data):
             "name": "Lara Núñez",
             "center_id": str(setup_data["c1"].id),
             "section_ids": [str(setup_data["sec_a"].id)],
-            "gender": "F",
             "area": "Funcional",
         },
     )

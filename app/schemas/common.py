@@ -72,31 +72,16 @@ class StudentFilterArgsSchema(Schema):
 
     Todos los criterios son opcionales y se combinan en conjunción (AND):
     - center_id / section_id: ámbito de centro y sección (T-BE27-02).
-    - gender / academic_status / sector: igualdad sobre las columnas nullable
+    - academic_status / sector: igualdad sobre las columnas nullable
       (T-BE27-04); `__missing__` selecciona a los alumnos sin el dato (T-BE27-05).
-    - min_age / max_age: edad derivada de birth_date en la consulta, nunca
-      almacenada (T-BE27-03).
     - page / limit: paginación reutilizando los rangos canónicos del contrato 4.
     """
     center_id = fields.UUID(load_default=None, data_key="center_id")
     section_id = fields.UUID(load_default=None, data_key="section_id")
-    gender = fields.Str(load_default=None, validate=validate.Length(max=20))
     academic_status = fields.Str(load_default=None, validate=validate.Length(max=100))
     sector = fields.Str(load_default=None, validate=validate.Length(max=100))
-    min_age = fields.Int(load_default=None, validate=validate.Range(min=0, max=120))
-    max_age = fields.Int(load_default=None, validate=validate.Range(min=0, max=120))
     page = fields.Int(load_default=1, validate=validate.Range(min=1))
     limit = fields.Int(load_default=10, validate=validate.Range(min=1, max=100))
-
-    @validates_schema
-    def _validate_age_range(self, data, **kwargs):
-        min_age = data.get("min_age")
-        max_age = data.get("max_age")
-        if min_age is not None and max_age is not None and min_age > max_age:
-            raise ValidationError(
-                "El rango de edad no es válido: min_age debe ser menor o igual que max_age",
-                field_names=["min_age", "max_age"],
-            )
 
 
 class ErrorSchema(Schema):
