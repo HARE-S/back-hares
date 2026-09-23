@@ -2,7 +2,7 @@
 
 import pytest
 from app.models.user import User, UserRole
-from app.models.center import Section
+from app.models.center import Center, Section
 from app.services.user_service import UserService
 from app.core.exceptions import ValidationError, ConflictError, NotFoundError
 
@@ -131,7 +131,7 @@ class TestUserManagement:
             name="Assign",
             role=UserRole.TUTOR.value,
         )
-        section = Section(name="Section1", code="S1")
+        section = Section(name="Section1", center=Center(name="Centro"))
         db_session.add(user)
         db_session.add(section)
         db_session.flush()
@@ -152,7 +152,7 @@ class TestUserManagement:
             name="Dup",
             role=UserRole.TUTOR.value,
         )
-        section = Section(name="Section2", code="S2")
+        section = Section(name="Section2", center=Center(name="Centro"))
         db_session.add(user)
         db_session.add(section)
         db_session.flush()

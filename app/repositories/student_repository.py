@@ -120,6 +120,20 @@ class StudentRepository:
         )
         return list(self.session.scalars(stmt).all())
 
+    def get_sections_by_centers(self, center_ids) -> List[Section]:
+        """Returns the non-disabled sections of several centers (BE-10)."""
+        if not center_ids:
+            return []
+        stmt = (
+            select(Section)
+            .where(
+                Section.center_id.in_(center_ids),
+                Section.disabled_at.is_(None),
+            )
+            .order_by(Section.name.asc())
+        )
+        return list(self.session.scalars(stmt).all())
+
     def get_active_section(self, section_id) -> Optional[Section]:
         """Returns a section by id, excluding disabled ones (BE-10)."""
         stmt = select(Section).where(
@@ -189,6 +203,38 @@ class StudentRepository:
     def count_sections(self) -> int:
         """Returns the total number of sections."""
         return int(self.session.scalar(select(func.count(Section.id))) or 0)
+
+    def count_active_sections_by_center(self, center_ids) -> Dict[Any, int]:
+        """Returns {center_id: count} of non-disabled sections (BE-10)."""
+        if not center_ids:
+            return {}
+        stmt = (
+            select(Section.center_id, func.count(Section.id))
+            .where(
+                Section.center_id.in_(center_ids),
+                Section.disabled_at.is_(None),
+            )
+            .group_by(Section.center_id)
+        )
+        return dict(self.session.execute(stmt).all())
+
+    def count_enrolled_students_by_section(self, section_ids) -> Dict[Any, int]:
+        """
+        Returns {section_id: count} of non-disabled students enrolled in each
+        section (BE-10, FE-25).
+        """
+        if not section_ids:
+            return {}
+        stmt = (
+            select(StudentSection.section_id, func.count(Student.id))
+            .join(Student, Student.id == StudentSection.student_id)
+            .where(
+                StudentSection.section_id.in_(section_ids),
+                Student.disabled_at.is_(None),
+            )
+            .group_by(StudentSection.section_id)
+        )
+        return dict(self.session.execute(stmt).all())
 
     # -------------------------------------------------------------- enrollments
     def has_enrollment(self, student: Student, section: Section) -> bool:

@@ -1,6 +1,7 @@
 """Servicio de auditoría (BE-44)."""
 
 from typing import Optional, Dict, Any
+from uuid import UUID
 from flask import request
 from sqlalchemy.orm import Session
 from app.models.audit import AuditLog, AuditAction
@@ -26,7 +27,7 @@ class AuditService:
         ip_address = self._get_client_ip()
 
         log = AuditLog(
-            user_id=user_id,
+            user_id=self._normalize_user_id(user_id),
             user_email=user_email,
             action=action,
             resource_type=resource_type,
@@ -88,6 +89,16 @@ class AuditService:
             "status": log.status,
             "timestamp": log.created_at.isoformat(),
         }
+
+    @staticmethod
+    def _normalize_user_id(user_id: Optional[str]) -> Optional[UUID]:
+        """Solo guarda IDs de usuario válidos (UUID); el resto se omite."""
+        if not user_id:
+            return None
+        try:
+            return UUID(user_id)
+        except (ValueError, AttributeError, TypeError):
+            return None
 
     @staticmethod
     def _get_client_ip() -> Optional[str]:

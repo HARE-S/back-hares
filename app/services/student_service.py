@@ -553,6 +553,7 @@ class StudentService:
                     "id": ss.section.id,
                     "name": ss.section.name,
                     "center": ss.section.center.name if ss.section.center else None,
+                    "center_id": ss.section.center_id,
                 }
                 for ss in (s.student_sections or [])
                 if ss.section and ss.section.disabled_at is None

@@ -1,5 +1,6 @@
 """Endpoints de secciones con flask-smorest."""
 
+from flask import jsonify, request, send_file
 from flask.views import MethodView
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
@@ -24,6 +25,8 @@ class SectionQueryArgsSchema(Schema):
     group_by = fields.Str(load_default=None)
     start_date = fields.Str(load_default=None)
     end_date = fields.Str(load_default=None)
+    from_date = fields.Str(load_default=None)
+    to_date = fields.Str(load_default=None)
 
 
 @sections_bp.route("/<section_id>/results")
@@ -44,15 +47,95 @@ class SectionResults(MethodView):
         try:
             history = service.get_section_history(
                 section_id=section_id,
-                start_date=args.get("start_date"),
-                end_date=args.get("end_date"),
+                start_date=args.get("start_date") or args.get("from_date"),
+                end_date=args.get("end_date") or args.get("to_date"),
                 group_by=args.get("group_by"),
                 current_user=current_user,
             )
-            return history, 200
+            return jsonify(history), 200
         except ValidationError as e:
-            return {"error": str(e), "field": getattr(e, "field", None)}, 400
+            return jsonify({"error": str(e), "field": getattr(e, "field", None)}), 400
         except NotFoundError as e:
-            return {"error": "NOT_FOUND", "message": str(e)}, 404
+            return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
         except ForbiddenError as e:
-            return {"error": "FORBIDDEN", "message": str(e)}, 403
+            return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
+
+
+@sections_bp.route("/<section_id>/report", methods=["GET"])
+@require_role("tutor", "coordinator", "coordinador", "admin")
+def get_section_report(section_id):
+    """
+    Informe agregado de una sección/grupo (BE-37).
+    - Devuelve medias de PPM, precisión, pruebas y participantes (Escenario 1).
+    - Incluye distribución de resultados por tramos y estadísticos (Escenario 2).
+    - Indica ausencia de datos si no hay resultados registrados (Escenario 4).
+    - Si ?format=excel, devuelve archivo .xlsx descargable (Escenario 5).
+    - 403 Forbidden si el tutor no tiene asignada la sección o rol 'pendiente' (Escenario 6).
+    """
+    format_arg = request.args.get("format") or request.args.get("export")
+    academic_year = request.args.get("academic_year")
+
+    current_user = get_current_user()
+    service = GroupReportService(db.session)
+
+    try:
+        report = service.get_section_report(
+            section_id=section_id,
+            current_user=current_user,
+            academic_year=academic_year,
+            format=format_arg,
+        )
+    except ValidationError as e:
+        payload = {"error": str(e)}
+        if hasattr(e, "field") and e.field:
+            payload["field"] = e.field
+        return jsonify(payload), 400
+    except NotFoundError as e:
+        return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
+    except ForbiddenError as e:
+        return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
+
+    if format_arg and str(format_arg).strip().lower() in ("excel", "xlsx"):
+        return send_file(
+            report,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=f"informe_seccion_{section_id}.xlsx",
+        )
+
+    return jsonify(report), 200
+
+
+@sections_bp.route("/<section_id>/report/export", methods=["GET"])
+@require_role("tutor", "coordinator", "coordinador", "admin")
+def export_section_report(section_id):
+    """
+    Descarga directa en Excel del informe agregado de una sección (BE-37 / Escenario 5).
+    """
+    academic_year = request.args.get("academic_year")
+    current_user = get_current_user()
+    service = GroupReportService(db.session)
+
+    try:
+        excel_buffer = service.get_section_report(
+            section_id=section_id,
+            current_user=current_user,
+            academic_year=academic_year,
+            format="excel",
+        )
+    except ValidationError as e:
+        payload = {"error": str(e)}
+        if hasattr(e, "field") and e.field:
+            payload["field"] = e.field
+        return jsonify(payload), 400
+    except NotFoundError as e:
+        return jsonify({"error": "NOT_FOUND", "message": str(e)}), 404
+    except ForbiddenError as e:
+        return jsonify({"error": "FORBIDDEN", "message": str(e)}), 403
+
+    return send_file(
+        excel_buffer,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=f"informe_seccion_{section_id}.xlsx",
+    )

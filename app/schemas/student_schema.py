@@ -38,6 +38,7 @@ class StudentSearchSectionItemSchema(Schema):
     id = fields.UUID()
     name = fields.Str()
     center = fields.Str()
+    center_id = fields.UUID(allow_none=True)
 
 
 class StudentSearchItemSchema(Schema):

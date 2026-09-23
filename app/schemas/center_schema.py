@@ -12,6 +12,7 @@ class CenterSchema(Schema):
     id = fields.Function(lambda obj: str(obj.id))
     external_id = fields.Str(attribute="external_id", allow_none=True)
     name = fields.Str(attribute="name")
+    sections_count = fields.Int(attribute="sections_count", missing=0)
 
 
 class SectionSchema(Schema):
@@ -22,6 +23,7 @@ class SectionSchema(Schema):
     name = fields.Str(attribute="name")
     academic_year = fields.Str(attribute="academic_year", allow_none=True)
     center_id = fields.Function(lambda obj: str(obj.center_id))
+    students_count = fields.Int(attribute="students_count", missing=0)
 
 
 class StudentSummarySchema(Schema):
