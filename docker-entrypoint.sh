@@ -11,9 +11,10 @@ until PGPASSWORD=$POSTGRES_PASSWORD psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER"
 done
 echo "✓ PostgreSQL está disponible"
 
-# Inicializar BD
-echo "🗄️  Inicializando base de datos..."
+# Inicializar BD y ejecutar migraciones Alembic
+echo "🗄️  Inicializando y migrando base de datos..."
 python scripts/init_db.py || echo "⚠️  Base de datos ya inicializada"
+alembic upgrade head || echo "⚠️  Alembic upgrade falló o ya está actualizado"
 
 # Cargar datos de prueba
 echo "📊 Cargando datos de prueba..."
