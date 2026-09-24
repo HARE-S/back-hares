@@ -33,4 +33,4 @@ echo "✓ Inicialización completada"
 echo "🚀 Iniciando servidor gunicorn..."
 
 # Ejecutar gunicorn
-exec gunicorn --bind 0.0.0.0:5000 --workers 4 "app:create_app()"
+exec gunicorn --bind 0.0.0.0:5000 --workers 4 --timeout 120 "app:create_app()"
