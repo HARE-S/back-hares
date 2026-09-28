@@ -64,6 +64,7 @@ class ResultRepository:
         time: int,
         successes: int,
         mistakes: int,
+        read_book_id: Optional[uuid.UUID] = None,
         commit: bool = True,
     ) -> Result:
         """
@@ -78,6 +79,7 @@ class ResultRepository:
             time=time,
             successes=successes,
             mistakes=mistakes,
+            read_book_id=read_book_id,
         )
         try:
             self.session.add(result)
@@ -187,6 +189,7 @@ class ResultRepository:
                     time=item["time"],
                     successes=item["successes"],
                     mistakes=item["mistakes"],
+                    read_book_id=item.get("read_book_id"),
                 )
                 self.session.add(res)
                 created_results.append(res)

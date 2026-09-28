@@ -420,6 +420,7 @@ def test_register_result_auto_creates_completed_reading(client, setup_data, sess
 
     resp = client.post(f"/api/v1/students/{student.id}/results", json=payload)
     assert resp.status_code == 201
+    data = resp.get_json()
 
     session.expire_all()
     reading = session.query(ReadBook).filter_by(student_id=student.id, test_id=test_obj.id).first()
@@ -427,6 +428,12 @@ def test_register_result_auto_creates_completed_reading(client, setup_data, sess
     assert reading.start_date == datetime.date(2026, 4, 15)
     assert reading.end_date == datetime.date(2026, 4, 15)
     assert reading.status == "finalizada"
+    # Solución 1: si start_date == end_date, duration_days es None (no 0)
+    assert reading.duration_days is None
+    # Solución 2: resultado enlazado directamente a la lectura
+    assert data["read_book_id"] == str(reading.id)
+    # Solución 3: vocabulario pedagógico unificado
+    assert data["book_title"] == test_obj.name
 
 
 def test_register_result_closes_existing_open_reading(client, setup_data, session):
@@ -461,10 +468,73 @@ def test_register_result_closes_existing_open_reading(client, setup_data, sessio
 
     resp = client.post(f"/api/v1/students/{student.id}/results", json=payload)
     assert resp.status_code == 201
+    data = resp.get_json()
 
     session.expire_all()
     updated = session.get(ReadBook, open_reading.id)
     assert updated.start_date == datetime.date(2026, 5, 1)
     assert updated.end_date == datetime.date(2026, 5, 20)
     assert updated.status == "finalizada"
+    # Duración calculada correctamente cuando hay días entre inicio y fin (20 - 1 = 19)
+    assert updated.duration_days == 19
+    assert data["read_book_id"] == str(open_reading.id)
+
+
+def test_register_result_with_custom_reading_start_date(client, setup_data, session):
+    """Verifica que al especificar reading_start_date se calcula correctamente la duración."""
+    student = setup_data["student"]
+    section1 = setup_data["section1"]
+    test_obj = setup_data["test"]
+
+    client.post(
+        "/api/dev/session",
+        json={"role": "tutor", "email": "tutor@penascal.org", "sections": [str(section1.id)]},
+    )
+
+    payload = {
+        "test_id": str(test_obj.id),
+        "section_id": str(section1.id),
+        "test_date": "2026-06-15",
+        "reading_start_date": "2026-06-01",
+        "time": 60,
+        "successes": 19,
+        "mistakes": 1,
+    }
+
+    resp = client.post(f"/api/v1/students/{student.id}/results", json=payload)
+    assert resp.status_code == 201
+    data = resp.get_json()
+
+    session.expire_all()
+    reading = session.get(ReadBook, uuid.UUID(data["read_book_id"]))
+    assert reading is not None
+    assert reading.start_date == datetime.date(2026, 6, 1)
+    assert reading.end_date == datetime.date(2026, 6, 15)
+    assert reading.duration_days == 14
+
+
+def test_register_result_with_invalid_reading_start_date_after_test_date(client, setup_data):
+    """Verifica que reading_start_date posterior a test_date devuelve 400 Bad Request."""
+    student = setup_data["student"]
+    section1 = setup_data["section1"]
+    test_obj = setup_data["test"]
+
+    client.post(
+        "/api/dev/session",
+        json={"role": "tutor", "email": "tutor@penascal.org", "sections": [str(section1.id)]},
+    )
+
+    payload = {
+        "test_id": str(test_obj.id),
+        "section_id": str(section1.id),
+        "test_date": "2026-06-15",
+        "reading_start_date": "2026-06-20",
+        "time": 60,
+        "successes": 19,
+        "mistakes": 1,
+    }
+
+    resp = client.post(f"/api/v1/students/{student.id}/results", json=payload)
+    assert resp.status_code == 400
+    assert resp.get_json()["field"] == "reading_start_date"
 

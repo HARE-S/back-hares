@@ -91,6 +91,16 @@ class ResultCreateSchema:
         if mistakes_val < 0:
             raise ValidationError("El campo 'mistakes' no puede ser negativo", field="mistakes")
 
+        # 7. reading_start_date (opcional)
+        reading_start_date = None
+        if "reading_start_date" in data and data["reading_start_date"] is not None and data["reading_start_date"] != "":
+            reading_start_date = _parse_date(data["reading_start_date"], "reading_start_date")
+            if reading_start_date > test_date:
+                raise ValidationError(
+                    "La fecha de inicio de lectura no puede ser posterior a la fecha de la prueba",
+                    field="reading_start_date",
+                )
+
         return {
             "test_id": test_id,
             "section_id": section_id,
@@ -98,6 +108,7 @@ class ResultCreateSchema:
             "time": time_val,
             "successes": successes_val,
             "mistakes": mistakes_val,
+            "reading_start_date": reading_start_date,
         }
 
 
@@ -122,6 +133,27 @@ class ResultSchema:
         data["comprehension"] = metrics["comprehension"]
         data["accuracy"] = metrics["comprehension"]
         data["vef"] = metrics["vef"]
+
+        if hasattr(result, "read_book_id"):
+            data["read_book_id"] = str(result.read_book_id) if result.read_book_id else None
+        elif "read_book_id" not in data:
+            data["read_book_id"] = None
+
+        if hasattr(result, "book_title"):
+            data["book_title"] = result.book_title
+        elif "book_title" not in data:
+            test_obj = getattr(result, "test", None)
+            data["book_title"] = test_obj.name if test_obj else ""
+
+        if hasattr(result, "book_level"):
+            data["book_level"] = result.book_level
+        elif "book_level" not in data:
+            test_obj = getattr(result, "test", None)
+            data["book_level"] = (
+                test_obj.test_letter
+                if (test_obj and test_obj.test_letter)
+                else (str(test_obj.course) if (test_obj and test_obj.course is not None) else "")
+            )
 
         # Compatibilidad: el parámetro ppm se mantiene para las llamadas existentes,
         # pero ya no hace falta pasarlo. Puede eliminarse cuando no queden usos.
@@ -241,6 +273,15 @@ class ResultBatchSchema:
         if "test_date" not in data or data["test_date"] is None:
             raise ValidationError("El campo 'test_date' es obligatorio", field="test_date")
         test_date = _parse_date(data["test_date"], "test_date")
+
+        batch_reading_start_date = None
+        if "reading_start_date" in data and data["reading_start_date"] is not None and data["reading_start_date"] != "":
+            batch_reading_start_date = _parse_date(data["reading_start_date"], "reading_start_date")
+            if batch_reading_start_date > test_date:
+                raise ValidationError(
+                    "La fecha de inicio de lectura no puede ser posterior a la fecha de la prueba",
+                    field="reading_start_date",
+                )
 
         raw_results = data.get("results")
         if raw_results is None:
@@ -424,6 +465,28 @@ class ResultBatchSchema:
                     })
                     row_has_error = True
 
+            # reading_start_date (opcional en fila)
+            row_reading_start_date = None
+            if "reading_start_date" in item and item["reading_start_date"] is not None and item["reading_start_date"] != "":
+                try:
+                    row_reading_start_date = _parse_date(item["reading_start_date"], "reading_start_date")
+                    if row_reading_start_date > test_date:
+                        errors.append({
+                            "index": idx,
+                            "student_id": str(student_id),
+                            "field": "reading_start_date",
+                            "error": "La fecha de inicio de lectura no puede ser posterior a la fecha de la prueba",
+                        })
+                        row_has_error = True
+                except ValidationError as ve:
+                    errors.append({
+                        "index": idx,
+                        "student_id": str(student_id),
+                        "field": "reading_start_date",
+                        "error": ve.message,
+                    })
+                    row_has_error = True
+
             if not row_has_error:
                 valid_items.append({
                     "index": idx,
@@ -431,12 +494,14 @@ class ResultBatchSchema:
                     "time": time_val,
                     "successes": succ_val,
                     "mistakes": mist_val,
+                    "reading_start_date": row_reading_start_date or batch_reading_start_date,
                 })
 
         return {
             "test_id": test_id,
             "section_id": section_id,
             "test_date": test_date,
+            "reading_start_date": batch_reading_start_date,
             "items": valid_items,
             "absent_count": absent_count,
             "errors": errors,

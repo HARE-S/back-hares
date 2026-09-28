@@ -40,15 +40,20 @@ class ResultService:
         student_id: uuid.UUID,
         test_id: uuid.UUID,
         test_date: datetime.date,
-    ) -> None:
+        reading_start_date: Optional[datetime.date] = None,
+    ) -> ReadBook:
         """
         Sincroniza el resultado de la prueba con la tabla read_books:
         - Si el alumno tiene una lectura abierta de este libro (en curso, end_date IS NULL):
           se fija end_date = test_date (cerrando la lectura al evaluar).
+          Si se proveyó reading_start_date, se actualiza también start_date si procede.
         - Si no tiene ninguna lectura para este libro:
-          se crea automáticamente la lectura finalizada con start_date = test_date y end_date = test_date.
+          se crea automáticamente la lectura finalizada con:
+            start_date = reading_start_date or test_date
+            end_date = test_date.
         - Si ya existe una lectura para esa fecha:
-          no hace nada (idempotente).
+          devuelve la lectura existente (idempotente).
+        Devuelve el objeto ReadBook asociado.
         """
         # 1. Buscar si hay una lectura abierta (en curso)
         open_reading = self.session.scalars(
@@ -60,28 +65,50 @@ class ResultService:
         ).first()
 
         if open_reading:
-            if open_reading.start_date > test_date:
-                open_reading.start_date = test_date
+            effective_start = reading_start_date or open_reading.start_date
+            if effective_start > test_date:
+                effective_start = test_date
+            open_reading.start_date = effective_start
             open_reading.end_date = test_date
-            return
+            self.session.flush()
+            return open_reading
 
-        # 2. Si no hay lectura abierta, comprobar si ya existe una lectura para esta fecha
+        # 2. Si no hay lectura abierta, comprobar si ya existe una lectura finalizada para esta fecha
+        effective_start = reading_start_date or test_date
+        if effective_start > test_date:
+            effective_start = test_date
+
         existing = self.session.scalars(
             select(ReadBook).where(
                 ReadBook.student_id == student_id,
                 ReadBook.test_id == test_id,
-                ReadBook.start_date == test_date,
+                ReadBook.end_date == test_date,
             )
         ).first()
 
         if not existing:
-            new_reading = ReadBook(
-                student_id=student_id,
-                test_id=test_id,
-                start_date=test_date,
-                end_date=test_date,
-            )
-            self.session.add(new_reading)
+            existing = self.session.scalars(
+                select(ReadBook).where(
+                    ReadBook.student_id == student_id,
+                    ReadBook.test_id == test_id,
+                    ReadBook.start_date == test_date,
+                )
+            ).first()
+
+        if existing:
+            if reading_start_date and existing.start_date != reading_start_date:
+                existing.start_date = reading_start_date
+            return existing
+
+        new_reading = ReadBook(
+            student_id=student_id,
+            test_id=test_id,
+            start_date=effective_start,
+            end_date=test_date,
+        )
+        self.session.add(new_reading)
+        self.session.flush()
+        return new_reading
 
     def register_result(
         self,
@@ -146,6 +173,14 @@ class ResultService:
                 f"Ya existe un resultado registrado para la prueba con fecha {validated['test_date']}"
             )
 
+        # Sincronizar lectura en read_books y obtener su ID
+        reading = self._sync_reading_on_test_result(
+            student_id=parsed_student_id,
+            test_id=validated["test_id"],
+            test_date=validated["test_date"],
+            reading_start_date=validated.get("reading_start_date"),
+        )
+
         # 7. Persistir resultado
         result = self.result_repo.create(
             student_id=parsed_student_id,
@@ -155,14 +190,8 @@ class ResultService:
             time=validated["time"],
             successes=validated["successes"],
             mistakes=validated["mistakes"],
+            read_book_id=reading.id if reading else None,
             commit=False,
-        )
-
-        # Sincronizar lectura en read_books
-        self._sync_reading_on_test_result(
-            student_id=parsed_student_id,
-            test_id=validated["test_id"],
-            test_date=validated["test_date"],
         )
         self.session.commit()
 
@@ -502,9 +531,16 @@ class ResultService:
                 "results": [],
             }
 
-        # 7. Persistir lote en una sola transacción atómica (Escenario 1 y 4)
-        batch_records = [
-            {
+        # 7. Sincronizar lecturas y persistir lote en una sola transacción atómica (Escenario 1 y 4)
+        batch_records = []
+        for it in items_to_persist:
+            reading = self._sync_reading_on_test_result(
+                student_id=it["student_id"],
+                test_id=validated["test_id"],
+                test_date=validated["test_date"],
+                reading_start_date=it.get("reading_start_date"),
+            )
+            batch_records.append({
                 "student_id": it["student_id"],
                 "section_id": validated["section_id"],
                 "test_id": validated["test_id"],
@@ -512,17 +548,10 @@ class ResultService:
                 "time": it["time"],
                 "successes": it["successes"],
                 "mistakes": it["mistakes"],
-            }
-            for it in items_to_persist
-        ]
+                "read_book_id": reading.id if reading else None,
+            })
 
         created_results = self.result_repo.create_batch(batch_records, commit=False)
-        for it in items_to_persist:
-            self._sync_reading_on_test_result(
-                student_id=it["student_id"],
-                test_id=validated["test_id"],
-                test_date=validated["test_date"],
-            )
         self.session.commit()
 
         # 8. Serializar resultados con PPM calculado (Escenario 1)

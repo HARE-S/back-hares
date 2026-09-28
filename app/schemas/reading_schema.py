@@ -154,6 +154,7 @@ class ReadingSchema:
             "sessions_note": getattr(reading, "sessions_note", None),
             "start_date": reading.start_date.isoformat() if reading.start_date else None,
             "end_date": reading.end_date.isoformat() if reading.end_date else None,
+            "duration_days": getattr(reading, "duration_days", None),
         }
 
         # Datos adicionales del alumno si está cargado

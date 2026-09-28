@@ -76,10 +76,17 @@ class Result(BaseModel):
     mistakes = db.Column(db.Integer, nullable=False, default=0)
     anomalous = db.Column(db.Boolean, nullable=False, default=False)
 
+    read_book_id = db.Column(
+        db.Uuid(as_uuid=True),
+        db.ForeignKey("read_books.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+
     # Relaciones
     student = db.relationship("Student", back_populates="results")
     section = db.relationship("Section", back_populates="results")
     test = db.relationship("Test", back_populates="results")
+    read_book = db.relationship("ReadBook", back_populates="results")
 
     # Restricción UNIQUE compuesta: un alumno solo puede tener un resultado
     # de la misma prueba en la misma fecha, pero puede repetir la prueba
@@ -88,7 +95,28 @@ class Result(BaseModel):
         db.UniqueConstraint("student_id", "test_id", "test_date",
                             name="uq_results_student_test_date"),
         db.Index("ix_results_student_test_date", "student_id", "test_date"),
+        db.Index("ix_results_read_book_id", "read_book_id"),
     )
+
+    @property
+    def book_title(self) -> str:
+        return self.test.name if self.test else ""
+
+    @property
+    def book_level(self) -> str:
+        if self.test:
+            if self.test.test_letter:
+                return self.test.test_letter
+            if self.test.course is not None:
+                return str(self.test.course)
+        return ""
+
+    def to_dict(self):
+        data = super().to_dict()
+        data["read_book_id"] = str(self.read_book_id) if self.read_book_id else None
+        data["book_title"] = self.book_title
+        data["book_level"] = self.book_level
+        return data
 
     def __repr__(self):
         return (

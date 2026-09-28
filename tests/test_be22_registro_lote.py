@@ -4,6 +4,7 @@ import pytest
 from app import create_app
 from app.config import TestingConfig
 from app.core.audit import clear_audit_logs, get_audit_logs
+from app.models.book import ReadBook
 from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
 from app.models.test import Result, Test
@@ -528,3 +529,69 @@ def test_all_absent_students_returns_201_zero_registered(client, setup_data, ses
     session.expire_all()
     count = session.query(Result).filter_by(test_date=datetime.date(2026, 3, 23)).count()
     assert count == 0
+
+
+def test_batch_register_with_reading_start_date(client, setup_data, session):
+    """
+    Verifica que el registro en lote soporta reading_start_date a nivel de cabecera y fila,
+    enlazando cada resultado con su read_book_id y calculando correctamente duration_days.
+    """
+    sec = setup_data["section1"]
+    test = setup_data["test"]
+    students = setup_data["students"]
+
+    client.post(
+        "/api/dev/session",
+        json={"role": "tutor", "sections": [str(sec.id)]},
+    )
+
+    batch_payload = {
+        "test_id": str(test.id),
+        "section_id": str(sec.id),
+        "test_date": "2026-04-20",
+        "reading_start_date": "2026-04-01",  # Heredado por student 0: 20 - 1 = 19 días
+        "results": [
+            {
+                "student_id": str(students[0].id),
+                "time": 60,
+                "successes": 18,
+                "mistakes": 2,
+            },
+            {
+                "student_id": str(students[1].id),
+                "reading_start_date": "2026-04-10",  # Específico de fila: 20 - 10 = 10 días
+                "time": 75,
+                "successes": 17,
+                "mistakes": 3,
+            },
+        ],
+    }
+
+    resp = client.post("/api/v1/results/batch", json=batch_payload)
+    assert resp.status_code == 201
+    data = resp.get_json()
+
+    assert data["registered_count"] == 2
+    r0 = data["results"][0]
+    r1 = data["results"][1]
+
+    # Traceabilidad directa: read_book_id presente en ambos
+    assert r0["read_book_id"] is not None
+    assert r1["read_book_id"] is not None
+    assert r0["book_title"] == test.name
+    assert r1["book_title"] == test.name
+
+    session.expire_all()
+    reading0 = session.get(ReadBook, uuid.UUID(r0["read_book_id"]))
+    reading1 = session.get(ReadBook, uuid.UUID(r1["read_book_id"]))
+
+    assert reading0 is not None
+    assert reading0.start_date == datetime.date(2026, 4, 1)
+    assert reading0.end_date == datetime.date(2026, 4, 20)
+    assert reading0.duration_days == 19
+
+    assert reading1 is not None
+    assert reading1.start_date == datetime.date(2026, 4, 10)
+    assert reading1.end_date == datetime.date(2026, 4, 20)
+    assert reading1.duration_days == 10
+

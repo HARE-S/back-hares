@@ -125,7 +125,7 @@ def list_readings():
         st = "finalizada" if is_completed else "en_curso"
         if status_filter and st != status_filter:
             continue
-        duration = (r.end_date - r.start_date).days if (r.end_date and r.start_date and r.end_date >= r.start_date) else None
+        duration = r.duration_days
         items.append({
             "id": str(r.id),
             "student_id": str(r.student_id),

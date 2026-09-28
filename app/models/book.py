@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy import func, select, text, UniqueConstraint
 from sqlalchemy.ext.hybrid import hybrid_property
 from app.extensions import db
@@ -43,6 +44,7 @@ class ReadBook(BaseModel):
     # Relaciones
     student = db.relationship("Student", back_populates="read_books")
     test = db.relationship("Test", back_populates="read_books", lazy="joined")
+    results = db.relationship("Result", back_populates="read_book")
 
     @hybrid_property
     def title(self) -> str:
@@ -111,6 +113,17 @@ class ReadBook(BaseModel):
     def status(self) -> str:
         return "finalizada" if self.end_date else "en_curso"
 
+    @property
+    def duration_days(self) -> Optional[int]:
+        """
+        Días transcurridos entre inicio y fin de lectura.
+        Si start_date == end_date (autogenerada al evaluar), se devuelve None
+        para no falsear las estadísticas pedagógicas del centro.
+        """
+        if self.start_date and self.end_date and self.end_date > self.start_date:
+            return (self.end_date - self.start_date).days
+        return None
+
     def to_dict(self):
         data = super().to_dict()
         data["test_id"] = str(self.test_id) if self.test_id else None
@@ -121,6 +134,7 @@ class ReadBook(BaseModel):
         data["book_level"] = self.level
         data["level"] = self.level
         data["status"] = self.status
+        data["duration_days"] = self.duration_days
         data["copies_note"] = self.copies_note
         data["sessions_note"] = self.sessions_note
         return data
