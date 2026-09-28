@@ -23,6 +23,23 @@ Thumbs.db
 .idea/
 .vscode/
 
-# SQLite test databases
+# SQLite test databases & instance
+instance/
 test_db.sqlite
 *.sqlite
+*.db
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Herramientas y skills de agentes IA
+.agents/
+.claude/
+skills-lock.json
+docs/superpowers/
+
+# Notas personales y archivos locales
+tareasyeremi.md
+*.local.md
