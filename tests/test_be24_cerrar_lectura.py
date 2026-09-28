@@ -4,9 +4,10 @@ import pytest
 from app import create_app
 from app.config import Config
 from app.core.audit import clear_audit_logs, get_audit_logs
-from app.models.book import Book, ReadBook
+from app.models.book import ReadBook
 from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
+from app.models.test import Test
 
 
 class NoBypassConfig(Config):
@@ -38,15 +39,15 @@ def setup_data(session):
     session.add_all([ss1, ss2])
     session.flush()
 
-    book1 = Book(book="Don Quijote de la Mancha", level="I")
-    book2 = Book(book="El Lazarillo de Tormes", level="0")
-    session.add_all([book1, book2])
+    test1 = Test(code="0IF", name="Don Quijote de la Mancha", words=200, test_letter="I")
+    test2 = Test(code="0IL", name="El Lazarillo de Tormes", words=250, test_letter="0")
+    session.add_all([test1, test2])
     session.flush()
 
-    # Lectura en curso para student1 con book1 (iniciada el 12/09/2026)
+    # Lectura en curso para student1 con Don Quijote (iniciada el 12/09/2026)
     reading1 = ReadBook(
         student_id=s1.id,
-        book_id=book1.id,
+        test_id=test1.id,
         start_date=datetime.date(2026, 9, 12),
         end_date=None,
     )
@@ -59,8 +60,10 @@ def setup_data(session):
         "section2": section2,
         "student1": s1,
         "student2": s2,
-        "book1": book1,
-        "book2": book2,
+        "test1": test1,
+        "test2": test2,
+        "book1_title": "Don Quijote de la Mancha",
+        "book2_title": "El Lazarillo de Tormes",
         "reading1": reading1,
     }
 
@@ -164,7 +167,7 @@ def test_scenario_3_distinction_of_states(client, setup_data, session):
     """
     s1 = setup_data["student1"]
     sec1 = setup_data["section1"]
-    book2 = setup_data["book2"]
+    book2_title = setup_data["book2_title"]
     r1 = setup_data["reading1"]
 
     # r1 se cierra el 2026-10-03
@@ -174,7 +177,7 @@ def test_scenario_3_distinction_of_states(client, setup_data, session):
     # Se añade una segunda lectura en curso para student1
     r2 = ReadBook(
         student_id=s1.id,
-        book_id=book2.id,
+        test_id=setup_data["test2"].id,
         start_date=datetime.date(2026, 10, 10),
         end_date=None,
     )

@@ -7,9 +7,10 @@ from app import create_app
 from app.config import Config
 from app.core.audit import clear_audit_logs, get_audit_logs
 from app.core.exceptions import ConflictError
-from app.models.book import Book, ReadBook
+from app.models.book import ReadBook
 from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
+from app.models.test import Test
 from app.repositories.reading_repository import ReadingRepository
 
 
@@ -35,8 +36,8 @@ def setup_data(session):
     session.add_all([ss1, ss2])
     session.flush()
 
-    book = Book(book="El Lazarillo de Tormes", level="0")
-    session.add(book)
+    test1 = Test(code="0IL", name="El Lazarillo de Tormes", words=250, test_letter="0")
+    session.add(test1)
     session.commit()
 
     return {
@@ -45,7 +46,8 @@ def setup_data(session):
         "section2": section2,
         "student1": s1,
         "student2": s2,
-        "book": book,
+        "test1": test1,
+        "book_title": "El Lazarillo de Tormes",
     }
 
 
@@ -59,7 +61,7 @@ def test_scenario_1_second_reading_in_another_course_accepted(client, setup_data
     """
     s1 = setup_data["student1"]
     sec1 = setup_data["section1"]
-    book = setup_data["book"]
+    title = setup_data["book_title"]
 
     client.post(
         "/api/dev/session",
@@ -69,27 +71,28 @@ def test_scenario_1_second_reading_in_another_course_accepted(client, setup_data
     # 1. Primera lectura (curso anterior)
     resp1 = client.post(
         f"/api/students/{s1.id}/books",
-        json={"book_id": str(book.id), "start_date": "2025-10-05"},
+        json={"book_title": title, "start_date": "2025-10-05"},
     )
     assert resp1.status_code == 201
 
     # 2. Segunda lectura del mismo libro (nuevo curso escolar)
     resp2 = client.post(
         f"/api/students/{s1.id}/books",
-        json={"book_id": str(book.id), "start_date": "2026-09-12"},
+        json={"book_title": title, "start_date": "2026-09-12"},
     )
     assert resp2.status_code == 201
 
     data2 = resp2.get_json()
     assert data2["student_id"] == str(s1.id)
-    assert data2["book_id"] == str(book.id)
+    assert data2["book_title"] == title
     assert data2["start_date"] == "2026-09-12"
 
     # Verificar en BD que existen exactamente 2 lecturas distintas
     session.expire_all()
+    test1 = setup_data["test1"]
     readings = (
         session.query(ReadBook)
-        .filter_by(student_id=s1.id, book_id=book.id)
+        .filter_by(student_id=s1.id, test_id=test1.id)
         .order_by(ReadBook.start_date.asc())
         .all()
     )
@@ -108,14 +111,14 @@ def test_scenario_2_exact_duplicate_rejected(client, setup_data):
     """
     s1 = setup_data["student1"]
     sec1 = setup_data["section1"]
-    book = setup_data["book"]
+    title = setup_data["book_title"]
 
     client.post(
         "/api/dev/session",
         json={"role": "tutor", "sections": [str(sec1.id)]},
     )
 
-    payload = {"book_id": str(book.id), "start_date": "2026-09-12"}
+    payload = {"book_title": title, "start_date": "2026-09-12"}
 
     # Primera vez -> 201 Created
     resp1 = client.post(f"/api/students/{s1.id}/books", json=payload)
@@ -137,15 +140,15 @@ def test_scenario_3_complete_history(client, setup_data):
     """
     s1 = setup_data["student1"]
     sec1 = setup_data["section1"]
-    book = setup_data["book"]
+    title = setup_data["book_title"]
 
     client.post(
         "/api/dev/session",
         json={"role": "tutor", "sections": [str(sec1.id)]},
     )
 
-    client.post(f"/api/students/{s1.id}/books", json={"book_id": str(book.id), "start_date": "2025-10-05"})
-    client.post(f"/api/students/{s1.id}/books", json={"book_id": str(book.id), "start_date": "2026-09-12"})
+    client.post(f"/api/students/{s1.id}/books", json={"book_title": title, "start_date": "2025-10-05"})
+    client.post(f"/api/students/{s1.id}/books", json={"book_title": title, "start_date": "2026-09-12"})
 
     resp = client.get(f"/api/students/{s1.id}/books")
     assert resp.status_code == 200
@@ -155,7 +158,7 @@ def test_scenario_3_complete_history(client, setup_data):
     start_dates = [item["start_date"] for item in items]
     assert "2025-10-05" in start_dates
     assert "2026-09-12" in start_dates
-    assert all(item["book_id"] == str(book.id) for item in items)
+    assert all(item["book_title"] == title for item in items)
 
 
 def test_scenario_4_independence_between_different_students(client, setup_data):
@@ -169,7 +172,7 @@ def test_scenario_4_independence_between_different_students(client, setup_data):
     s2 = setup_data["student2"]
     sec1 = setup_data["section1"]
     sec2 = setup_data["section2"]
-    book = setup_data["book"]
+    title = setup_data["book_title"]
 
     # Tutor con acceso a ambas secciones
     client.post(
@@ -177,7 +180,7 @@ def test_scenario_4_independence_between_different_students(client, setup_data):
         json={"role": "tutor", "sections": [str(sec1.id), str(sec2.id)]},
     )
 
-    payload = {"book_id": str(book.id), "start_date": "2026-09-12"}
+    payload = {"book_title": title, "start_date": "2026-09-12"}
 
     # Alumno 1
     resp1 = client.post(f"/api/students/{s1.id}/books", json=payload)
@@ -196,13 +199,13 @@ def test_repository_integrity_conflict(session, setup_data):
     y lanza ConflictError cuando se intenta insertar duplicado a nivel persistencia.
     """
     s1 = setup_data["student1"]
-    book = setup_data["book"]
+    test1 = setup_data["test1"]
     repo = ReadingRepository(session)
 
     # Inserción inicial
     repo.create(
         student_id=s1.id,
-        book_id=book.id,
+        test_id=test1.id,
         start_date=datetime.date(2026, 9, 12),
         commit=True,
     )
@@ -211,7 +214,7 @@ def test_repository_integrity_conflict(session, setup_data):
     with pytest.raises(ConflictError) as exc_info:
         repo.create(
             student_id=s1.id,
-            book_id=book.id,
+            test_id=test1.id,
             start_date=datetime.date(2026, 9, 12),
             commit=True,
         )
@@ -222,11 +225,11 @@ def test_postgresql_unique_constraint_direct():
     """
     T-BE25-01: Verificación de la restricción física UNIQUE en PostgreSQL real.
     Si el contenedor PostgreSQL está accesible, verifica en pg_constraint que existe
-    la restricción uq_read_books_student_book_start.
+    la restricción uq_read_books_student_test_start.
     """
     db_user = os.getenv("POSTGRES_USER", "hares_user")
-    db_pass = os.getenv("POSTGRES_PASSWORD")
-    db_host = os.getenv("POSTGRES_HOST", "db")
+    db_pass = os.getenv("POSTGRES_PASSWORD", "hares_dev_secret")
+    db_host = os.getenv("POSTGRES_HOST", "database")
     db_port = os.getenv("POSTGRES_PORT", "5432")
     db_name = os.getenv("POSTGRES_DB", "hares_db")
     db_url = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
@@ -238,11 +241,11 @@ def test_postgresql_unique_constraint_direct():
             query = text("""
                 SELECT conname, contype
                 FROM pg_constraint
-                WHERE conname = 'uq_read_books_student_book_start'
+                WHERE conname = 'uq_read_books_student_test_start'
                   AND conrelid = 'read_books'::regclass;
             """)
             res = conn.execute(query).fetchone()
-            assert res is not None, "La restricción 'uq_read_books_student_book_start' no existe en PostgreSQL"
+            assert res is not None, "La restricción 'uq_read_books_student_test_start' no existe en PostgreSQL"
             assert res[1] == "u", "La restricción debe ser de tipo UNIQUE ('u')"
     except Exception as e:
         pytest.skip(f"Base de datos PostgreSQL real no accesible directamente desde este test runner: {e}")

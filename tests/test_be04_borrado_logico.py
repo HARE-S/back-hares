@@ -1,10 +1,8 @@
 import datetime
 import uuid
-from app.models.book import Book
 from app.models.center import Center, Section
 from app.models.student import Student
 from app.models.test import Result, Test
-from app.repositories.book_repository import BookRepository
 from app.repositories.test_repository import TestRepository
 
 
@@ -147,38 +145,3 @@ def test_scenario_5_delete_nonexistent_test_returns_404(client):
     data = response.get_json()
     assert "no encontrada" in data.get("error", "").lower()
 
-
-def test_book_soft_delete_scenarios(client, session):
-    """
-    Pruebas de borrado lógico aplicadas a la entidad Book (alcance de BE-04).
-    """
-    repo = BookRepository(session)
-    b1 = repo.create(book="Libro Vigente", level="I")
-    b2 = repo.create(
-        book="Libro Antiguo", level="0", disabled_at=datetime.date(2024, 5, 1)
-    )
-
-    # 1. Por defecto no aparece el deshabilitado
-    res_active = client.get("/api/v1/books")
-    assert res_active.status_code == 200
-    titles = [b["book"] for b in res_active.get_json()]
-    assert "Libro Vigente" in titles
-    assert "Libro Antiguo" not in titles
-
-    # 2. Con include_disabled=true aparecen ambos
-    res_all = client.get("/api/v1/books?include_disabled=true")
-    titles_all = [b["book"] for b in res_all.get_json()]
-    assert "Libro Vigente" in titles_all
-    assert "Libro Antiguo" in titles_all
-
-    # 3. DELETE sobre b1 rellena disabled_at y devuelve 204
-    res_del = client.delete(f"/api/v1/books/{b1.id}")
-    assert res_del.status_code == 204
-
-    session.expire_all()
-    b1_saved = session.get(Book, b1.id)
-    assert b1_saved.disabled_at == datetime.date.today()
-
-    # 4. DELETE sobre id inexistente devuelve 404
-    res_404 = client.delete(f"/api/v1/books/{uuid.uuid4()}")
-    assert res_404.status_code == 404

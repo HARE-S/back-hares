@@ -11,11 +11,8 @@ from app.core.exceptions import (
     SchemaValidationError,
     ValidationError,
 )
-from app.models.book import Book
 from app.models.test import Test
-from app.repositories.book_repository import BookRepository
 from app.repositories.test_repository import TestRepository
-from app.schemas.book_schema import BookCreateSchema, BookUpdateSchema
 from app.schemas.common import paginate_response
 from app.schemas.test_schema import TestUpdateSchema, TestCreateSchema
 from marshmallow import ValidationError as MarshmallowValidationError
@@ -23,14 +20,13 @@ from marshmallow import ValidationError as MarshmallowValidationError
 
 class CatalogService:
     """
-    Servicio de lógica de negocio para los catálogos de pruebas y libros (Bloque B).
+    Servicio de lógica de negocio para el catálogo de pruebas (Bloque B).
     Implementa reglas de unicidad, validación de palabras/niveles y deducción de nivel/tipo.
     """
 
     def __init__(self, session: Session):
         self.session = session
         self.test_repo = TestRepository(session)
-        self.book_repo = BookRepository(session)
 
 
     @staticmethod
@@ -353,85 +349,4 @@ class CatalogService:
             page=page,
             limit=limit,
         )
-    def create_book(self, data: Dict[str, Any]) -> Book:
-        """
-        Alta de libro en el catálogo (BE-16 Escenario 1 y 2).
-        - Valida datos con BookCreateSchema (lanza SchemaValidationError -> 422 si falla).
-        - Valida unicidad de título (lanza DuplicateCodeError -> 409 si ya existe).
-        - Persiste el libro y retorna la entidad.
-        """
-        schema = BookCreateSchema()
-        try:
-            validated = schema.load(data)
-        except MarshmallowValidationError as e:
-            raise SchemaValidationError(str(e.messages))
-        title = validated["title"]
-
-        if self.book_repo.exists_by_title(title):
-            raise DuplicateCodeError(f"Ya existe un libro registrado con el título '{title}'")
-
-        return self.book_repo.create(
-            book=title,
-            level=validated["level"],
-            copies_note=validated.get("copies_note"),
-            sessions_note=validated.get("sessions_note"),
-        )
-
-    def get_book(self, book_id: Union[str, uuid.UUID]) -> Optional[Book]:
-        """Obtiene un libro por su ID o retorna None si no existe."""
-        return self.book_repo.get_by_id(book_id)
-
-    def list_books(
-        self,
-        level: Optional[str] = None,
-        order_by_level: bool = False,
-        include_disabled: bool = False,
-    ) -> List[Book]:
-        """Consulta libros con filtros por nivel, ordenación pedagógica y estado."""
-        return self.book_repo.get_all(
-            level=level,
-            order_by_level=order_by_level,
-            include_disabled=include_disabled,
-        )
-
-    def update_book(
-        self,
-        book_id: Union[str, uuid.UUID],
-        data: Dict[str, Any],
-        is_patch: bool = False,
-    ) -> Optional[Book]:
-        """
-        Actualiza un libro existente (BE-16 Escenario 3).
-        - Si is_patch=False (PUT): reemplazo completo (requiere title y level).
-        - Si is_patch=True (PATCH): modificación parcial.
-        - Valida datos con BookUpdateSchema (lanza SchemaValidationError -> 422 si falla).
-        - Si se modifica el título y coincide con otro libro existente, lanza DuplicateCodeError -> 409.
-        """
-        book = self.book_repo.get_by_id(book_id)
-        if not book:
-            return None
-
-        schema = BookUpdateSchema()
-        try:
-            cleaned = schema.load(data)
-        except MarshmallowValidationError as e:
-            raise SchemaValidationError(str(e.messages))
-
-        if "title" in cleaned:
-            new_title = cleaned["title"]
-            if new_title.lower() != book.book.lower():
-                if self.book_repo.exists_by_title(new_title, exclude_id=book.id):
-                    raise DuplicateCodeError(
-                        f"Ya existe otro libro registrado con el título '{new_title}'"
-                    )
-
-        updated_book = self.book_repo.update(book, commit=True, **cleaned)
-        return updated_book
-
-    def soft_delete_book(self, book_id: Union[str, uuid.UUID]) -> bool:
-        """
-        Baja lógica de un libro (BE-16 Escenario 4).
-        Establece disabled_at y preserva lecturas asociadas.
-        """
-        return self.book_repo.soft_delete(book_id)
 

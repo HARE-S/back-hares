@@ -3,7 +3,7 @@ import uuid
 import pytest
 from app import create_app
 from app.config import Config
-from app.models.book import Book, ReadBook
+from app.models.book import ReadBook
 from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
 from app.models.test import Result, Test
@@ -81,7 +81,8 @@ def setup_data(session):
 
     # Prueba y resultado para s1
     test1 = Test(code="TEST-01", name="Comprensión Inicial", words=120, course=1, test_letter="I", type="Lectura")
-    session.add(test1)
+    test_book = Test(code="TEST-LAZ", name="El Lazarillo de Tormes", words=100, course=1, test_letter="0", type="Lectura")
+    session.add_all([test1, test_book])
     session.flush()
 
     res1 = Result(
@@ -95,14 +96,10 @@ def setup_data(session):
     )
     session.add(res1)
 
-    # Libro y lectura para s1
-    book1 = Book(book="El Lazarillo de Tormes", level="0")
-    session.add(book1)
-    session.flush()
-
+    # Lectura para s1
     reading1 = ReadBook(
         student_id=s1.id,
-        book_id=book1.id,
+        test_id=test_book.id,
         start_date=datetime.date(2025, 10, 1),
         end_date=datetime.date(2025, 10, 20),
     )
@@ -118,7 +115,6 @@ def setup_data(session):
         "student_empty": s2_empty,
         "test1": test1,
         "result1": res1,
-        "book1": book1,
         "reading1": reading1,
     }
 

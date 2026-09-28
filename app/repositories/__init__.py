@@ -1,4 +1,4 @@
-from .book_repository import BookRepository
+from .reading_repository import ReadingRepository
 from .test_repository import TestRepository
 
-__all__ = ["BookRepository", "TestRepository"]
+__all__ = ["ReadingRepository", "TestRepository"]

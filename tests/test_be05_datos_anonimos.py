@@ -3,7 +3,6 @@ import re
 from app.analytics.evolution import calculate_individual_evolution
 from app.extensions import db
 from app.models.student import Student
-from app.repositories.book_repository import BookRepository
 from app.repositories.result_repository import ResultRepository
 from app.repositories.student_repository import StudentRepository
 from app.repositories.test_repository import TestRepository
@@ -20,12 +19,10 @@ def _run_seed():
 def _snapshot_counts():
     student_repo = StudentRepository(db.session)
     test_repo = TestRepository(db.session)
-    book_repo = BookRepository(db.session)
     result_repo = ResultRepository(db.session)
     return {
         "students": student_repo.count_students(),
         "tests": len(test_repo.get_all()),
-        "books": len(book_repo.get_all()),
         "results": result_repo.count(),
         "enrollments": student_repo.count_enrollments(),
     }
@@ -47,8 +44,6 @@ def test_scenario_1_initial_load_creates_masters_and_catalog(app):
         assert summary["students"]["students_created"] == 28
         assert summary["tests"]["total"] == 34
         assert summary["tests"]["created"] == 34
-        assert summary["books"]["total"] == 5
-        assert summary["books"]["created"] == 5
         assert summary["results"]["created"] == 28 * 3
 
         student_repo = StudentRepository(db.session)
@@ -66,7 +61,6 @@ def test_scenario_1_initial_load_creates_masters_and_catalog(app):
 
         assert TestRepository(db.session).get_by_code("0IF") is not None
         assert TestRepository(db.session).get_by_code("3CL") is not None
-        assert len(BookRepository(db.session).get_all()) == 5
 
 
 def test_scenario_1_multi_section_student_gets_multiple_enrollments(app):
@@ -142,7 +136,6 @@ def test_scenario_3_command_is_idempotent(app):
         assert counts_after_first == counts_after_second
         assert second_summary["students"]["students_created"] == 0
         assert second_summary["tests"]["created"] == 0
-        assert second_summary["books"]["created"] == 0
         assert second_summary["results"]["created"] == 0
         assert counts_after_second["results"] == first_summary["results"]["created"]
 

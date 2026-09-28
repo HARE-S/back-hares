@@ -19,7 +19,6 @@ from sqlalchemy.orm import Session
 
 from app.importer import StudentImporter
 from app.importer.parser import parse_students_csv
-from app.repositories.book_repository import BookRepository
 from app.repositories.result_repository import ResultRepository
 from app.repositories.student_repository import StudentRepository
 from app.repositories.test_repository import TestRepository
@@ -35,21 +34,12 @@ class SeedService:
     DEFAULT_STUDENTS_CSV = "data/seeds/import_data.csv"
     DEFAULT_TESTS_CSV = "data/seeds/tests.csv"
 
-    MINIMAL_BOOKS: Tuple[Tuple[str, str], ...] = (
-        ("El pirata valiente", "0"),
-        ("Aventuras en el mar", "0-I"),
-        ("Misterios de invierno", "I"),
-        ("Historias del bosque", "I/II"),
-        ("El viaje de las estrellas", "II"),
-    )
-
     def __init__(self, session: Session):
         self.session = session
         self.catalog = CatalogService(session)
         self.importer = StudentImporter(session)
         self.student_repo = StudentRepository(session)
         self.test_repo = TestRepository(session)
-        self.book_repo = BookRepository(session)
         self.result_repo = ResultRepository(session)
 
     def seed(
@@ -64,22 +54,9 @@ class SeedService:
         summary: Dict[str, Any] = {}
         summary["tests"] = self.catalog.import_tests_from_csv(tests_csv_path)
         summary["students"] = self.importer.import_students(rows, commit=False)
-        summary["books"] = self._seed_books()
         summary["results"] = self._seed_results()
         self.session.commit()
         return summary
-
-    def _seed_books(self) -> Dict[str, int]:
-        """Creates the minimal book catalog if the titles do not exist yet."""
-        created = 0
-        existing = 0
-        for title, level in self.MINIMAL_BOOKS:
-            if self.book_repo.exists_by_title(title):
-                existing += 1
-            else:
-                self.book_repo.create(book=title, level=level)
-                created += 1
-        return {"total": len(self.MINIMAL_BOOKS), "created": created, "existing": existing}
 
     def _seed_results(self) -> Dict[str, Any]:
         """

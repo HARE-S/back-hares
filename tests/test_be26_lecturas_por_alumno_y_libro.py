@@ -3,9 +3,10 @@ import uuid
 import pytest
 from app import create_app
 from app.config import Config
-from app.models.book import Book, ReadBook
+from app.models.book import ReadBook
 from app.models.center import Center, Section
 from app.models.student import Student, StudentSection
+from app.models.test import Test
 
 
 class NoBypassConfig(Config):
@@ -39,30 +40,34 @@ def setup_data(session):
     session.add_all([ss1, ss2, ss3])
     session.flush()
 
-    book1 = Book(book="Don Quijote de la Mancha", level="I")
-    book2 = Book(book="El Lazarillo de Tormes", level="0")
-    book_unread = Book(book="La Celestina", level="II")
-    session.add_all([book1, book2, book_unread])
+    book1_title = "Don Quijote de la Mancha"
+    book2_title = "El Lazarillo de Tormes"
+    book_unread_title = "La Celestina"
+
+    test1 = Test(code="TEST-QUIJOTE", name=book1_title, test_letter="I", words=200, course=1, type="Lectura")
+    test2 = Test(code="TEST-LAZARILLO", name=book2_title, test_letter="0", words=150, course=1, type="Lectura")
+    test_unread = Test(code="TEST-CELESTINA", name=book_unread_title, test_letter="I", words=180, course=1, type="Lectura")
+    session.add_all([test1, test2, test_unread])
     session.flush()
 
-    # Lectura 1 de s1: Finalizada de book1
+    # Lectura 1 de s1: Finalizada de Don Quijote
     r1 = ReadBook(
         student_id=s1.id,
-        book_id=book1.id,
+        test_id=test1.id,
         start_date=datetime.date(2026, 9, 1),
         end_date=datetime.date(2026, 9, 25),
     )
-    # Lectura 2 de s1: En curso de book2
+    # Lectura 2 de s1: En curso de El Lazarillo
     r2 = ReadBook(
         student_id=s1.id,
-        book_id=book2.id,
+        test_id=test2.id,
         start_date=datetime.date(2026, 10, 1),
         end_date=None,
     )
-    # Lectura 3 de s2: En curso de book1 (mismo libro que leyó s1)
+    # Lectura 3 de s2: En curso de Don Quijote (mismo libro que leyó s1)
     r3 = ReadBook(
         student_id=s2.id,
-        book_id=book1.id,
+        test_id=test1.id,
         start_date=datetime.date(2026, 10, 5),
         end_date=None,
     )
@@ -76,9 +81,9 @@ def setup_data(session):
         "student1": s1,
         "student2": s2,
         "student_no_readings": s3_no_readings,
-        "book1": book1,
-        "book2": book2,
-        "book_unread": book_unread,
+        "book1_title": book1_title,
+        "book2_title": book2_title,
+        "book_unread_title": book_unread_title,
         "reading1": r1,
         "reading2": r2,
         "reading3": r3,
@@ -126,11 +131,11 @@ def test_scenario_1_student_readings_with_book_title_and_level(client, setup_dat
 def test_scenario_2_students_who_read_a_book(client, setup_data):
     """
     Escenario 2: Alumnos que han leído un libro
-    Dado un libro leído por varios alumnos (book1 leído por s1 y s2)
-    Cuando se consulta GET /api/books/{id}/students
+    Dado un libro leído por varios alumnos (Don Quijote leído por s1 y s2)
+    Cuando se consulta GET /api/readings/book/{title}/students
     Entonces se devuelve la lista de alumnos con sus fechas de lectura
     """
-    b1 = setup_data["book1"]
+    b1_title = setup_data["book1_title"]
     s1 = setup_data["student1"]
     s2 = setup_data["student2"]
 
@@ -139,7 +144,7 @@ def test_scenario_2_students_who_read_a_book(client, setup_data):
         json={"role": "coordinator", "sections": []},
     )
 
-    resp = client.get(f"/api/books/{b1.id}/students")
+    resp = client.get(f"/api/readings/book/{b1_title}/students")
     assert resp.status_code == 200
 
     items = resp.get_json()
@@ -241,40 +246,28 @@ def test_scenario_5_tutor_without_permission_forbidden(client, setup_data):
     assert resp.get_json()["error"] == "FORBIDDEN"
 
 
-def test_book_students_non_existent_book_404(client, setup_data):
-    """Consulta de alumnos para un libro inexistente devuelve 404 Not Found."""
-    client.post(
-        "/api/dev/session",
-        json={"role": "coordinator", "sections": []},
-    )
-    non_existent_id = uuid.uuid4()
-    resp = client.get(f"/api/books/{non_existent_id}/students")
-    assert resp.status_code == 404
-    assert resp.get_json()["error"] == "NOT_FOUND"
-
-
 def test_book_students_unread_book_returns_empty_list(client, setup_data):
     """Libro que no ha sido leído por nadie devuelve lista vacía con 200 OK."""
-    b_unread = setup_data["book_unread"]
+    b_unread = setup_data["book_unread_title"]
     client.post(
         "/api/dev/session",
         json={"role": "coordinator", "sections": []},
     )
-    resp = client.get(f"/api/books/{b_unread.id}/students")
+    resp = client.get(f"/api/readings/book/{b_unread}/students")
     assert resp.status_code == 200
     assert resp.get_json() == []
 
 
 def test_book_students_filter_by_status(client, setup_data):
-    """Filtro por status en GET /api/books/{id}/students."""
-    b1 = setup_data["book1"]
+    """Filtro por status en GET /api/readings/book/{title}/students."""
+    b1_title = setup_data["book1_title"]
     client.post(
         "/api/dev/session",
         json={"role": "coordinator", "sections": []},
     )
 
-    # Solo en curso para book1 (leído por s2)
-    resp = client.get(f"/api/books/{b1.id}/students?status=en curso")
+    # Solo en curso para Don Quijote (leído por s2)
+    resp = client.get(f"/api/readings/book/{b1_title}/students?status=en curso")
     assert resp.status_code == 200
     items = resp.get_json()
     assert len(items) == 1
@@ -283,16 +276,16 @@ def test_book_students_filter_by_status(client, setup_data):
 
 def test_unauthenticated_and_pending_role(client, setup_data):
     """Control de acceso: 401 sin sesión y 403 con rol pendiente."""
-    b1_id = str(setup_data["book1"].id)
+    b1_title = setup_data["book1_title"]
     s1_id = str(setup_data["student1"].id)
 
     app = create_app(NoBypassConfig)
     with app.test_client() as unauth_client:
         # 401 sin sesión
         assert unauth_client.get(f"/api/students/{s1_id}/books").status_code == 401
-        assert unauth_client.get(f"/api/books/{b1_id}/students").status_code == 401
+        assert unauth_client.get(f"/api/readings/book/{b1_title}/students").status_code == 401
 
     # 403 con rol pendiente
     client.post("/api/dev/session", json={"role": "pendiente", "sections": []})
     assert client.get(f"/api/students/{s1_id}/books").status_code == 403
-    assert client.get(f"/api/books/{b1_id}/students").status_code == 403
+    assert client.get(f"/api/readings/book/{b1_title}/students").status_code == 403

@@ -7,7 +7,6 @@ from app.models import (
     StudentSection,
     Test,
     Result,
-    Book,
     ReadBook,
 )
 
@@ -93,15 +92,17 @@ def test_test_and_results(session):
     assert len(student.results) == 1
 
 
-def test_book_and_read_books(session):
+def test_read_books_model(session):
     student = Student(name="STU02")
-    book = Book(book="El Lazarillo de Tormes", level="II")
-    session.add_all([student, book])
+    test = Test(code="0IF", name="Normativa piscinas", words=235)
+    session.add_all([student, test])
     session.commit()
 
     read_book = ReadBook(
         student_id=student.id,
-        book_id=book.id,
+        test_id=test.id,
+        copies_note="Ejemplar 1",
+        sessions_note="Lectura en biblioteca",
         start_date=datetime.date(2026, 9, 1),
         end_date=datetime.date(2026, 9, 15),
     )
@@ -109,8 +110,19 @@ def test_book_and_read_books(session):
     session.commit()
 
     assert len(student.read_books) == 1
-    assert student.read_books[0].book.book == "El Lazarillo de Tormes"
+    assert len(test.read_books) == 1
+    assert student.read_books[0].test_id == test.id
+    assert student.read_books[0].book_title == "Normativa piscinas"
+    assert student.read_books[0].title == "Normativa piscinas"
+    assert student.read_books[0].test_code == "0IF"
+    assert student.read_books[0].status == "finalizada"
+    assert student.read_books[0].copies_note == "Ejemplar 1"
     assert student.read_books[0].end_date == datetime.date(2026, 9, 15)
+
+    data = read_book.to_dict()
+    assert data["test_id"] == str(test.id)
+    assert data["title"] == "Normativa piscinas"
+    assert data["status"] == "finalizada"
 
 
 def test_to_dict_method(session):

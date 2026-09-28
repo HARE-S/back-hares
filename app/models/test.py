@@ -30,6 +30,12 @@ class Test(BaseModel):
         cascade="all, delete-orphan",
         lazy="select",
     )
+    read_books = db.relationship(
+        "ReadBook",
+        back_populates="test",
+        cascade="all, delete-orphan",
+        lazy="select",
+    )
 
     @property
     def letter_order(self) -> int:

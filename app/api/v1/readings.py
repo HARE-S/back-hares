@@ -18,9 +18,9 @@ single_readings_bp = Blueprint("single_readings_v1", __name__)
 @require_role("tutor", "coordinator", "coordinador", "admin")
 def assign_student_book(student_id):
     """
-    Asigna un libro a un alumno registrando el inicio de lectura (BE-23).
+    Asigna un libro del catálogo de pruebas a un alumno registrando el inicio de lectura (BE-23).
     - 201 Created con el recurso y estado de lectura (Escenario 1 y 2).
-    - 400 Bad Request si el libro no existe o está deshabilitado (Escenarios 3 y 4).
+    - 400 Bad Request si la prueba/libro no existe o está deshabilitada (Escenarios 3 y 4).
     - 403 Forbidden si el tutor no tiene permiso sobre el alumno o rol 'pendiente' (Escenario 5).
     - 404 Not Found si el alumno no existe.
     - 409 Conflict si ya existe lectura idéntica para la misma fecha de inicio.
@@ -62,18 +62,60 @@ def assign_student_book(student_id):
 @single_readings_bp.route("", methods=["GET"])
 @require_role("tutor", "coordinator", "coordinador", "admin")
 def list_readings():
-    """Listado general de lecturas activas/finalizadas."""
+    """Listado general de lecturas activas/finalizadas con filtros y soporte para búsqueda."""
     import uuid
+    from sqlalchemy import func, or_
+    from sqlalchemy.orm import joinedload
     from app.models.book import ReadBook
+    from app.models.student import Student
+    from app.models.test import Test
+
     status_filter = request.args.get("status")
     student_id_filter = request.args.get("student_id")
+    test_id_filter = request.args.get("test_id")
+    book_title_filter = request.args.get("book_title") or request.args.get("book") or request.args.get("title")
+    level_filter = request.args.get("level")
+    filter_text = request.args.get("filter") or request.args.get("q") or request.args.get("search")
 
-    query = db.session.query(ReadBook)
+    query = (
+        db.session.query(ReadBook)
+        .join(ReadBook.test)
+        .options(joinedload(ReadBook.student), joinedload(ReadBook.test))
+    )
+
     if student_id_filter:
         try:
             query = query.filter(ReadBook.student_id == uuid.UUID(str(student_id_filter).strip()))
         except (ValueError, TypeError):
             pass
+
+    if test_id_filter:
+        try:
+            query = query.filter(ReadBook.test_id == uuid.UUID(str(test_id_filter).strip()))
+        except (ValueError, TypeError):
+            pass
+
+    if book_title_filter:
+        term = str(book_title_filter).strip().lower()
+        query = query.filter(
+            (func.lower(Test.name) == term) | (func.lower(Test.code) == term)
+        )
+
+    if level_filter:
+        lvl = str(level_filter).strip().upper()
+        query = query.filter(
+            (Test.test_letter == lvl) | (func.cast(Test.course, db.String) == lvl)
+        )
+
+    if filter_text:
+        term = f"%{str(filter_text).strip().lower()}%"
+        query = query.join(ReadBook.student).filter(
+            or_(
+                func.lower(Test.name).like(term),
+                func.lower(Test.code).like(term),
+                func.lower(Student.name).like(term),
+            )
+        )
 
     readings = query.order_by(ReadBook.start_date.desc()).all()
 
@@ -83,19 +125,76 @@ def list_readings():
         st = "finalizada" if is_completed else "en_curso"
         if status_filter and st != status_filter:
             continue
+        duration = (r.end_date - r.start_date).days if (r.end_date and r.start_date and r.end_date >= r.start_date) else None
         items.append({
             "id": str(r.id),
             "student_id": str(r.student_id),
             "student_name": r.student.name if r.student else "Alumno",
-            "book_id": str(r.book_id),
-            "book_title": r.book.title if r.book and r.book.title else (r.book.book if r.book else "Libro"),
-            "book_level": r.book.level if r.book else "0",
+            "test_id": str(r.test_id),
+            "test_code": r.test_code,
+            "book_id": str(r.test_id),
+            "book_title": r.title,
+            "title": r.title,
+            "book": r.title,
+            "book_level": r.level,
+            "level": r.level,
+            "copies_note": r.copies_note,
+            "sessions_note": r.sessions_note,
             "start_date": r.start_date.isoformat() if r.start_date else None,
             "end_date": r.end_date.isoformat() if r.end_date else None,
+            "duration_days": duration,
             "status": st
         })
 
     return jsonify({"items": items, "total": len(items)}), 200
+
+
+@single_readings_bp.route("/titles", methods=["GET"])
+@require_role("tutor", "coordinator", "coordinador", "admin")
+def list_book_titles():
+    """Catálogo agregado de libros/pruebas leídos con métricas."""
+    from sqlalchemy import func
+    from app.models.book import ReadBook
+    from app.models.test import Test
+
+    rows = (
+        db.session.query(
+            Test.id,
+            Test.code,
+            Test.name,
+            func.count(ReadBook.id).label("total_readings"),
+            func.count(func.nullif(ReadBook.end_date.isnot(None), True)).label("active_readings")
+        )
+        .join(ReadBook, ReadBook.test_id == Test.id)
+        .group_by(Test.id, Test.code, Test.name)
+        .order_by(Test.name.asc())
+        .all()
+    )
+    items = [
+        {
+            "test_id": str(r[0]),
+            "test_code": r[1],
+            "title": r[2],
+            "book_title": r[2],
+            "total_readings": r[3],
+            "active_readings": r[4],
+        }
+        for r in rows
+    ]
+    return jsonify({"items": items, "total": len(items)}), 200
+
+
+@single_readings_bp.route("/test/<path:test_id>/students", methods=["GET"])
+@single_readings_bp.route("/book/<path:book_title>/students", methods=["GET"])
+@require_role("tutor", "coordinator", "coordinador", "admin")
+def get_book_students_endpoint(test_id=None, book_title=None):
+    """Consulta alumnos que han leído una prueba por ID o título."""
+    identifier = test_id if test_id is not None else book_title
+    status = request.args.get("status")
+    current_user = get_current_user()
+    service = ReadingService(db.session)
+    results = service.get_book_students(identifier, status=status, current_user=current_user)
+    return jsonify(results), 200
 
 
 @single_readings_bp.route("", methods=["POST"])
