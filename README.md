@@ -52,5 +52,8 @@ El script orquestador de tests (`run_tests.sh`) vive en `../infra-hares/scripts/
 - [SQLAlchemy 2.0](https://docs.sqlalchemy.org/) + [Alembic](https://alembic.sqlalchemy.org/)
 - [Gunicorn](https://gunicorn.org/) como servidor WSGI
 
-## Contibucion
--https://github.com/alvarezmarlen
+## Contribución
+
+**Autores principales:**
+- Marlén Álvarez ([@alvarezmarlen](https://github.com/alvarezmarlen))
+- Santiago Patiño Torres ([@SANTPT](https://github.com/SANTPT))
