@@ -14,7 +14,9 @@ echo "✓ PostgreSQL está disponible"
 # Inicializar BD y ejecutar migraciones Alembic
 echo "🗄️  Inicializando y migrando base de datos..."
 python scripts/init_db.py || echo "⚠️  Base de datos ya inicializada"
-alembic upgrade head || echo "⚠️  Alembic upgrade falló o ya está actualizado"
+# Si una migración falla, NO se arranca: mejor un contenedor caído y visible
+# que un backend sirviendo con el esquema a medias (500 silenciosos en la UI).
+alembic upgrade head || { echo "❌ Falló la migración de la base de datos. No se arranca el backend."; exit 1; }
 
 # Cargar datos de prueba
 echo "📊 Cargando datos de prueba..."
