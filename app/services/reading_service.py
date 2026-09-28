@@ -12,6 +12,7 @@ from app.core.exceptions import (
     ValidationError,
 )
 from app.models.book import ReadBook
+from app.models.enums import BOOK_LEVELS
 from app.models.student import Student
 from app.models.test import Test
 from app.repositories.reading_repository import ReadingRepository
@@ -34,11 +35,12 @@ class ReadingService:
         current_user: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
-        Asigna un libro del catálogo de pruebas a un alumno registrando el inicio de su lectura (BE-23).
-        - Valida identificadores y existencia de alumno y prueba.
+        Asigna un libro o prueba del catálogo a un alumno registrando el inicio de su lectura (BE-23).
+        - Valida identificadores y existencia de alumno.
+        - Permite asignar cualquier libro de aula por su título y nivel, o vincular a una prueba del catálogo.
         - Si no se envía end_date -> lectura registrada en curso con 201 Created (Escenario 2).
         - Si el tutor no tiene asignada la sección del alumno -> 403 Forbidden (Escenario 5).
-        - Si ya existe una lectura para ese mismo alumno, prueba y fecha de inicio -> 409 Conflict.
+        - Si ya existe una lectura para ese mismo alumno, libro/prueba y fecha de inicio -> 409 Conflict.
         - Registra evento de auditoría 'ASSIGN_BOOK'.
         """
         # 1. Parsear y verificar alumno
@@ -67,13 +69,25 @@ class ReadingService:
         # 3. Validar esquema de entrada
         validated = ReadingCreateSchema.validate(data)
 
-        # 4. Resolver y verificar la prueba (Test)
+        # 4. Resolver y verificar la prueba (Test) o libro
         test: Optional[Test] = None
+        book_title: Optional[str] = validated.get("book_title")
+        level: str = validated.get("level") or "0"
+
+        # A) Si se especificó test_id explícito
         if validated.get("test_id"):
             test = self.session.get(Test, validated["test_id"])
+            if not test:
+                raise NotFoundError("La prueba o libro especificado no existe en el catálogo")
+            if test.disabled_at is not None:
+                raise ConflictError("La prueba o libro especificado está dado de baja")
+            book_title = test.name
+            if (not level or level == "0") and test.test_letter in BOOK_LEVELS:
+                level = test.test_letter
+
+        # B) Si se especificó test_identifier (código o UUID)
         elif validated.get("test_identifier"):
             ident = validated["test_identifier"].strip()
-            # Probar si es UUID en string
             try:
                 test_uuid = uuid.UUID(ident)
                 test = self.session.get(Test, test_uuid)
@@ -88,30 +102,55 @@ class ReadingService:
                     )
                 ).first()
 
-        if not test:
-            raise NotFoundError("La prueba o libro especificado no existe en el catálogo")
+            if not test:
+                raise NotFoundError("La prueba o libro especificado no existe en el catálogo")
+            if test.disabled_at is not None:
+                raise ConflictError("La prueba o libro especificado está dado de baja")
+            book_title = test.name
+            if (not level or level == "0") and test.test_letter in BOOK_LEVELS:
+                level = test.test_letter
 
-        if test.disabled_at is not None:
-            raise ConflictError("La prueba o libro especificado está dado de baja")
+        # C) Si se proporcionó un título de libro (book_title):
+        elif book_title:
+            # Comprobar si coincide con alguna prueba del catálogo existente
+            matched_test = self.session.scalars(
+                select(Test).where(
+                    (func.lower(Test.code) == book_title.lower()) |
+                    (func.lower(Test.name) == book_title.lower())
+                )
+            ).first()
+            if matched_test:
+                if matched_test.disabled_at is not None:
+                    raise ConflictError("La prueba o libro especificado está dado de baja")
+                test = matched_test
+                book_title = matched_test.name
+                if (not level or level == "0") and matched_test.test_letter in BOOK_LEVELS:
+                    level = matched_test.test_letter
+
+        if not book_title:
+            raise ValidationError("Debe especificar el título del libro o la prueba", field="book_title")
 
         # 5. Comprobar duplicado exacto
+        check_target = test.id if test else book_title
         if self.reading_repo.exists_duplicate(
             student_id=parsed_student_id,
-            test_id=test.id,
+            book_or_test=check_target,
             start_date=validated["start_date"],
         ):
             raise ConflictError(
-                f"Ya existe una lectura registrada para '{test.name}' con fecha de inicio {validated['start_date']}"
+                f"Ya existe una lectura registrada para '{book_title}' con fecha de inicio {validated['start_date']}"
             )
 
         # 6. Persistir la lectura
         reading = self.reading_repo.create(
             student_id=parsed_student_id,
-            test_id=test.id,
+            book_title=book_title,
+            level=level,
             start_date=validated["start_date"],
             end_date=validated["end_date"],
             copies_note=validated.get("copies_note"),
             sessions_note=validated.get("sessions_note"),
+            test_id=test.id if test else None,
             commit=True,
         )
 
@@ -126,9 +165,9 @@ class ReadingService:
             resource_id=str(reading.id),
             details={
                 "student_id": str(parsed_student_id),
-                "test_id": str(test.id),
-                "test_code": test.code,
-                "book_title": test.name,
+                "test_id": str(test.id) if test else None,
+                "test_code": test.code if test else None,
+                "book_title": book_title,
                 "start_date": validated["start_date"].isoformat(),
                 "end_date": validated["end_date"].isoformat() if validated["end_date"] else None,
             },

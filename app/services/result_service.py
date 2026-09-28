@@ -14,6 +14,7 @@ from app.core.exceptions import (
     ValidationError,
 )
 from app.models.book import ReadBook
+from app.models.enums import BOOK_LEVELS
 from app.models.center import Section
 from app.models.student import Student
 from app.models.test import Test
@@ -100,9 +101,17 @@ class ResultService:
                 existing.start_date = reading_start_date
             return existing
 
+        test = self.session.get(Test, test_id)
+        test_name = test.name if test else "Prueba de lectura"
+        level_val = "0"
+        if test and test.test_letter in BOOK_LEVELS:
+            level_val = test.test_letter
+
         new_reading = ReadBook(
             student_id=student_id,
             test_id=test_id,
+            book_title=test_name,
+            level=level_val,
             start_date=effective_start,
             end_date=test_date,
         )

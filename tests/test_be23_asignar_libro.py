@@ -160,9 +160,9 @@ def test_scenario_3_missing_book_returns_400(client, setup_data):
     assert resp.status_code == 400
 
 
-def test_scenario_4_nonexistent_catalog_book_returns_404(client, setup_data):
+def test_scenario_4_nonexistent_catalog_test_returns_404(client, setup_data):
     """
-    Escenario 4: Libro no existente en catálogo devuelve 404 Not Found
+    Escenario 4: Prueba o identificador no existente en catálogo devuelve 404 Not Found
     """
     s1 = setup_data["student1"]
     sec1 = setup_data["section1"]
@@ -173,13 +173,39 @@ def test_scenario_4_nonexistent_catalog_book_returns_404(client, setup_data):
     )
 
     payload = {
-        "book_title": "Cien Años de Soledad Inexistente",
+        "test_id": str(uuid.uuid4()),
         "start_date": "2026-09-12",
     }
 
     resp = client.post(f"/api/students/{s1.id}/books", json=payload)
     assert resp.status_code == 404
     assert resp.get_json()["error"] == "NOT_FOUND"
+
+
+def test_assign_custom_classroom_book_success(client, setup_data, session):
+    """
+    Permite asignar un libro de la biblioteca del centro (no registrado previamente como prueba).
+    """
+    s1 = setup_data["student1"]
+    sec1 = setup_data["section1"]
+
+    client.post(
+        "/api/dev/session",
+        json={"role": "tutor", "sections": [str(sec1.id)]},
+    )
+
+    payload = {
+        "book_title": "El pequeño conejo blanco",
+        "level": "0-I",
+        "start_date": "2026-09-12",
+    }
+
+    resp = client.post(f"/api/students/{s1.id}/books", json=payload)
+    assert resp.status_code == 201
+    data = resp.get_json()
+    assert data["book_title"] == "El pequeño conejo blanco"
+    assert data["book_level"] == "0-I"
+    assert data["test_id"] is None
 
 
 def test_scenario_5_tutor_without_permission_returns_403(client, setup_data):

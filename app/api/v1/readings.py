@@ -79,7 +79,7 @@ def list_readings():
 
     query = (
         db.session.query(ReadBook)
-        .join(ReadBook.test)
+        .outerjoin(ReadBook.test)
         .options(joinedload(ReadBook.student), joinedload(ReadBook.test))
     )
 
@@ -98,19 +98,24 @@ def list_readings():
     if book_title_filter:
         term = str(book_title_filter).strip().lower()
         query = query.filter(
-            (func.lower(Test.name) == term) | (func.lower(Test.code) == term)
+            (func.lower(ReadBook.book_title) == term) |
+            (func.lower(Test.name) == term) |
+            (func.lower(Test.code) == term)
         )
 
     if level_filter:
         lvl = str(level_filter).strip().upper()
         query = query.filter(
-            (Test.test_letter == lvl) | (func.cast(Test.course, db.String) == lvl)
+            (ReadBook.level == lvl) |
+            (Test.test_letter == lvl) |
+            (func.cast(Test.course, db.String) == lvl)
         )
 
     if filter_text:
         term = f"%{str(filter_text).strip().lower()}%"
-        query = query.join(ReadBook.student).filter(
+        query = query.outerjoin(ReadBook.student).filter(
             or_(
+                func.lower(ReadBook.book_title).like(term),
                 func.lower(Test.name).like(term),
                 func.lower(Test.code).like(term),
                 func.lower(Student.name).like(term),
@@ -130,12 +135,12 @@ def list_readings():
             "id": str(r.id),
             "student_id": str(r.student_id),
             "student_name": r.student.name if r.student else "Alumno",
-            "test_id": str(r.test_id),
+            "test_id": str(r.test_id) if r.test_id else None,
             "test_code": r.test_code,
-            "book_id": str(r.test_id),
-            "book_title": r.title,
+            "book_id": str(r.test_id) if r.test_id else str(r.id),
+            "book_title": r.book_title,
             "title": r.title,
-            "book": r.title,
+            "book": r.book,
             "book_level": r.level,
             "level": r.level,
             "copies_note": r.copies_note,
@@ -152,37 +157,96 @@ def list_readings():
 @single_readings_bp.route("/titles", methods=["GET"])
 @require_role("tutor", "coordinator", "coordinador", "admin")
 def list_book_titles():
-    """Catálogo agregado de libros/pruebas leídos con métricas."""
-    from sqlalchemy import func
+    """Catálogo agregado de libros/pruebas leídos y disponibles con métricas y nivel pedagógico."""
+    from sqlalchemy import case, func
     from app.models.book import ReadBook
     from app.models.test import Test
 
-    rows = (
+    filter_text = request.args.get("filter") or request.args.get("q")
+    level_filter = request.args.get("level")
+
+    # 1. Pruebas oficiales activas
+    test_rows = (
         db.session.query(
-            Test.id,
-            Test.code,
-            Test.name,
+            Test.id.label("test_id"),
+            Test.code.label("test_code"),
+            Test.name.label("title"),
+            case(
+                (Test.test_letter.in_(["0", "0-I", "I", "I/II", "II"]), Test.test_letter),
+                (Test.course == 0, "0"),
+                (Test.course == 1, "I"),
+                (Test.course >= 2, "II"),
+                else_="0"
+            ).label("level"),
             func.count(ReadBook.id).label("total_readings"),
             func.count(func.nullif(ReadBook.end_date.isnot(None), True)).label("active_readings")
         )
-        .join(ReadBook, ReadBook.test_id == Test.id)
-        .group_by(Test.id, Test.code, Test.name)
-        .order_by(Test.name.asc())
+        .outerjoin(ReadBook, ReadBook.test_id == Test.id)
+        .filter(Test.disabled_at.is_(None))
+        .group_by(Test.id, Test.code, Test.name, Test.test_letter, Test.course)
         .all()
     )
-    items = [
-        {
-            "test_id": str(r[0]),
-            "test_code": r[1],
+
+    # 2. Libros propios registrados en lecturas que no están vinculados a tests
+    custom_rows = (
+        db.session.query(
+            ReadBook.book_title.label("title"),
+            ReadBook.level.label("level"),
+            func.count(ReadBook.id).label("total_readings"),
+            func.count(func.nullif(ReadBook.end_date.isnot(None), True)).label("active_readings")
+        )
+        .filter(ReadBook.test_id.is_(None))
+        .group_by(ReadBook.book_title, ReadBook.level)
+        .all()
+    )
+
+    items = []
+    seen_titles = set()
+
+    for r in test_rows:
+        title_lower = r[2].strip().lower()
+        seen_titles.add(title_lower)
+        items.append({
+            "test_id": str(r[0]) if r[0] else None,
+            "test_code": r[1] if r[1] else None,
             "title": r[2],
             "book_title": r[2],
-            "total_readings": r[3],
-            "active_readings": r[4],
-        }
-        for r in rows
-    ]
-    return jsonify({"items": items, "total": len(items)}), 200
+            "book": r[2],
+            "level": r[3],
+            "book_level": r[3],
+            "total_readings": r[4],
+            "active_readings": r[5],
+        })
 
+    for r in custom_rows:
+        title_lower = r[0].strip().lower()
+        if title_lower in seen_titles:
+            continue
+        items.append({
+            "test_id": None,
+            "test_code": None,
+            "title": r[0],
+            "book_title": r[0],
+            "book": r[0],
+            "level": r[1],
+            "book_level": r[1],
+            "total_readings": r[2],
+            "active_readings": r[3],
+        })
+
+    if filter_text:
+        term = filter_text.strip().lower()
+        items = [
+            it for it in items
+            if term in it["title"].lower() or (it["test_code"] and term in it["test_code"].lower())
+        ]
+
+    if level_filter:
+        lvl = level_filter.strip()
+        items = [it for it in items if it["level"] == lvl]
+
+    items.sort(key=lambda x: x["title"].lower())
+    return jsonify({"items": items, "total": len(items)}), 200
 
 @single_readings_bp.route("/test/<path:test_id>/students", methods=["GET"])
 @single_readings_bp.route("/book/<path:book_title>/students", methods=["GET"])

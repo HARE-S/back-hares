@@ -14,6 +14,9 @@ class BookLevel(str, Enum):
         return [item.value for item in cls]
 
 
+BOOK_LEVELS = BookLevel.values()
+
+
 # Ponderación del orden pedagógico: 0 < 0-I < I < I/II < II
 BOOK_LEVEL_ORDER = {
     BookLevel.LEVEL_0.value: 0,

@@ -2,6 +2,7 @@ import datetime
 from typing import Any, Dict, Optional, Union
 import uuid
 from app.core.exceptions import SchemaValidationError, ValidationError
+from app.models.enums import validate_book_level
 
 
 def _parse_uuid(val: Any, field_name: str) -> uuid.UUID:
@@ -34,7 +35,8 @@ def _parse_date(val: Any, field_name: str) -> datetime.date:
 class ReadingCreateSchema:
     """
     Esquema de validación para asignación de una lectura a un alumno (BE-23).
-    - 'test_id' (UUID) o 'test_code' o 'book_title' / 'title' / 'book': obligatorio para identificar la prueba/libro.
+    - 'book_title' / 'title' / 'book' o 'test_id' / 'test_code': título o prueba a asignar.
+    - 'level': nivel pedagógico del libro ('0', '0-I', 'I', 'I/II', 'II'), opcional (defecto '0').
     - 'start_date': obligatorio, fecha ISO (YYYY-MM-DD).
     - 'end_date': opcional, fecha ISO (YYYY-MM-DD) o None.
     - Validación de coherencia temporal: end_date >= start_date (422 SchemaValidationError).
@@ -45,7 +47,6 @@ class ReadingCreateSchema:
         if not isinstance(data, dict):
             raise ValidationError("El cuerpo de la petición debe ser un objeto JSON válido")
 
-        # 1. Identificación del test/libro
         raw_test_id = data.get("test_id")
         raw_code = data.get("test_code") or data.get("code")
         raw_title = data.get("book_title") or data.get("title") or data.get("book")
@@ -54,31 +55,39 @@ class ReadingCreateSchema:
         if raw_test_id:
             test_id = _parse_uuid(raw_test_id, "test_id")
 
-        test_identifier = None
-        if not test_id:
-            test_identifier = raw_code or raw_title
-            if not test_identifier or not str(test_identifier).strip():
-                raise ValidationError("Debe especificar 'test_id', 'test_code' o el título del libro", field="test_id")
-            test_identifier = str(test_identifier).strip()
+        book_title = str(raw_title).strip() if raw_title and str(raw_title).strip() else None
+        test_identifier = str(raw_code).strip() if raw_code and str(raw_code).strip() else None
 
-        # 2. start_date
+        if not test_id and not book_title and not test_identifier:
+            raise ValidationError("Debe especificar 'test_id', 'test_code' o el título del libro", field="book_title")
+
+        # start_date
         if "start_date" not in data or data["start_date"] is None:
             raise ValidationError("El campo 'start_date' es obligatorio", field="start_date")
         start_date = _parse_date(data["start_date"], "start_date")
 
-        # 3. end_date (opcional)
+        # end_date (opcional)
         end_date: Optional[datetime.date] = None
         if "end_date" in data and data["end_date"] is not None and data["end_date"] != "":
             end_date = _parse_date(data["end_date"], "end_date")
             if end_date < start_date:
                 raise SchemaValidationError("La fecha de finalización no puede ser anterior a la fecha de inicio")
 
+        # level
+        raw_level = data.get("level") or data.get("book_level") or "0"
+        try:
+            level = validate_book_level(str(raw_level).strip())
+        except ValueError as e:
+            raise ValidationError(str(e), field="level")
+
         copies_note = data.get("copies_note")
         sessions_note = data.get("sessions_note")
 
         return {
             "test_id": test_id,
+            "book_title": book_title,
             "test_identifier": test_identifier,
+            "level": level,
             "start_date": start_date,
             "end_date": end_date,
             "copies_note": str(copies_note).strip() if copies_note is not None else None,
@@ -133,7 +142,7 @@ class ReadingSchema:
         is_finished = reading.end_date is not None
         status = "finalizada" if is_finished else "en curso"
 
-        book_title = getattr(reading, "title", None) or getattr(reading, "book_title", "Libro")
+        book_title = getattr(reading, "book_title", None) or getattr(reading, "title", "Libro")
         level = getattr(reading, "level", "0")
         test_id_str = str(reading.test_id) if getattr(reading, "test_id", None) else None
         test_code = getattr(reading, "test_code", None)

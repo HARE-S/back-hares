@@ -94,7 +94,7 @@ class TestingConfig(Config):
     DEV_AUTH_BYPASS = _get_bool_env("DEV_AUTH_BYPASS", True)
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "TEST_DATABASE_URL",
-        "postgresql://test_user:test_password@db-test:5432/hares_test",
+        f"postgresql://{os.getenv('POSTGRES_USER', 'hares_user')}:{os.getenv('POSTGRES_PASSWORD', 'hares_dev_secret')}@{os.getenv('POSTGRES_HOST', 'database')}:{os.getenv('POSTGRES_PORT', '5432')}/hares_test",
     )
     IMPORT_ALLOWED_EXTENSIONS = {".csv"}
 
