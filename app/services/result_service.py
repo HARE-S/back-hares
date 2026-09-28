@@ -1,6 +1,7 @@
 import datetime
 from typing import Any, Dict, List, Optional, Union
 import uuid
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.analytics.metrics import calculate_ppm
 from app.core.audit import log_audit
@@ -12,6 +13,7 @@ from app.core.exceptions import (
     SchemaValidationError,
     ValidationError,
 )
+from app.models.book import ReadBook
 from app.models.center import Section
 from app.models.student import Student
 from app.models.test import Test
@@ -32,6 +34,54 @@ class ResultService:
     def __init__(self, session: Session):
         self.session = session
         self.result_repo = ResultRepository(session)
+
+    def _sync_reading_on_test_result(
+        self,
+        student_id: uuid.UUID,
+        test_id: uuid.UUID,
+        test_date: datetime.date,
+    ) -> None:
+        """
+        Sincroniza el resultado de la prueba con la tabla read_books:
+        - Si el alumno tiene una lectura abierta de este libro (en curso, end_date IS NULL):
+          se fija end_date = test_date (cerrando la lectura al evaluar).
+        - Si no tiene ninguna lectura para este libro:
+          se crea automáticamente la lectura finalizada con start_date = test_date y end_date = test_date.
+        - Si ya existe una lectura para esa fecha:
+          no hace nada (idempotente).
+        """
+        # 1. Buscar si hay una lectura abierta (en curso)
+        open_reading = self.session.scalars(
+            select(ReadBook).where(
+                ReadBook.student_id == student_id,
+                ReadBook.test_id == test_id,
+                ReadBook.end_date.is_(None),
+            )
+        ).first()
+
+        if open_reading:
+            if open_reading.start_date > test_date:
+                open_reading.start_date = test_date
+            open_reading.end_date = test_date
+            return
+
+        # 2. Si no hay lectura abierta, comprobar si ya existe una lectura para esta fecha
+        existing = self.session.scalars(
+            select(ReadBook).where(
+                ReadBook.student_id == student_id,
+                ReadBook.test_id == test_id,
+                ReadBook.start_date == test_date,
+            )
+        ).first()
+
+        if not existing:
+            new_reading = ReadBook(
+                student_id=student_id,
+                test_id=test_id,
+                start_date=test_date,
+                end_date=test_date,
+            )
+            self.session.add(new_reading)
 
     def register_result(
         self,
@@ -105,8 +155,16 @@ class ResultService:
             time=validated["time"],
             successes=validated["successes"],
             mistakes=validated["mistakes"],
-            commit=True,
+            commit=False,
         )
+
+        # Sincronizar lectura en read_books
+        self._sync_reading_on_test_result(
+            student_id=parsed_student_id,
+            test_id=validated["test_id"],
+            test_date=validated["test_date"],
+        )
+        self.session.commit()
 
         # 8. Calcular PPM (Contrato 3)
         ppm = calculate_ppm(test.words, result.time)
@@ -458,7 +516,14 @@ class ResultService:
             for it in items_to_persist
         ]
 
-        created_results = self.result_repo.create_batch(batch_records, commit=True)
+        created_results = self.result_repo.create_batch(batch_records, commit=False)
+        for it in items_to_persist:
+            self._sync_reading_on_test_result(
+                student_id=it["student_id"],
+                test_id=validated["test_id"],
+                test_date=validated["test_date"],
+            )
+        self.session.commit()
 
         # 8. Serializar resultados con PPM calculado (Escenario 1)
         serialized_results = []

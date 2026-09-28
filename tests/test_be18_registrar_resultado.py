@@ -4,6 +4,7 @@ import pytest
 from app import create_app
 from app.config import TestingConfig
 from app.core.audit import clear_audit_logs, get_audit_logs
+from app.models.book import ReadBook
 from app.models.center import Center, Section
 from app.models.student import Student
 from app.models.test import Result, Test
@@ -395,3 +396,75 @@ def test_scenario_8_audit_logged_on_success(client, setup_data):
     assert audit_entry["resource_type"] == "results"
     assert audit_entry["resource_id"] == str(created_id)
     assert audit_entry["date"] == datetime.date.today().isoformat()
+
+
+def test_register_result_auto_creates_completed_reading(client, setup_data, session):
+    """Verifica que al registrar un resultado se crea automáticamente la lectura finalizada."""
+    student = setup_data["student"]
+    section1 = setup_data["section1"]
+    test_obj = setup_data["test"]
+
+    client.post(
+        "/api/dev/session",
+        json={"role": "tutor", "email": "tutor@penascal.org", "sections": [str(section1.id)]},
+    )
+
+    payload = {
+        "test_id": str(test_obj.id),
+        "section_id": str(section1.id),
+        "test_date": "2026-04-15",
+        "time": 60,
+        "successes": 15,
+        "mistakes": 2,
+    }
+
+    resp = client.post(f"/api/v1/students/{student.id}/results", json=payload)
+    assert resp.status_code == 201
+
+    session.expire_all()
+    reading = session.query(ReadBook).filter_by(student_id=student.id, test_id=test_obj.id).first()
+    assert reading is not None
+    assert reading.start_date == datetime.date(2026, 4, 15)
+    assert reading.end_date == datetime.date(2026, 4, 15)
+    assert reading.status == "finalizada"
+
+
+def test_register_result_closes_existing_open_reading(client, setup_data, session):
+    """Verifica que al registrar un resultado se cierra la lectura abierta previa del alumno."""
+    student = setup_data["student"]
+    section1 = setup_data["section1"]
+    test_obj = setup_data["test"]
+
+    # Crear lectura previa abierta (en curso)
+    open_reading = ReadBook(
+        student_id=student.id,
+        test_id=test_obj.id,
+        start_date=datetime.date(2026, 5, 1),
+        end_date=None,
+    )
+    session.add(open_reading)
+    session.commit()
+
+    client.post(
+        "/api/dev/session",
+        json={"role": "tutor", "email": "tutor@penascal.org", "sections": [str(section1.id)]},
+    )
+
+    payload = {
+        "test_id": str(test_obj.id),
+        "section_id": str(section1.id),
+        "test_date": "2026-05-20",
+        "time": 55,
+        "successes": 18,
+        "mistakes": 1,
+    }
+
+    resp = client.post(f"/api/v1/students/{student.id}/results", json=payload)
+    assert resp.status_code == 201
+
+    session.expire_all()
+    updated = session.get(ReadBook, open_reading.id)
+    assert updated.start_date == datetime.date(2026, 5, 1)
+    assert updated.end_date == datetime.date(2026, 5, 20)
+    assert updated.status == "finalizada"
+

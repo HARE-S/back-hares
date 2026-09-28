@@ -15,10 +15,12 @@ import random
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.importer import StudentImporter
 from app.importer.parser import parse_students_csv
+from app.models.book import ReadBook
 from app.repositories.result_repository import ResultRepository
 from app.repositories.student_repository import StudentRepository
 from app.repositories.test_repository import TestRepository
@@ -99,6 +101,23 @@ class SeedService:
                     successes=successes,
                     mistakes=mistakes,
                 )
+
+                if not self.session.scalars(
+                    select(ReadBook).where(
+                        ReadBook.student_id == student.id,
+                        ReadBook.test_id == test.id,
+                        ReadBook.start_date == test_date,
+                    )
+                ).first():
+                    self.session.add(
+                        ReadBook(
+                            student_id=student.id,
+                            test_id=test.id,
+                            start_date=test_date,
+                            end_date=test_date,
+                        )
+                    )
+
                 created += 1
             reported_students += 1
 
