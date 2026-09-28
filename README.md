@@ -51,3 +51,6 @@ El script orquestador de tests (`run_tests.sh`) vive en `../infra-hares/scripts/
 - [Flask](https://flask.palletsprojects.com/) + [flask-smorest](https://flask-smorest.readthedocs.io/) (API/OpenAPI)
 - [SQLAlchemy 2.0](https://docs.sqlalchemy.org/) + [Alembic](https://alembic.sqlalchemy.org/)
 - [Gunicorn](https://gunicorn.org/) como servidor WSGI
+
+## Contibucion
+-https://github.com/alvarezmarlen
